@@ -3,8 +3,8 @@ package away3d.bounds
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometryBase;
-	import away3d.core.math.Box;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Box;
+	import away3d.core.geom.Plane3D;
 	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;
 
@@ -13,7 +13,7 @@ package away3d.bounds
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
-	
+
 	/**
 	 * An abstract base class for all bounding volume classes. It should not be instantiated directly.
 	 */
@@ -47,10 +47,10 @@ package away3d.bounds
 		public function get aabbPoints():Vector.<Number>
 		{
 			if (_aabbPointsDirty) updateAABBPoints();
-			
+
 			return _aabbPoints;
 		}
-		
+
 		/**
 		 * Returns the bounding renderable object for the bounding volume, in cases where the showBounds
 		 * property of the entity is set to true.
@@ -63,7 +63,7 @@ package away3d.bounds
 				_boundingEntity = createBoundingEntity();
 				updateBoundingEntity();
 			}
-			
+
 			return _boundingEntity;
 		}
 
@@ -78,7 +78,7 @@ package away3d.bounds
 			if (_boundingEntity)
 				updateBoundingEntity();
 		}
-		
+
 		/**
 		 * Disposes of the bounds renderable object. Used to clear memory after a bounds rendeable is no longer required.
 		 */
@@ -87,7 +87,7 @@ package away3d.bounds
 			if (_boundingEntity) _boundingEntity.dispose();
 			_boundingEntity = null;
 		}
-		
+
 		/**
 		 * Updates the bounds to fit a list of vertices
 		 *
@@ -99,39 +99,39 @@ package away3d.bounds
 			var len:uint = vertices.length;
 			var minX:Number, minY:Number, minZ:Number;
 			var maxX:Number, maxY:Number, maxZ:Number;
-			
+
 			if (len == 0) {
 				nullify();
 				return;
 			}
-			
+
 			var v:Number;
-			
+
 			minX = maxX = vertices[uint(i++)];
 			minY = maxY = vertices[uint(i++)];
 			minZ = maxZ = vertices[uint(i++)];
-			
+
 			while (i < len) {
 				v = vertices[i++];
 				if (v < minX)
-					minX = v;
-				else if (v > maxX)
-					maxX = v;
+					minX = v; else
+					if (v > maxX)
+						maxX = v;
 				v = vertices[i++];
 				if (v < minY)
-					minY = v;
-				else if (v > maxY)
-					maxY = v;
+					minY = v; else
+					if (v > maxY)
+						maxY = v;
 				v = vertices[i++];
 				if (v < minZ)
-					minZ = v;
-				else if (v > maxZ)
-					maxZ = v;
+					minZ = v; else
+					if (v > maxZ)
+						maxZ = v;
 			}
-			
+
 			fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 		}
-		
+
 		/**
 		 * Updates the bounds to fit a Geometry object.
 		 *
@@ -153,7 +153,7 @@ package away3d.bounds
 				i = 0;
 				subGeom = subGeoms[0];
 				boundingPositions = subGeom.getBoundingPositions();
-				if(boundingPositions && boundingPositions.length > 0) {
+				if (boundingPositions && boundingPositions.length > 0) {
 					minX = maxX = boundingPositions[i];
 					minY = maxY = boundingPositions[i + 1];
 					minZ = maxZ = boundingPositions[i + 2];
@@ -162,27 +162,27 @@ package away3d.bounds
 					while (j--) {
 						subGeom = subGeoms[j];
 						boundingPositions = subGeom.getBoundingPositions();
-						i = boundingPositions.length-2;
+						i = boundingPositions.length - 2;
 						while (i--) {
 							p = boundingPositions[i];
 							if (p < minX)
-								minX = p;
-							else if (p > maxX)
-								maxX = p;
+								minX = p; else
+								if (p > maxX)
+									maxX = p;
 
 							p = boundingPositions[i + 1];
 
 							if (p < minY)
-								minY = p;
-							else if (p > maxY)
-								maxY = p;
+								minY = p; else
+								if (p > maxY)
+									maxY = p;
 
 							p = boundingPositions[i + 2];
 
 							if (p < minZ)
-								minZ = p;
-							else if (p > maxZ)
-								maxZ = p;
+								minZ = p; else
+								if (p > maxZ)
+									maxZ = p;
 						}
 					}
 				}
@@ -191,7 +191,7 @@ package away3d.bounds
 				fromExtremes(0, 0, 0, 0, 0, 0);
 			}
 		}
-		
+
 		/**
 		 * Sets the bound to fit a given sphere.
 		 *
@@ -204,7 +204,7 @@ package away3d.bounds
 			// but then again, sphere already overrides it, and if we'd call "fromSphere", it'd probably need a sphere bound anyway
 			fromExtremes(center.x - radius, center.y - radius, center.z - radius, center.x + radius, center.y + radius, center.z + radius);
 		}
-		
+
 		/**
 		 * Sets the bounds to the given extrema.
 		 *
@@ -227,7 +227,7 @@ package away3d.bounds
 			if (_boundingEntity)
 				updateBoundingEntity();
 		}
-		
+
 		/**
 		 * Tests if the bounds are in the camera frustum.
 		 *
@@ -238,7 +238,7 @@ package away3d.bounds
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		/**
 		 * Tests if the bounds overlap other bounds, treating both bounds as AABBs.
 		 */
@@ -246,13 +246,13 @@ package away3d.bounds
 		{
 			return _aabb.intersects(bounds.aabb);
 		}
-		
+
 		/*public function classifyAgainstPlane(plane : Plane3D) : int
 		 {
 		 throw new AbstractMethodError();
 		 return -1;
 		 }*/
-		
+
 		/**
 		 * Clones the current BoundingVolume object
 		 * @return An exact duplicate of this object
@@ -261,7 +261,7 @@ package away3d.bounds
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		/**
 		 * Method for calculating whether an intersection of the given ray occurs with the bounding volume.
 		 *
@@ -274,7 +274,7 @@ package away3d.bounds
 		{
 			return -1;
 		}
-		
+
 		/**
 		 * Method for calculating whether the given position is contained within the bounding volume.
 		 *
@@ -285,7 +285,7 @@ package away3d.bounds
 		{
 			return false;
 		}
-		
+
 		protected function updateAABBPoints():void
 		{
 			var minX:Number = _aabb.x;
@@ -322,22 +322,22 @@ package away3d.bounds
 
 			_aabbPointsDirty = false;
 		}
-		
+
 		protected function updateBoundingEntity():void
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		protected function createBoundingEntity():IEntity
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		public function classifyToPlane(plane:Plane3D):int
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		public function transformFrom(bounds:BoundingVolumeBase, matrix:Matrix3D):void
 		{
 			throw new AbstractMethodError();

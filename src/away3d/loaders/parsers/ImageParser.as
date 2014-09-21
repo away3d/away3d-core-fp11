@@ -3,13 +3,13 @@ package away3d.loaders.parsers
 {
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
-	import away3d.library.assets.BitmapDataAsset;
+	import away3d.core.library.BitmapDataAsset;
 	import away3d.textures.ATFTexture;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.TextureUtils;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.core.library.IAsset;
+	import away3d.core.library.NamedAssetBase;
 	import away3d.textures.ATFCubeTexture;
 	
 	import flash.display.Bitmap;

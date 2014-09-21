@@ -2,7 +2,6 @@ package away3d.prefabs
 {
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
 
 	/**
 	 * A Capsule primitive.
@@ -15,7 +14,7 @@ package away3d.prefabs
 		private var _segmentsH:uint;
 		private var _yUp:Boolean;
 		private var _numVertices:uint = 0;
-		
+
 		/**
 		 * Creates a new Capsule object.
 		 * @param radius The radius of the capsule.
@@ -27,14 +26,14 @@ package away3d.prefabs
 		public function PrimitiveCapsulePrefab(radius:Number = 50, height:Number = 100, segmentsW:uint = 16, segmentsH:uint = 15, yUp:Boolean = true)
 		{
 			super();
-			
+
 			_radius = radius;
 			_height = height;
 			_segmentsW = segmentsW;
-			_segmentsH = (segmentsH%2 == 0)? segmentsH + 1 : segmentsH;
+			_segmentsH = (segmentsH % 2 == 0) ? segmentsH + 1 : segmentsH;
 			_yUp = yUp;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -54,8 +53,8 @@ package away3d.prefabs
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
 				// evaluate target number of vertices, triangles and indices
-				_numVertices = (_segmentsH + 1)*(_segmentsW + 1); // segmentsH + 1 because of closure, segmentsW + 1 because of closure
-				numIndices = (_segmentsH - 1)*_segmentsW*6; // each level has segmentH quads, each of 2 triangles
+				_numVertices = (_segmentsH + 1) * (_segmentsW + 1); // segmentsH + 1 because of closure, segmentsW + 1 because of closure
+				numIndices = (_segmentsH - 1) * _segmentsW * 6; // each level has segmentH quads, each of 2 triangles
 				// need to initialize raw arrays or can be reused?
 				if (_numVertices == triangleGeometry.numVertices) {
 					indices = triangleGeometry.indices;
@@ -64,36 +63,36 @@ package away3d.prefabs
 					tangents = triangleGeometry.vertexTangents;
 				} else {
 					indices = new Vector.<uint>(numIndices)
-					positions = new Vector.<Number>(_numVertices*3);
-					normals = new Vector.<Number>(_numVertices*3);
-					tangents = new Vector.<Number>(_numVertices*3);
+					positions = new Vector.<Number>(_numVertices * 3);
+					normals = new Vector.<Number>(_numVertices * 3);
+					tangents = new Vector.<Number>(_numVertices * 3);
 
 					invalidateUVs();
 				}
 
 				for (j = 0; j <= _segmentsH; ++j) {
 
-					var horangle:Number = Math.PI*j/_segmentsH;
-					var z:Number = -_radius*Math.cos(horangle);
-					var ringradius:Number = _radius*Math.sin(horangle);
+					var horangle:Number = Math.PI * j / _segmentsH;
+					var z:Number = -_radius * Math.cos(horangle);
+					var ringradius:Number = _radius * Math.sin(horangle);
 					startIndex = index;
 
 					for (i = 0; i <= _segmentsW; ++i) {
-						var verangle:Number = 2*Math.PI*i/_segmentsW;
-						var x:Number = ringradius*Math.cos(verangle);
-						var offset:Number = j > _segmentsH/2? _height/2 : -_height/2;
-						var y:Number = ringradius*Math.sin(verangle);
-						var normLen:Number = 1/Math.sqrt(x*x + y*y + z*z);
-						var tanLen:Number = Math.sqrt(y*y + x*x);
+						var verangle:Number = 2 * Math.PI * i / _segmentsW;
+						var x:Number = ringradius * Math.cos(verangle);
+						var offset:Number = j > _segmentsH / 2 ? _height / 2 : -_height / 2;
+						var y:Number = ringradius * Math.sin(verangle);
+						var normLen:Number = 1 / Math.sqrt(x * x + y * y + z * z);
+						var tanLen:Number = Math.sqrt(y * y + x * x);
 
 						if (_yUp) {
 							t1 = 0;
-							t2 = tanLen > .007? x/tanLen : 0;
+							t2 = tanLen > .007 ? x / tanLen : 0;
 							comp1 = -z;
 							comp2 = y;
 
 						} else {
-							t1 = tanLen > .007? x/tanLen : 0;
+							t1 = tanLen > .007 ? x / tanLen : 0;
 							t2 = 0;
 							comp1 = y;
 							comp2 = z;
@@ -104,33 +103,33 @@ package away3d.prefabs
 							positions[index] = positions[startIndex];
 							positions[index + 1] = positions[startIndex + 1];
 							positions[index + 2] = positions[startIndex + 2];
-							normals[index] = (normals[startIndex] + (x*normLen))*.5;
-							normals[index + 1] = (normals[startIndex + 1] + ( comp1*normLen))*.5;
-							normals[index + 2] = (normals[startIndex + 2] + (comp2*normLen))*.5;
-							tangents[index] = (tangents[startIndex] + (tanLen > .007? -y/tanLen : 1))*.5;
-							tangents[index + 1] = (tangents[startIndex + 1] + t1)*.5;
-							tangents[index + 2] = (tangents[startIndex + 2] + t2)*.5;
+							normals[index] = (normals[startIndex] + (x * normLen)) * .5;
+							normals[index + 1] = (normals[startIndex + 1] + ( comp1 * normLen)) * .5;
+							normals[index + 2] = (normals[startIndex + 2] + (comp2 * normLen)) * .5;
+							tangents[index] = (tangents[startIndex] + (tanLen > .007 ? -y / tanLen : 1)) * .5;
+							tangents[index + 1] = (tangents[startIndex + 1] + t1) * .5;
+							tangents[index + 2] = (tangents[startIndex + 2] + t2) * .5;
 
 						} else {
 							// vertex
 							positions[index] = x;
-							positions[index + 1] = (_yUp)? comp1 - offset : comp1;
-							positions[index + 2] = (_yUp)? comp2 : comp2 + offset;
+							positions[index + 1] = (_yUp) ? comp1 - offset : comp1;
+							positions[index + 2] = (_yUp) ? comp2 : comp2 + offset;
 							// normal
-							normals[index] = x*normLen;
-							normals[index + 1] = comp1*normLen;
-							normals[index + 2] = comp2*normLen;
+							normals[index] = x * normLen;
+							normals[index + 1] = comp1 * normLen;
+							normals[index + 2] = comp2 * normLen;
 							// tangent
-							tangents[index] = tanLen > .007? -y/tanLen : 1;
+							tangents[index] = tanLen > .007 ? -y / tanLen : 1;
 							tangents[index + 1] = t1;
 							tangents[index + 2] = t2;
 						}
 
 						if (i > 0 && j > 0) {
-							var a:int = (_segmentsW + 1)*j + i;
-							var b:int = (_segmentsW + 1)*j + i - 1;
-							var c:int = (_segmentsW + 1)*(j - 1) + i - 1;
-							var d:int = (_segmentsW + 1)*(j - 1) + i;
+							var a:int = (_segmentsW + 1) * j + i;
+							var b:int = (_segmentsW + 1) * j + i - 1;
+							var c:int = (_segmentsW + 1) * (j - 1) + i - 1;
+							var d:int = (_segmentsW + 1) * (j - 1) + i;
 
 							if (j == _segmentsH) {
 								positions[index] = positions[startIndex];
@@ -141,19 +140,20 @@ package away3d.prefabs
 								indices[triIndex++] = c;
 								indices[triIndex++] = d;
 
-							} else if (j == 1) {
-								indices[triIndex++] = a;
-								indices[triIndex++] = b;
-								indices[triIndex++] = c;
+							} else
+								if (j == 1) {
+									indices[triIndex++] = a;
+									indices[triIndex++] = b;
+									indices[triIndex++] = c;
 
-							} else {
-								indices[triIndex++] = a;
-								indices[triIndex++] = b;
-								indices[triIndex++] = c;
-								indices[triIndex++] = a;
-								indices[triIndex++] = c;
-								indices[triIndex++] = d;
-							}
+								} else {
+									indices[triIndex++] = a;
+									indices[triIndex++] = b;
+									indices[triIndex++] = c;
+									indices[triIndex++] = a;
+									indices[triIndex++] = c;
+									indices[triIndex++] = d;
+								}
 						}
 
 						index += 3;
@@ -165,11 +165,12 @@ package away3d.prefabs
 				triangleGeometry.updatePositions(positions);
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
-			}else if(geometryType == GeometryType.LINE) {
-				//TODO:
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//TODO:
+				}
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -214,13 +215,13 @@ package away3d.prefabs
 		{
 			return _radius;
 		}
-		
+
 		public function set radius(value:Number):void
 		{
 			_radius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The height of the capsule.
 		 */
@@ -228,13 +229,13 @@ package away3d.prefabs
 		{
 			return _height;
 		}
-		
+
 		public function set height(value:Number):void
 		{
 			_height = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines the number of horizontal segments that make up the capsule. Defaults to 16.
 		 */
@@ -242,14 +243,14 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set segmentsW(value:uint):void
 		{
 			_segmentsW = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines the number of vertical segments that make up the capsule. Defaults to 15. Must be uneven.
 		 */
@@ -257,14 +258,14 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set segmentsH(value:uint):void
 		{
-			_segmentsH = (value%2 == 0)? value + 1 : value;
+			_segmentsH = (value % 2 == 0) ? value + 1 : value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines whether the capsule poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
@@ -272,7 +273,7 @@ package away3d.prefabs
 		{
 			return _yUp;
 		}
-		
+
 		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;

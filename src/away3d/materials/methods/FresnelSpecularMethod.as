@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
@@ -23,7 +24,7 @@ package away3d.materials.methods
 		 * @param basedOnSurface Defines whether the fresnel effect should be based on the view angle on the surface (if true), or on the angle between the light and the view.
 		 * @param baseSpecularMethod The specular method to which the fresnel equation. Defaults to BasicSpecularMethod.
 		 */
-		public function FresnelSpecularMethod(basedOnSurface:Boolean = true, baseSpecularMethod:BasicSpecularMethod = null)
+		public function FresnelSpecularMethod(basedOnSurface:Boolean = true, baseSpecularMethod:SpecularBasicMethod = null)
 		{
 			// may want to offer diff speculars
 			super(modulateSpecular, baseSpecularMethod);

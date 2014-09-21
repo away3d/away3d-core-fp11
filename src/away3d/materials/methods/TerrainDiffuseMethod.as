@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 	import away3d.textures.TextureProxyBase;
@@ -15,7 +16,7 @@ package away3d.materials.methods
 	 * TerrainDiffuseMethod provides a diffuse method that uses different tiled textures with alpha masks to create a
 	 * large surface with high detail and less apparent tiling.
 	 */
-	public class TerrainDiffuseMethod extends BasicDiffuseMethod
+	public class TerrainDiffuseMethod extends DiffuseBasicMethod
 	{
 		private var _blendingTexture:Texture2DBase;
 		private var _splats:Vector.<Texture2DBase>;

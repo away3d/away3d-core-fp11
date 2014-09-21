@@ -4,9 +4,9 @@ package away3d.textures
 	import away3d.entities.Camera3D;
 	import away3d.projections.ObliqueNearPlaneLens;
 	import away3d.containers.View3D;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Plane3D;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.Matrix3DUtils;
+	import away3d.core.geom.Plane3D;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;

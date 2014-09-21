@@ -4,8 +4,8 @@ package away3d.core.pick
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.pool.*;
-	import away3d.core.managers.*;
-	import away3d.core.math.*;
+	import away3d.managers.*;
+	import away3d.core.geom.*;
 	import away3d.core.traverse.*;
 	import away3d.entities.*;
 

@@ -1,4 +1,5 @@
-package away3d.core.pool {
+package away3d.core.pool
+{
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.SubGeometryBase;
@@ -11,60 +12,62 @@ package away3d.core.pool {
 
 	use namespace arcane;
 
-	public class RenderableBase implements IRenderable {
-		public var JOINT_INDEX_FORMAT:String;
-		public var JOINT_WEIGHT_FORMAT:String;
-
+	public class RenderableBase implements IRenderable
+	{
 		public var cascaded:Boolean;
 		public var renderSceneTransform:Matrix3D;
-		public var sourceEntity:IEntity;
-		public var materialOwner:IMaterialOwner;
 		public var material:MaterialBase;
-		public var pool:RenderablePool;
 
 		protected var _vertexDataDirty:Object = {};
 
 		private var _subGeometry:SubGeometryBase;
 		private var _geometryDirty:Boolean = true;
 		private var _indexData:IndexData;
-		private var _indexDataDirty:Boolean;
+		private var _indexDataDirty:Boolean = true;
 		private var _vertexData:Object = {};
 		private var _vertexOffset:Object = {};
+
+		private var _next:IRenderable;
+		private var _materialId:int;
+		private var _renderOrderId:int;
+		private var _zIndex:Number;
+		private var _materialOwner:IMaterialOwner;
+		private var _sourceEntity:IEntity;
 
 		private var _level:Number;
 		private var _indexOffset:Number;
 		private var _overflow:RenderableBase;
 		private var _numTriangles:Number;
 		private var _concatenateArrays:Boolean;
+		private var _pool:RenderablePool;
 
-		private var _next:IRenderable;
-		private var _materialId:int;
-		private var _renderOrderId:int;
-		private var _zIndex:Number;
-
-		public function get overflow():RenderableBase {
-			if (_geometryDirty)
-				updateGeometry();
-
+		public function get overflow():RenderableBase
+		{
 			if (_indexDataDirty)
 				updateIndexData();
 
 			return _overflow;
 		}
 
-		public function get numTriangles():Number {
+
+		public function get numTriangles():Number
+		{
 			return _numTriangles;
 		}
 
-
-		public function getIndexData():IndexData {
+		public function getIndexData():IndexData
+		{
 			if (_indexDataDirty)
 				updateIndexData();
 
 			return _indexData;
 		}
 
-		public function getVertexData(dataType:String):VertexData {
+		public function getVertexData(dataType:String):VertexData
+		{
+			if (_indexDataDirty)
+				updateIndexData();
+
 			if (_vertexDataDirty[dataType])
 				updateVertexData(dataType);
 
@@ -72,42 +75,43 @@ package away3d.core.pool {
 			return _vertexData[key];
 		}
 
-		public function getVertexOffset(dataType:String):Number {
+		/**
+		 *
+		 */
+		public function getVertexOffset(dataType:String):Number
+		{
+			if (_indexDataDirty)
+				updateIndexData();
+
 			if (_vertexDataDirty[dataType])
 				updateVertexData(dataType);
 
 			return _vertexOffset[dataType];
 		}
 
-		/**
-		 *
-		 * @param sourceEntity
-		 * @param materialOwner
-		 * @param subGeometry
-		 * @param animationSubGeometry
-		 */
-		public function RenderableBase(pool:RenderablePool, sourceEntity:IEntity, materialOwner:IMaterialOwner, level:Number = 0, indexOffset:Number = 0) {
-			//store a reference to the pool for later disposal
-			this.pool = pool;
+		public function RenderableBase(pool:RenderablePool, sourceEntity:IEntity, materialOwner:IMaterialOwner, level:Number = 0, indexOffset:Number = 0)
+		{
+			_pool = pool;
 
 			//reference to level of overflow
-            _level = level;
+			_level = level;
 
 			//reference to the offset on indices (if this is an overflow renderable)
 			_indexOffset = indexOffset;
 
-			this.sourceEntity = sourceEntity;
-			this.materialOwner = materialOwner;
+			this._sourceEntity = sourceEntity;
+			this._materialOwner = materialOwner;
 		}
 
-		public function dispose():void {
-			pool.disposeItem(materialOwner);
+		public function dispose():void
+		{
+			_pool.disposeItem(_materialOwner);
 
 			_indexData.dispose();
 			_indexData = null;
 
 			for (var dataType:* in _vertexData) {
-				_vertexData[dataType].dispose();
+				(_vertexData[dataType] as VertexData).dispose();
 				_vertexData[dataType] = null;
 			}
 
@@ -117,31 +121,39 @@ package away3d.core.pool {
 			}
 		}
 
-		public function invalidateGeometry():void {
+		public function invalidateGeometry():void
+		{
 			_geometryDirty = true;
+
+			//invalidate indices
+			if (_level == 0)
+				_indexDataDirty = true;
 
 			if (_overflow)
 				_overflow.invalidateGeometry();
 		}
 
-		public function invalidateIndexData():void {
+		public function invalidateIndexData():void
+		{
 			_indexDataDirty = true;
 		}
 
-		public function invalidateVertexData(dataType:String):void {
+		public function invalidateVertexData(dataType:String):void
+		{
 			_vertexDataDirty[dataType] = true;
 		}
 
-		protected function getSubGeometry():SubGeometryBase {
+		protected function getSubGeometry():SubGeometryBase
+		{
 			throw new AbstractMethodError();
 		}
 
-		arcane function fillIndexData(indexOffset:Number):void {
-			if (!_indexData) {
-				_indexData = IndexDataPool.getItem(_subGeometry, _level, indexOffset);
-			}
+		arcane function fillIndexData(indexOffset:Number):void
+		{
+			if (_geometryDirty)
+				updateGeometry();
 
-			_indexData.updateData(indexOffset, _subGeometry.indices, _subGeometry.numVertices);
+			_indexData = IndexDataPool.getItem(_subGeometry, _level, indexOffset);
 
 			_numTriangles = _indexData.data.length / 3;
 
@@ -150,22 +162,31 @@ package away3d.core.pool {
 			//check if there is more to split
 			if (indexOffset < _subGeometry.indices.length) {
 				if (!_overflow)
-					_overflow = getOverflowRenderable(pool, materialOwner, indexOffset, _level + 1);
-				else
-					_overflow.fillIndexData(indexOffset);
-			} else if (_overflow) {
-				_overflow.dispose();
-				_overflow = null;
-			}
+					_overflow = getOverflowRenderable(_pool, _materialOwner, indexOffset, _level + 1);
+
+				_overflow.fillIndexData(indexOffset);
+			} else
+				if (_overflow) {
+					_overflow.dispose();
+					_overflow = null;
+				}
 		}
 
-		public function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase {
+		protected function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase
+		{
 			throw new AbstractMethodError();
 		}
 
-		private function updateGeometry():void {
+		/**
+		 * //TODO
+		 *
+		 * @private
+		 */
+		private function updateGeometry():void
+		{
 			if (_subGeometry) {
-				_subGeometry.removeEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
+				if (_level == 0)
+					_subGeometry.removeEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
 				_subGeometry.removeEventListener(SubGeometryEvent.VERTICES_UPDATED, onVerticesUpdated);
 			}
 
@@ -174,37 +195,46 @@ package away3d.core.pool {
 			_concatenateArrays = _subGeometry.concatenateArrays;
 
 			if (_subGeometry) {
-				_subGeometry.addEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
+				if (_level == 0)
+					_subGeometry.addEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
 				_subGeometry.addEventListener(SubGeometryEvent.VERTICES_UPDATED, onVerticesUpdated);
 			}
 
 			//dispose
-			if (_indexData) {
-				//_indexData.dispose(); //TODO where is a good place to dispose?
-				_indexData = null;
-			}
+			//			if (_indexData) {
+			//				_indexData.dispose(); //TODO where is a good place to dispose?
+			//				_indexData = null;
+			//			}
 
-			for (var dataType:* in _vertexData) {
-				//(<VertexData> _vertexData[dataType]).dispose(); //TODO where is a good place to dispose?
-				_vertexData[dataType] = null;
-			}
+			//			for (var dataType in _vertexData) {
+			//				(<VertexData> _vertexData[dataType]).dispose(); //TODO where is a good place to dispose?
+			//				_vertexData[dataType] = null;
+			//			}
 
 			_geometryDirty = false;
-
-			//invalidate indices
-			if (_level == 0)
-				_indexDataDirty = true;
 
 			//specific vertex data types have to be invalidated in the specific renderable
 		}
 
-		private function updateIndexData():void {
+		/**
+		 * //TODO
+		 *
+		 * @private
+		 */
+		private function updateIndexData():void
+		{
 			fillIndexData(_indexOffset);
-
 			_indexDataDirty = false;
 		}
 
-		private function updateVertexData(dataType:String):void {
+		/**
+		 * //TODO
+		 *
+		 * @param dataType
+		 * @private
+		 */
+		private function updateVertexData(dataType:String):void
+		{
 			_vertexOffset[dataType] = _subGeometry.getOffset(dataType);
 
 			if (_subGeometry.concatenateArrays)
@@ -215,45 +245,86 @@ package away3d.core.pool {
 			_vertexDataDirty[dataType] = false;
 		}
 
-		private function onIndicesUpdated(event:SubGeometryEvent):void {
+		/**
+		 * //TODO
+		 *
+		 * @param event
+		 * @private
+		 */
+		private function onIndicesUpdated(event:SubGeometryEvent):void
+		{
 			invalidateIndexData();
 		}
 
-		private function onVerticesUpdated(event:SubGeometryEvent):void {
-			_concatenateArrays = (event.target).concatenateArrays;
-
+		/**
+		 * //TODO
+		 *
+		 * @param event
+		 * @private
+		 */
+		private function onVerticesUpdated(event:SubGeometryEvent):void
+		{
+			_concatenateArrays = (event.target as SubGeometryBase).concatenateArrays;
 			invalidateVertexData(event.dataType);
 		}
 
-		public function get materialId():int {
+		public function get materialId():int
+		{
 			return _materialId;
 		}
 
-		public function set materialId(value:int):void {
+		public function set materialId(value:int):void
+		{
 			_materialId = value;
 		}
 
-		public function get next():IRenderable {
-			return _next;
-		}
-
-		public function set next(value:IRenderable):void {
-			_next = value;
-		}
-
-		public function get renderOrderId():int {
+		public function get renderOrderId():int
+		{
 			return _renderOrderId;
 		}
 
-		public function set renderOrderId(value:int):void {
+		public function set renderOrderId(value:int):void
+		{
 			_renderOrderId = value;
 		}
 
-		public function get zIndex():Number {
+		public function get materialOwner():IMaterialOwner
+		{
+			return _materialOwner;
+		}
+
+		public function set materialOwner(value:IMaterialOwner):void
+		{
+			_materialOwner = value;
+		}
+
+		public function get next():IRenderable
+		{
+			return _next;
+		}
+
+		public function set next(value:IRenderable):void
+		{
+			_next = value;
+		}
+
+		public function get sourceEntity():IEntity
+		{
+			return _sourceEntity;
+		}
+
+		public function set sourceEntity(value:IEntity):void
+		{
+			_sourceEntity = value;
+		}
+
+		public function get zIndex():Number
+		{
 			return _zIndex;
 		}
 
-		public function set zIndex(value:Number):void {
+		public function set zIndex(value:Number):void
+		{
 			_zIndex = value;
 		}
 	}

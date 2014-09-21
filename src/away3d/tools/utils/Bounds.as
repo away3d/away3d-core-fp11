@@ -2,10 +2,10 @@ package away3d.tools.utils
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.math.Box;
+	import away3d.core.geom.Box;
 	import away3d.entities.IEntity;
 	import away3d.entities.Mesh;
-	import away3d.lights.LightBase;
+	import away3d.core.base.LightBase;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;

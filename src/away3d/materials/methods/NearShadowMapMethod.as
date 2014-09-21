@@ -1,14 +1,15 @@
 package away3d.materials.methods
 {
 	import away3d.*;
-	import away3d.core.managers.*;
+	import away3d.managers.*;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.lights.shadowmaps.*;
 	import away3d.materials.compilation.*;
-	
+	import away3d.materials.shadowmappers.NearDirectionalShadowMapper;
+
 	use namespace arcane;
 	
 	// TODO: shadow mappers references in materials should be an interface so that this class should NOT extend ShadowMapMethodBase just for some delegation work
@@ -16,11 +17,11 @@ package away3d.materials.methods
 	 * NearShadowMapMethod provides a shadow map method that restricts the shadowed area near the camera to optimize
 	 * shadow map usage. This method needs to be used in conjunction with a NearDirectionalShadowMapper.
 	 *
-	 * @see away3d.lights.shadowmaps.NearDirectionalShadowMapper
+	 * @see away3d.materials.shadowmappers.NearDirectionalShadowMapper
 	 */
-	public class NearShadowMapMethod extends SimpleShadowMapMethodBase
+	public class NearShadowMapMethod extends ShadowMethodBase
 	{
-		private var _baseMethod:SimpleShadowMapMethodBase;
+		private var _baseMethod:ShadowMethodBase;
 		
 		private var _fadeRatio:Number;
 		private var _nearShadowMapper:NearDirectionalShadowMapper;
@@ -30,7 +31,7 @@ package away3d.materials.methods
 		 * @param baseMethod The shadow map sampling method used to sample individual cascades (fe: HardShadowMapMethod, SoftShadowMapMethod)
 		 * @param fadeRatio The amount of shadow fading to the outer shadow area. A value of 1 would mean the shadows start fading from the camera's near plane.
 		 */
-		public function NearShadowMapMethod(baseMethod:SimpleShadowMapMethodBase, fadeRatio:Number = .1)
+		public function NearShadowMapMethod(baseMethod:ShadowMethodBase, fadeRatio:Number = .1)
 		{
 			super(baseMethod.castingLight);
 			_baseMethod = baseMethod;
@@ -44,12 +45,12 @@ package away3d.materials.methods
 		/**
 		 * The base shadow map method on which this method's shading is based.
 		 */
-		public function get baseMethod():SimpleShadowMapMethodBase
+		public function get baseMethod():ShadowMethodBase
 		{
 			return _baseMethod;
 		}
 
-		public function set baseMethod(value:SimpleShadowMapMethodBase):void
+		public function set baseMethod(value:ShadowMethodBase):void
 		{
 			if (_baseMethod == value)
 				return;

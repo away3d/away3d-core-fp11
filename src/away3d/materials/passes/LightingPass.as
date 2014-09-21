@@ -4,14 +4,14 @@ package away3d.materials.passes
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightProbe;
-	import away3d.lights.PointLight;
+	import away3d.managers.Stage3DProxy;
+	import away3d.entities.DirectionalLight;
+	import away3d.entities.LightProbe;
+	import away3d.entities.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.compilation.LightingShaderCompiler;
-	import away3d.materials.compilation.ShaderCompiler;
+	import away3d.materials.compilation.ShaderLightingCompiler;
+	import away3d.materials.compilation.ShaderCompilerBase;
 	
 	import flash.display3D.Context3D;
 	import flash.geom.Matrix3D;
@@ -26,7 +26,7 @@ package away3d.materials.passes
 	 * @see away3d.materials.MultiPassMaterialBase
 	 */
 	
-	public class LightingPass extends CompiledPass
+	public class LightingPass extends TriangleBasicPass
 	{
 		private var _includeCasters:Boolean = true;
 		private var _tangentSpace:Boolean;
@@ -93,11 +93,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function createCompiler(profile:String):ShaderCompiler
+		override protected function createCompiler(profile:String):ShaderCompilerBase
 		{
 			//TODO: STANDARD profile support
 			_maxLights = profile == "baselineConstrained"? 1 : 3;
-			return new LightingShaderCompiler(profile);
+			return new ShaderLightingCompiler(profile);
 		}
 
 		/**
@@ -194,7 +194,7 @@ package away3d.materials.passes
 		override protected function updateShaderProperties():void
 		{
 			super.updateShaderProperties();
-			_tangentSpace = LightingShaderCompiler(_compiler).tangentSpace;
+			_tangentSpace = ShaderLightingCompiler(_compiler).tangentSpace;
 		}
 
 		/**
@@ -203,7 +203,7 @@ package away3d.materials.passes
 		override protected function updateRegisterIndices():void
 		{
 			super.updateRegisterIndices();
-			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
+			_lightVertexConstantIndex = ShaderLightingCompiler(_compiler).lightVertexConstantIndex;
 		}
 
 		/**

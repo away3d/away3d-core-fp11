@@ -3,7 +3,7 @@ package away3d.loaders.parsers
 	import away3d.arcane;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
-	import away3d.core.math.*;
+	import away3d.core.geom.*;
 	
 	import flash.geom.*;
 	
@@ -606,7 +606,7 @@ package away3d.loaders.parsers
 	}
 }
 
-import away3d.core.math.Quaternion;
+import away3d.core.geom.Quaternion;
 
 import flash.geom.Vector3D;
 

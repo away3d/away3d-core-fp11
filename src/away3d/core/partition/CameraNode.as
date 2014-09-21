@@ -16,7 +16,7 @@ package away3d.core.partition
 		{
 			super(camera);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */

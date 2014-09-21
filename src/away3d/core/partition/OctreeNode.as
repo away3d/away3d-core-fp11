@@ -2,8 +2,8 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.core.math.Box;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Box;
+	import away3d.core.geom.Plane3D;
 	import away3d.entities.IEntity;
 	import away3d.entities.Mesh;
 	import away3d.prefabs.PrimitiveCubePrefab;

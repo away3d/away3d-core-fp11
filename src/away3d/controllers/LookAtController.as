@@ -2,7 +2,7 @@ package away3d.controllers
 {
 	import away3d.containers.*;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.events.*;
 

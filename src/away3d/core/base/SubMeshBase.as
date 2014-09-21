@@ -1,29 +1,39 @@
-package away3d.core.base {
+package away3d.core.base
+{
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
-	import away3d.core.math.UVTransform;
+	import away3d.core.geom.UVTransform;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.render.IRenderer;
 	import away3d.entities.Camera3D;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.materials.IMaterial;
+	import away3d.core.library.NamedAssetBase;
+	import away3d.materials.MaterialBase;
 
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
+	/**
+	 * SubMeshBase wraps a TriangleSubGeometry as a scene graph instantiation. A SubMeshBase is owned by a Mesh object.
+	 *
+	 * @see away3d.core.base.TriangleSubGeometry
+	 * @see away3d.entities.Mesh
+	 *
+	 * @class away3d.core.base.SubMeshBase
+	 */
 	public class SubMeshBase extends NamedAssetBase implements IMaterialOwner
 	{
 		protected var _parentMesh:Mesh;
 		protected var _uvTransform:UVTransform;
 		protected var _index:Number = 0;
 
-		protected var _material:IMaterial;
+		protected var _material:MaterialBase;
 		private var _renderables:Vector.<IRenderable> = new Vector.<IRenderable>();
 
-		public function SubMeshBase() {
+		public function SubMeshBase()
+		{
 		}
 
 		/**
@@ -37,12 +47,12 @@ package away3d.core.base {
 		/**
 		 * The material used to render the current TriangleSubMesh. If set to null, its parent Mesh's material will be used instead.
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
-			return this._material || _parentMesh.material;
+			return _material || _parentMesh.material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (material)
 				material.removeOwner(this);
@@ -52,6 +62,7 @@ package away3d.core.base {
 			if (material)
 				material.addOwner(this);
 		}
+
 		/**
 		 * The scene transform object that transforms from model to world space.
 		 */
@@ -83,17 +94,17 @@ package away3d.core.base {
 
 		override public function dispose():void
 		{
-			this.material = null;
+			material = null;
 
-			var len:uint = _renderables.length;
-			for (var i:uint = 0; i < len; i++)
+			var len:int = _renderables.length;
+			for (var i:int = 0; i < len; i++)
 				_renderables[i].dispose();
 		}
 
 		/**
 		 *
 		 * @param camera
-		 * @returns {away.geom.Matrix3D}
+		 * @returns {flash.geom.Matrix3D}
 		 */
 		public function getRenderSceneTransform(camera:Camera3D):Matrix3D
 		{
@@ -118,8 +129,8 @@ package away3d.core.base {
 
 		public function invalidateRenderableGeometry():void
 		{
-			var len:uint = _renderables.length;
-			for (var i:uint = 0; i < len; i++)
+			var len:int = _renderables.length;
+			for (var i:int = 0; i < len; i++)
 				_renderables[i].invalidateGeometry();
 		}
 
@@ -128,16 +139,18 @@ package away3d.core.base {
 			throw new AbstractMethodError();
 		}
 
-		public function getExplicitMaterial():IMaterial
+		public function getExplicitMaterial():MaterialBase
 		{
 			return _material;
 		}
 
-		public function get index():Number {
+		public function get index():Number
+		{
 			return _index;
 		}
 
-		public function set index(value:Number):void {
+		public function set index(value:Number):void
+		{
 			_index = value;
 		}
 	}

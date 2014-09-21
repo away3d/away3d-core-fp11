@@ -1,5 +1,8 @@
 package away3d.core.pool {
-	import flash.display.Stage;
+    import away3d.core.base.IMaterialOwner;
+    import away3d.entities.IEntity;
+
+    import flash.display.Stage;
 
 	/**
 	 * IRenderable is an interface for classes that are used in the rendering pipeline to render the
@@ -21,6 +24,10 @@ package away3d.core.pool {
 		function get zIndex():Number;
 
 		function set zIndex(value:Number):void;
+
+        function get sourceEntity():IEntity;
+
+        function get materialOwner():IMaterialOwner;
 
 		function dispose():void;
 

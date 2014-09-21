@@ -1,25 +1,31 @@
-package away3d.core.render {
+package away3d.core.render
+{
 	import away3d.arcane;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.pool.MaterialData;
+	import away3d.core.pool.MaterialPassData;
+	import away3d.managers.RTTBufferManager;
+	import away3d.managers.Stage3DManager;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.ICollector;
 	import away3d.debug.Debug;
 	import away3d.entities.Camera3D;
 	import away3d.filters.Filter3DBase;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.entities.DirectionalLight;
+	import away3d.core.base.LightBase;
+	import away3d.entities.PointLight;
+	import away3d.materials.passes.IMaterialPass;
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.materials.shadowmappers.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
 	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.RenderTexture;
-    import away3d.textures.Texture2DBase;
+	import away3d.textures.Texture2DBase;
 
-    import flash.display.Stage;
+	import flash.display.Stage;
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProfile;
@@ -37,19 +43,16 @@ package away3d.core.render {
 	 * The DefaultRenderer class provides the default rendering method. It renders the scene graph objects using the
 	 * materials assigned to them.
 	 */
-	public class DefaultRenderer extends RendererBase implements IRenderer {
+	public class DefaultRenderer extends RendererBase implements IRenderer
+	{
 		private static const _frustumCorners:Vector.<Number> = new Vector.<Number>();
 
 		protected var _requireDepthRender:Boolean;
 
-		private static const RTT_PASSES:int = 1;
-		private static const SCREEN_PASSES:int = 2;
-		private static const ALL_PASSES:int = 3;
-
 		private var _activeMaterial:MaterialBase;
 
-        private var _distanceRenderer:DepthRenderer;
-        private var _depthRenderer:DepthRenderer;
+		private var _distanceRenderer:DepthRenderer;
+		private var _depthRenderer:DepthRenderer;
 		private var _skyboxProjection:Matrix3D = new Matrix3D();
 
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
@@ -58,45 +61,48 @@ package away3d.core.render {
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
 
-        protected var filter3DRenderer:Filter3DRenderer;
-        protected var sceneDepthTexture:RenderTexture;
-        //deferred lighting
-        protected var sceneNormalTexture:RenderTexture;
-        protected var lightAccumulation:RenderTexture;
-        protected var lightAccumulationSpecular:RenderTexture;
+		protected var filter3DRenderer:Filter3DRenderer;
+		protected var sceneDepthTexture:RenderTexture;
+		//deferred lighting
+		protected var sceneNormalTexture:RenderTexture;
+		protected var lightAccumulation:RenderTexture;
+		protected var lightAccumulationSpecular:RenderTexture;
 
-        private var _renderTargetToScreenCopy:RenderTargetCopy;
-        private var _worldNormalRenderer:WorldNormalRenderer;
-        private var _gbufferRenderer:GBufferRenderer;
-        private var _lightRenderer:ILightRenderer;
+		private var _renderTargetToScreenCopy:RenderTargetCopy;
+		private var _worldNormalRenderer:WorldNormalRenderer;
+		private var _gbufferRenderer:GBufferRenderer;
+		private var _lightRenderer:ILightRenderer;
 
-        //todo: thinking about the creation of DeferredLightingConfig class to accumulate these properties
-        //but it should be immutable, because passes can't change these values
-        //or move it to EntityCollector
-        private var _useDeferredLighting:Boolean = false;
-        private var _useDeferredSpecularLighting:Boolean = false;
-        private var _useDeferredDiffuseLighting:Boolean = false;
-        private var _useDeferredColoredSpecular:Boolean = false;
+		//todo: thinking about the creation of DeferredLightingConfig class to accumulate these properties
+		//but it should be immutable, because passes can't change these values
+		//or move it to EntityCollector
+		private var _useDeferredLighting:Boolean = false;
+		private var _useDeferredSpecularLighting:Boolean = false;
+		private var _useDeferredDiffuseLighting:Boolean = false;
+		private var _useDeferredColoredSpecular:Boolean = false;
 
-        /**
+		/**
 		 *
 		 * @returns {*}
 		 */
-		public function get filters3d():Vector.<Filter3DBase> {
+		public function get filters3d():Vector.<Filter3DBase>
+		{
 			return filter3DRenderer ? filter3DRenderer.filters : null;
 		}
 
-		public function set filters3d(value:Vector.<Filter3DBase>):void {
+		public function set filters3d(value:Vector.<Filter3DBase>):void
+		{
 			if (value && value.length == 0)
 				value = null;
 
 			if (filter3DRenderer && !value) {
 				filter3DRenderer.dispose();
 				filter3DRenderer = null;
-			} else if (!filter3DRenderer && value) {
-				filter3DRenderer = new Filter3DRenderer(_stage3DProxy);
-				filter3DRenderer.filters = value;
-			}
+			} else
+				if (!filter3DRenderer && value) {
+					filter3DRenderer = new Filter3DRenderer(_stage3DProxy);
+					filter3DRenderer.filters = value;
+				}
 
 			if (filter3DRenderer) {
 				filter3DRenderer.filters = value;
@@ -116,7 +122,8 @@ package away3d.core.render {
 		 * @param antiAlias The amount of anti-aliasing to use.
 		 * @param renderMode The render mode to use.
 		 */
-		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline") {
+		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline")
+		{
 			super();
 			_depthRenderer = new DepthRenderer();
 			_worldNormalRenderer = new WorldNormalRenderer();
@@ -126,31 +133,32 @@ package away3d.core.render {
 			_profile = profile;
 		}
 
-		override public function init(stage:Stage):void {
+		override public function init(stage:Stage):void
+		{
 			if (!stage3DProxy)
 				stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 
 			if (_width == 0)
-				width = stage.stageWidth;
-			else
+				width = stage.stageWidth; else
 				_rttBufferManager.viewWidth = _width;
 
 			if (_height == 0)
-				height = stage.stageHeight;
-			else
+				height = stage.stageHeight; else
 				_rttBufferManager.viewHeight = _height;
 		}
 
-		override public function set stage3DProxy(value:Stage3DProxy):void {
+		override public function set stage3DProxy(value:Stage3DProxy):void
+		{
 			super.stage3DProxy = value;
 			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
 
-		override public function render(collector:ICollector):void {
-            var entityCollector:EntityCollector = collector as EntityCollector;
+		override public function render(collector:ICollector):void
+		{
+			var entityCollector:EntityCollector = collector as EntityCollector;
 			super.render(entityCollector);
 
 			if (!_stage3DProxy || !_stage3DProxy.recoverFromDisposal()) {
@@ -170,26 +178,26 @@ package away3d.core.render {
 			//setup camera for rendering required scene data
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
 
-            //update deferred rendering properties
-            _useDeferredLighting = entityCollector.numDeferredDirectionalLights > 0 || entityCollector.numDeferredPointLights > 0;
-            if(!_useDeferredLighting) {
-                if(lightAccumulation){
-                    lightAccumulation.dispose();
-                    lightAccumulation = null;
-                }
-                if(lightAccumulationSpecular) {
-                    lightAccumulationSpecular.dispose();
-                    lightAccumulationSpecular = null;
-                }
-            }
+			//update deferred rendering properties
+			_useDeferredLighting = entityCollector.numDeferredDirectionalLights > 0 || entityCollector.numDeferredPointLights > 0;
+			if (!_useDeferredLighting) {
+				if (lightAccumulation) {
+					lightAccumulation.dispose();
+					lightAccumulation = null;
+				}
+				if (lightAccumulationSpecular) {
+					lightAccumulationSpecular.dispose();
+					lightAccumulationSpecular = null;
+				}
+			}
 
-            _useDeferredColoredSpecular = entityCollector.coloredSpecularDeferredLights;
-            if(!_useDeferredColoredSpecular && lightAccumulationSpecular) {
-                lightAccumulationSpecular.dispose();
-            }
+			_useDeferredColoredSpecular = entityCollector.coloredSpecularDeferredLights;
+			if (!_useDeferredColoredSpecular && lightAccumulationSpecular) {
+				lightAccumulationSpecular.dispose();
+			}
 
-            _useDeferredSpecularLighting = entityCollector.hasSpecularDeferredLights;
-            _useDeferredDiffuseLighting = entityCollector.hasDiffuseDeferredLights;
+			_useDeferredSpecularLighting = entityCollector.hasSpecularDeferredLights;
+			_useDeferredDiffuseLighting = entityCollector.hasDiffuseDeferredLights;
 
 			_textureRatioX = 1;
 			_textureRatioY = 1;
@@ -255,9 +263,9 @@ package away3d.core.render {
 				if (!_lightRenderer) _lightRenderer = new PointLightRenderer();
 				_lightRenderer.textureRatioX = _textureRatioX;
 				_lightRenderer.textureRatioY = _textureRatioY;
-                _lightRenderer.diffuseEnabled = _useDeferredDiffuseLighting;
-                _lightRenderer.specularEnabled = _useDeferredSpecularLighting;
-                _lightRenderer.coloredSpecularOutput = _useDeferredColoredSpecular;
+				_lightRenderer.diffuseEnabled = _useDeferredDiffuseLighting;
+				_lightRenderer.specularEnabled = _useDeferredSpecularLighting;
+				_lightRenderer.coloredSpecularOutput = _useDeferredColoredSpecular;
 				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture);
 
 				_context3D.setRenderToTexture(null, true, 0, 0, 0);
@@ -273,11 +281,12 @@ package away3d.core.render {
 				} else {
 					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, null, _shareContext);
 				}
-			} else if (_shareContext) {
-				renderScene(entityCollector, null, _scissorRect);
-			} else {
-				renderScene(entityCollector);
-			}
+			} else
+				if (_shareContext) {
+					renderScene(entityCollector, null, _scissorRect);
+				} else {
+					renderScene(entityCollector);
+				}
 
 			super.render(entityCollector);
 
@@ -317,7 +326,8 @@ package away3d.core.render {
 			_stage3DProxy.bufferClear = false;
 		}
 
-		private static function updateFrustumCorners(camera:Camera3D):Vector.<Number> {
+		private static function updateFrustumCorners(camera:Camera3D):Vector.<Number>
+		{
 			var j:uint;
 			var k:uint;
 			var frustumCorners:Vector.<Number> = camera.projection.frustumCorners;
@@ -330,18 +340,20 @@ package away3d.core.render {
 			return _frustumCorners;
 		}
 
-		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void {
+		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
+		{
 			updateShadows(entityCollector);
 
 			// otherwise RTT will interfere with other RTTs
 			if (target) {
-				drawRenderables(opaqueRenderableHead, entityCollector, RTT_PASSES);
-				drawRenderables(blendedRenderableHead, entityCollector, RTT_PASSES);
+				drawRenderables(opaqueRenderableHead, entityCollector);
+				drawRenderables(blendedRenderableHead, entityCollector);
 			}
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
-		private function updateShadows(collector:ICollector):void {
+		private function updateShadows(collector:ICollector):void
+		{
 			_depthRenderer.textureRatioX = 1;
 			_depthRenderer.textureRatioY = 1;
 			var entityCollector:EntityCollector = collector as EntityCollector;
@@ -371,7 +383,8 @@ package away3d.core.render {
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(collector:ICollector, target:TextureBase):void {
+		override protected function draw(collector:ICollector, target:TextureBase):void
+		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			if (!target) {
 				collectRenderables(entityCollector);
@@ -405,7 +418,8 @@ package away3d.core.render {
 		 * Draw the skybox if present.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawSkyBox(entityCollector:EntityCollector):void {
+		private function drawSkyBox(entityCollector:EntityCollector):void
+		{
 			var skyBox:RenderableBase = entityCollector.skyBox;
 			var material:MaterialBase = skyBox.material;
 			var camera:Camera3D = entityCollector.camera;
@@ -417,7 +431,8 @@ package away3d.core.render {
 			material.deactivatePass(0, _stage3DProxy);
 		}
 
-		private function updateSkyBoxProjection(camera:Camera3D):void {
+		private function updateSkyBoxProjection(camera:Camera3D):void
+		{
 			_skyboxProjection.copyFrom(_rttViewProjectionMatrix);
 			_skyboxProjection.copyRowTo(2, _skyboxTempVector);
 			var camPos:Vector3D = camera.scenePosition;
@@ -473,59 +488,48 @@ package away3d.core.render {
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(renderable:RenderableBase, collector:ICollector, which:int, useDeferredLighting:Boolean = false):void {
+		private function drawRenderables(renderable:RenderableBase, collector:ICollector):void
+		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
-			var numPasses:uint;
-			var j:uint;
+			var i:int;
+			var len:int;
+			var passes:Vector.<IMaterialPass>;
+			var activePass:MaterialPassData;
+			var activeMaterial:MaterialData;
+
+			var context:Context3D = _stage3DProxy.context3D;
 			var camera:Camera3D = entityCollector.camera;
 			var renderable2:RenderableBase;
 
 			while (renderable) {
-				_activeMaterial = renderable.material;
-				_activeMaterial.updateMaterial(_context3D);
+				activeMaterial = context.getMaterial(renderable.material, _stage3DProxy.profile);
 
-				numPasses = _activeMaterial.numPasses;
-				j = 0;
-
-				do {
+				//iterate through each screen pass
+				passes = renderable.material.screenPasses;
+				len = renderable.material.numScreenPasses();
+				for (i = 0; i < len; i++) {
 					renderable2 = renderable;
 
-					var rttMask:int = _activeMaterial.passRendersToTexture(j) ? 1 : 2;
+					activePass = activeMaterial.getMaterialPass(passes[i] as MaterialPassBase, _stage3DProxy.profile);
 
-					if ((rttMask & which) != 0) {
-                        //todo: how to pass deferred lighting to supershaderpass and multimaterialpass
-                        if(useDeferredLighting) {
-                            _activeMaterial.useDeferredDiffuseLighting = _useDeferredDiffuseLighting;
-                            _activeMaterial.useDeferredColoredSpecular = _useDeferredColoredSpecular;
-                            _activeMaterial.useDeferredSpecularLighting = _useDeferredSpecularLighting;
-                            _activeMaterial.lightAccumulation = lightAccumulation;
-                            if(_useDeferredColoredSpecular) {
-                                _activeMaterial.lightAccumulationSpecular = lightAccumulationSpecular;
-                            }
-                        }
+					renderable.material.activatePass(activePass, _stage3DProxy, camera);
 
-						_activeMaterial.activatePass(j, _stage3DProxy, camera);
-						do {
-							_activeMaterial.renderPass(j, renderable2, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
-							renderable2 = renderable2.next as RenderableBase;
-						} while (renderable2 && renderable2.material == _activeMaterial);
-						_activeMaterial.deactivatePass(j, _stage3DProxy);
+					do {
+						renderable.material.renderPass(activePass, renderable2, _stage3DProxy, camera, _rttViewProjectionMatrix);
 
-                        _activeMaterial.lightAccumulation = null;
-                        _activeMaterial.lightAccumulationSpecular = null;
-					} else {
-						do
-							renderable2 = renderable2.next as RenderableBase;
-						while (renderable2 && renderable2.material == _activeMaterial);
-					}
+						renderable2 = renderable2.next as RenderableBase;
 
-				} while (++j < numPasses);
+					} while (renderable2 && renderable2.material == renderable.material);
+
+					activeMaterial.material.deactivatePass(activePass, _stage3DProxy);
+				}
 
 				renderable = renderable2;
 			}
 		}
 
-		override public function dispose():void {
+		override public function dispose():void
+		{
 			super.dispose();
 			_depthRenderer.dispose();
 			_distanceRenderer.dispose();
@@ -535,7 +539,8 @@ package away3d.core.render {
 			_gbufferRenderer = null;
 		}
 
-		protected function renderDepthPrepass(entityCollector:EntityCollector):void {
+		protected function renderDepthPrepass(entityCollector:EntityCollector):void
+		{
 			_depthRenderer.disableColor = true;
 
 			if (filter3DRenderer) {
@@ -554,7 +559,8 @@ package away3d.core.render {
 		/**
 		 * Updates the backbuffer dimensions.
 		 */
-		protected function updateBackBuffer():void {
+		protected function updateBackBuffer():void
+		{
 			if (!_stage3DProxy.context3D) return;
 			// No reason trying to configure back buffer if there is no context available.
 			// Doing this anyway (and relying on _stageGL to cache width/height for
@@ -570,7 +576,8 @@ package away3d.core.render {
 		/**
 		 * Updates rendertarget. It depends on profile type usage. if we have rectangle textures support
 		 */
-		private function updateScreenRenderTargetTexture(renderTarget:RenderTexture, format:String = Context3DTextureFormat.BGRA):RenderTexture {
+		private function updateScreenRenderTargetTexture(renderTarget:RenderTexture, format:String = Context3DTextureFormat.BGRA):RenderTexture
+		{
 			var targetWidth:Number = _rttBufferManager.textureWidth;
 			var targetHeight:Number = _rttBufferManager.textureHeight;
 
@@ -583,22 +590,25 @@ package away3d.core.render {
 			if ((!result && hasRectangleRenderTargetSupport) || (hasRectangleRenderTargetSupport && !(result is RectangleRenderTexture))) {
 				if (result) result.dispose();
 				result = new RectangleRenderTexture(targetWidth, targetHeight, format);
-			} else if ((!result && !hasRectangleRenderTargetSupport) || (!hasRectangleRenderTargetSupport && !(result is RenderTexture))) {
-				if (result) result.dispose();
-				result = new RenderTexture(targetWidth, targetHeight);
-			}
+			} else
+				if ((!result && !hasRectangleRenderTargetSupport) || (!hasRectangleRenderTargetSupport && !(result is RenderTexture))) {
+					if (result) result.dispose();
+					result = new RenderTexture(targetWidth, targetHeight);
+				}
 
 			result.width = targetWidth;
 			result.height = targetHeight;
 			return result;
 		}
 
-		public function get hasRectangleRenderTargetSupport():Boolean {
+		public function get hasRectangleRenderTargetSupport():Boolean
+		{
 			return _profile == Context3DProfile.STANDARD;
 		}
 
-		public function get hasMRTSupport():Boolean {
+		public function get hasMRTSupport():Boolean
+		{
 			return _profile == Context3DProfile.STANDARD;
 		}
-    }
+	}
 }

@@ -1,239 +1,182 @@
-package away3d.materials.methods
-{
-	import away3d.*;
-	import away3d.core.managers.*;
-	import away3d.core.pool.IRenderable;
-	import away3d.core.pool.RenderableBase;
-	import away3d.entities.Camera3D;
-	import away3d.events.*;
-	import away3d.library.assets.*;
-	import away3d.materials.compilation.*;
-	import away3d.materials.passes.*;
-	import away3d.textures.*;
-	
-	import flash.display3D.*;
-	
-	use namespace arcane;
-	
-	/**
-	 * ShadingMethodBase provides an abstract base method for shading methods, used by compiled passes to compile
-	 * the final shading program.
-	 */
-	public class ShadingMethodBase extends NamedAssetBase
-	{
-		protected static const DXT1:String = "dxt1,";
-		protected static const DXT5:String = "dxt5,";
-		protected static const COMPRESSED_ALPHA:String = "compressedAlpha";
+package away3d.materials.methods {
+    import away3d.arcane;
+    import away3d.core.library.NamedAssetBase;
+    import away3d.core.pool.RenderableBase;
+    import away3d.entities.Camera3D;
+    import away3d.events.ShadingMethodEvent;
+    import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.passes.MaterialPassBase;
 
-		protected var _sharedRegisters:ShaderRegisterData;
-		protected var _passes:Vector.<MaterialPassBase>;
-		
-		/**
-		 * Create a new ShadingMethodBase object.
-		 * @param needsNormals Defines whether or not the method requires normals.
-		 * @param needsView Defines whether or not the method requires the view direction.
-		 */
-		public function ShadingMethodBase() // needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean
-		{
-		}
+    use namespace arcane;
 
-		/**
-		 * Initializes the properties for a MethodVO, including register and texture indices.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 */
-		arcane function initVO(vo:MethodVO):void
-		{
-		
-		}
+    /**
+     * ShadingMethodBase provides an abstract base method for shading methods, used by compiled passes to compile
+     * the final shading program.
+     */
+    public class ShadingMethodBase extends NamedAssetBase {
+        protected var _passes:Vector.<MaterialPassBase>;
 
-		/**
-		 * Initializes unchanging shader constants using the data from a MethodVO.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 */
-		arcane function initConstants(vo:MethodVO):void
-		{
-		
-		}
+        /**
+         * Create a new ShadingMethodBase object.
+         */
+        public function ShadingMethodBase()
+        {
+        }
 
-		/**
-		 * The shared registers created by the compiler and possibly used by methods.
-		 */
-		arcane function get sharedRegisters():ShaderRegisterData
-		{
-			return _sharedRegisters;
-		}
-		
-		arcane function set sharedRegisters(value:ShaderRegisterData):void
-		{
-			_sharedRegisters = value;
-		}
-		
-		/**
-		 * Any passes required that render to a texture used by this method.
-		 */
-		public function get passes():Vector.<MaterialPassBase>
-		{
-			return _passes;
-		}
-		
-		/**
-		 * Cleans up any resources used by the current object.
-		 */
-		override public function dispose():void
-		{
-		
-		}
-		
-		/**
-		 * Creates a data container that contains material-dependent data. Provided as a factory method so a custom subtype can be overridden when needed.
-		 */
-		arcane function createMethodVO():MethodVO
-		{
-			return new MethodVO();
-		}
 
-		/**
-		 * Resets the compilation state of the method.
-		 */
-		arcane function reset():void
-		{
-			cleanCompilationData();
-		}
-		
-		/**
-		 * Resets the method's state for compilation.
-		 * @private
-		 */
-		arcane function cleanCompilationData():void
-		{
-		}
-		
-		/**
-		 * Get the vertex shader code for this method.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param regCache The register cache used during the compilation.
-		 * @private
-		 */
-		arcane function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
-		{
-			return "";
-		}
-		
-		/**
-		 * Sets the render state for this method.
-		 *
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
-		 * @private
-		 */
-		arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
-		{
-		
-		}
-		
-		/**
-		 * Sets the render state for a single renderable.
-		 *
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param renderable The renderable currently being rendered.
-		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
-		 * @param camera The camera from which the scene is currently rendered.
-		 */
-		arcane function setRenderState(vo:MethodVO, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
-		{
-		
-		}
-		
-		/**
-		 * Clears the render state for this method.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
-		 */
-		arcane function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
-		{
-		
-		}
-		
-		/**
-		 * A helper method that generates standard code for sampling from a texture using the normal uv coordinates.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param targetReg The register in which to store the sampled colour.
-		 * @param inputReg The texture stream register.
-		 * @param texture The texture which will be assigned to the given slot.
-		 * @param uvReg An optional uv register if coordinates different from the primary uv coordinates are to be used.
-		 * @param forceWrap If true, texture wrapping is enabled regardless of the material setting.
-		 * @return The fragment code that performs the sampling.
-		 */
-		protected function getTex2DSampleCode(vo:MethodVO, targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, uvReg:ShaderRegisterElement = null, forceWrap:String = null):String
-		{
-			var wrap:String = forceWrap || (vo.repeatTextures? "wrap" : "clamp");
-			var filter:String;
-			var format:String = getFormatStringForTexture(texture);
-			var enableMipMaps:Boolean = vo.useMipmapping && texture.hasMipMaps;
-			
-			if (vo.useSmoothTextures)
-				filter = enableMipMaps? "linear,miplinear" : "linear";
-			else
-				filter = enableMipMaps? "nearest,mipnearest" : "nearest";
-			
-			uvReg ||= _sharedRegisters.uvVarying;
-			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + "," + format + wrap + ">\n";
-		}
+        arcane function isUsed(shaderObject:ShaderObjectBase):Boolean
+        {
+            return true;
+        }
 
-		/**
-		 * A helper method that generates standard code for sampling from a cube texture.
-		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
-		 * @param targetReg The register in which to store the sampled colour.
-		 * @param inputReg The texture stream register.
-		 * @param texture The cube map which will be assigned to the given slot.
-		 * @param uvReg The direction vector with which to sample the cube map.
-		 */
-		protected function getTexCubeSampleCode(vo:MethodVO, targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, uvReg:ShaderRegisterElement):String
-		{
-			var filter:String;
-			var format:String = getFormatStringForTexture(texture);
-			var enableMipMaps:Boolean = vo.useMipmapping && texture.hasMipMaps;
-			
-			if (vo.useSmoothTextures)
-				filter = enableMipMaps? "linear,miplinear" : "linear";
-			else
-				filter = enableMipMaps? "nearest,mipnearest" : "nearest";
-			
-			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <cube," + format + filter + ">\n";
-		}
+        /**
+         * Initializes the properties for a MethodVO, including register and texture indices.
+         *
+         * @param methodVO The MethodVO object linking this method with the pass currently being compiled.
+         *
+         * @internal
+         */
+        arcane function initVO(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
+        {
 
-		/**
-		 * Generates a texture format string for the sample instruction.
-		 * @param texture The texture for which to get the format string.
-		 * @return
-		 */
-		private function getFormatStringForTexture(texture:TextureProxyBase):String
-		{
-			switch (texture.format) {
-				case Context3DTextureFormat.COMPRESSED:
-					return DXT1;
-					break;
-				case COMPRESSED_ALPHA:
-					return DXT5;
-					break;
-				default:
-					return "";
-			}
-		}
-		
-		/**
-		 * Marks the shader program as invalid, so it will be recompiled before the next render.
-		 */
-		protected function invalidateShaderProgram():void
-		{
-			dispatchEvent(new ShadingMethodEvent(ShadingMethodEvent.SHADER_INVALIDATED));
-		}
-		
-		/**
-		 * Copies the state from a ShadingMethodBase object into the current object.
-		 */
-		public function copyFrom(method:ShadingMethodBase):void
-		{
-		}
-	}
+        }
+
+        /**
+         * Initializes unchanging shader constants using the data from a MethodVO.
+         *
+         * @param methodVO The MethodVO object linking this method with the pass currently being compiled.
+         *
+         * @internal
+         */
+        arcane function initConstants(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
+        {
+
+
+        }
+
+        /**
+         * Indicates whether or not this method expects normals in tangent space. Override for object-space normals.
+         */
+        arcane function usesTangentSpace():Boolean
+        {
+            return true;
+        }
+
+        /**
+         * Any passes required that render to a texture used by this method.
+         */
+        public function get passes():Vector.<MaterialPassBase>
+        {
+            return _passes;
+        }
+
+        /**
+         * Cleans up any resources used by the current object.
+         */
+        override public function dispose():void
+        {
+
+        }
+
+        /**
+         * Resets the compilation state of the method.
+         *
+         * @internal
+         */
+        arcane function reset():void
+        {
+            cleanCompilationData();
+        }
+
+        /**
+         * Resets the method's state for compilation.
+         *
+         * @internal
+         */
+        arcane function cleanCompilationData():void
+        {
+        }
+
+        /**
+         * Get the vertex shader code for this method.
+         * @param vo The MethodVO object linking this method with the pass currently being compiled.
+         * @param regCache The register cache used during the compilation.
+         *
+         * @internal
+         */
+        arcane function getVertexCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        {
+            return "";
+        }
+
+        /**
+         * @inheritDoc
+         */
+        arcane function getFragmentCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, targetReg:ShaderRegisterElement, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        {
+            return null;
+        }
+
+        /**
+         * Sets the render state for this method.
+         *
+         * @param methodVO The MethodVO object linking this method with the pass currently being compiled.
+         * @param stage The Stage object currently used for rendering.
+         *
+         * @internal
+         */
+        arcane function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
+        {
+
+        }
+
+        /**
+         * Sets the render state for a single renderable.
+         *
+         * @param vo The MethodVO object linking this method with the pass currently being compiled.
+         * @param renderable The renderable currently being rendered.
+         * @param stage The Stage object currently used for rendering.
+         * @param camera The camera from which the scene is currently rendered.
+         *
+         * @internal
+         */
+        public function setRenderState(shaderObject:ShaderObjectBase, methodVO:MethodVO, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D):void
+        {
+
+        }
+
+        /**
+         * Clears the render state for this method.
+         * @param vo The MethodVO object linking this method with the pass currently being compiled.
+         * @param stage The Stage object currently used for rendering.
+         *
+         * @internal
+         */
+        arcane function deactivate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
+        {
+
+        }
+
+        /**
+         * Marks the shader program as invalid, so it will be recompiled before the next render.
+         *
+         * @internal
+         */
+        arcane function invalidateShaderProgram():void
+        {
+            dispatchEvent(new ShadingMethodEvent(ShadingMethodEvent.SHADER_INVALIDATED));
+        }
+
+        /**
+         * Copies the state from a ShadingMethodBase object into the current object.
+         */
+        public function copyFrom(method:ShadingMethodBase):void
+        {
+        }
+    }
 }

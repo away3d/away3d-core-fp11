@@ -1,7 +1,7 @@
 package away3d.animators
 {
 	import away3d.core.base.Object3D;
-	import away3d.core.math.Vector3DUtils;
+	import away3d.core.geom.Vector3DUtils;
 	import away3d.events.PathEvent;
 	import away3d.paths.IPath;
 	import away3d.paths.IPathSegment;

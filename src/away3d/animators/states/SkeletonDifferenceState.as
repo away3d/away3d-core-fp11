@@ -5,7 +5,7 @@ package away3d.animators.states
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonPose;
 	import away3d.animators.nodes.SkeletonDifferenceNode;
-	import away3d.core.math.Quaternion;
+	import away3d.core.geom.Quaternion;
 
 	import flash.geom.Vector3D;
 

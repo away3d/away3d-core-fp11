@@ -1,9 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.DirectionalLight;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+	import away3d.entities.DirectionalLight;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.BitmapTexture;
 	
@@ -14,7 +15,7 @@ package away3d.materials.methods
 	/**
 	 * DitheredShadowMapMethod provides a soft shadowing technique by randomly distributing sample points differently for each fragment.
 	 */
-	public class DitheredShadowMapMethod extends SimpleShadowMapMethodBase
+	public class DitheredShadowMapMethod extends ShadowMethodBase
 	{
 		private static var _grainTexture:BitmapTexture;
 		private static var _grainUsages:int;

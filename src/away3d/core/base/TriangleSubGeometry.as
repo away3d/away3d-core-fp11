@@ -1,7 +1,7 @@
 package away3d.core.base
 {
 	import away3d.arcane;
-	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.events.SubGeometryEvent;
 
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -58,7 +58,7 @@ package away3d.core.base
 		private var _condensedIndexLookUp:Vector.<uint>;
 		private var _numCondensedJoints:Number;
 
-		private var _jointsPerVertex:Number;
+		private var _jointsPerVertex:int;
 
 		private var _autoDeriveNormals:Boolean = true;
 		private var _autoDeriveTangents:Boolean = false;
@@ -146,12 +146,12 @@ package away3d.core.base
 				_stride[JOINT_INDEX_DATA] = stride;
 				_stride[JOINT_WEIGHT_DATA] = stride;
 
-				var len:Number = _numVertices*stride;
+				var len:Number = _numVertices * stride;
 
 				if (_vertices == null)
-					_vertices = new Vector.<Number>(len);
-				else if (_vertices.length != len)
-					_vertices.length = len;
+					_vertices = new Vector.<Number>(len); else
+					if (_vertices.length != len)
+						_vertices.length = len;
 
 			} else {
 				_offset[POSITION_DATA] = 0;
@@ -174,12 +174,12 @@ package away3d.core.base
 			_strideOffsetDirty = false;
 		}
 
-		public function get jointsPerVertex():Number
+		public function get jointsPerVertex():int
 		{
 			return _jointsPerVertex;
 		}
 
-		public function set jointsPerVertex(value:Number):void
+		public function set jointsPerVertex(value:int):void
 		{
 			if (_jointsPerVertex == value) return;
 			_jointsPerVertex = value;
@@ -423,7 +423,6 @@ package away3d.core.base
 		}
 
 
-
 		override public function getBoundingPositions():Vector.<Number>
 		{
 			if (_positionsDirty)
@@ -432,102 +431,115 @@ package away3d.core.base
 			return _positions;
 		}
 
-		public function updateData(targetDataType:String, sourceData:Vector.<Number>, sourceOffset:uint, sourceDataPerVertex:uint, format:String):void{
-			if(sourceOffset>=sourceDataPerVertex) return;
+		public function updateData(targetDataType:String, sourceData:Vector.<Number>, sourceOffset:uint, sourceDataPerVertex:uint, format:String):void
+		{
+			if (sourceOffset >= sourceDataPerVertex) return;
 
 			var targetIndex:int;
 			var sourceIndex:int;
 			var stride:uint;
-			if(_concatenateArrays) {
+			if (_concatenateArrays) {
 				var offset:uint = getOffset(targetDataType);
 				stride = getStride(targetDataType);
 				targetIndex = offset;
 				sourceIndex = sourceOffset;
-				var i:uint = 0;
-				if(format == Context3DVertexBufferFormat.FLOAT_1) {
-					for(i = 0; i<_numVertices; i++) {
+				var i:int;
+				if (format == Context3DVertexBufferFormat.FLOAT_1) {
+					for (i = 0; i < _numVertices; i++) {
 						_vertices[targetIndex] = sourceData[sourceIndex];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
+						targetIndex += stride;
+						sourceIndex += sourceDataPerVertex;
 					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_2) {
-					for(i = 0; i<_numVertices; i++) {
-						_vertices[targetIndex] = sourceData[sourceIndex];
-						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_3) {
-					for(i = 0; i<_numVertices; i++) {
-						_vertices[targetIndex] = sourceData[sourceIndex];
-						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
-						_vertices[targetIndex+2] = sourceData[sourceIndex+2];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_4) {
-					for(i = 0; i<_numVertices; i++) {
-						_vertices[targetIndex] = sourceData[sourceIndex];
-						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
-						_vertices[targetIndex+2] = sourceData[sourceIndex+2];
-						_vertices[targetIndex+3] = sourceData[sourceIndex+3];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}
-			}else{
+				} else
+					if (format == Context3DVertexBufferFormat.FLOAT_2) {
+						for (i = 0; i < _numVertices; i++) {
+							_vertices[targetIndex] = sourceData[sourceIndex];
+							_vertices[targetIndex + 1] = sourceData[sourceIndex + 1];
+							targetIndex += stride;
+							sourceIndex += sourceDataPerVertex;
+						}
+					} else
+						if (format == Context3DVertexBufferFormat.FLOAT_3) {
+							for (i = 0; i < _numVertices; i++) {
+								_vertices[targetIndex] = sourceData[sourceIndex];
+								_vertices[targetIndex + 1] = sourceData[sourceIndex + 1];
+								_vertices[targetIndex + 2] = sourceData[sourceIndex + 2];
+								targetIndex += stride;
+								sourceIndex += sourceDataPerVertex;
+							}
+						} else
+							if (format == Context3DVertexBufferFormat.FLOAT_4) {
+								for (i = 0; i < _numVertices; i++) {
+									_vertices[targetIndex] = sourceData[sourceIndex];
+									_vertices[targetIndex + 1] = sourceData[sourceIndex + 1];
+									_vertices[targetIndex + 2] = sourceData[sourceIndex + 2];
+									_vertices[targetIndex + 3] = sourceData[sourceIndex + 3];
+									targetIndex += stride;
+									sourceIndex += sourceDataPerVertex;
+								}
+							}
+			} else {
 
 				var values:Vector.<Number>;
-				if(targetDataType == POSITION_DATA) {
+				if (targetDataType == POSITION_DATA) {
 					values = _positions;
-				}else if(targetDataType == NORMAL_DATA) {
-					values = _vertexNormals;
-				}else if(targetDataType == UV_DATA) {
-					values = _uvs;
-				}else if(targetDataType == SECONDARY_UV_DATA) {
-					values = _secondaryUVs;
-				}else if(targetDataType == TANGENT_DATA) {
-					values = _vertexTangents;
-				}else if(targetDataType == JOINT_INDEX_DATA) {
-					values = _jointIndices;
-				}else if(targetDataType == JOINT_WEIGHT_DATA) {
-					values = _jointWeights;
-				}
+				} else
+					if (targetDataType == NORMAL_DATA) {
+						values = _vertexNormals;
+					} else
+						if (targetDataType == UV_DATA) {
+							values = _uvs;
+						} else
+							if (targetDataType == SECONDARY_UV_DATA) {
+								values = _secondaryUVs;
+							} else
+								if (targetDataType == TANGENT_DATA) {
+									values = _vertexTangents;
+								} else
+									if (targetDataType == JOINT_INDEX_DATA) {
+										values = _jointIndices;
+									} else
+										if (targetDataType == JOINT_WEIGHT_DATA) {
+											values = _jointWeights;
+										}
 
 				targetIndex = 0;
 				stride = getStride(targetDataType);
 				sourceIndex = sourceOffset;
-				if(format == Context3DVertexBufferFormat.FLOAT_1) {
-					for(i = 0; i<_numVertices; i++) {
+				if (format == Context3DVertexBufferFormat.FLOAT_1) {
+					for (i = 0; i < _numVertices; i++) {
 						values[targetIndex] = sourceData[sourceIndex];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
+						targetIndex += stride;
+						sourceIndex += sourceDataPerVertex;
 					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_2) {
-					for(i = 0; i<_numVertices; i++) {
-						values[targetIndex] = sourceData[sourceIndex];
-						values[targetIndex+1] = sourceData[sourceIndex+1];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_3) {
-					for(i = 0; i<_numVertices; i++) {
-						values[targetIndex] = sourceData[sourceIndex];
-						values[targetIndex+1] = sourceData[sourceIndex+1];
-						values[targetIndex+2] = sourceData[sourceIndex+2];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}else if(format == Context3DVertexBufferFormat.FLOAT_4) {
-					for(i = 0; i<_numVertices; i++) {
-						values[targetIndex] = sourceData[sourceIndex];
-						values[targetIndex+1] = sourceData[sourceIndex+1];
-						values[targetIndex+2] = sourceData[sourceIndex+2];
-						values[targetIndex+3] = sourceData[sourceIndex+3];
-						targetIndex+=stride;
-						sourceIndex+=sourceDataPerVertex;
-					}
-				}
+				} else
+					if (format == Context3DVertexBufferFormat.FLOAT_2) {
+						for (i = 0; i < _numVertices; i++) {
+							values[targetIndex] = sourceData[sourceIndex];
+							values[targetIndex + 1] = sourceData[sourceIndex + 1];
+							targetIndex += stride;
+							sourceIndex += sourceDataPerVertex;
+						}
+					} else
+						if (format == Context3DVertexBufferFormat.FLOAT_3) {
+							for (i = 0; i < _numVertices; i++) {
+								values[targetIndex] = sourceData[sourceIndex];
+								values[targetIndex + 1] = sourceData[sourceIndex + 1];
+								values[targetIndex + 2] = sourceData[sourceIndex + 2];
+								targetIndex += stride;
+								sourceIndex += sourceDataPerVertex;
+							}
+						} else
+							if (format == Context3DVertexBufferFormat.FLOAT_4) {
+								for (i = 0; i < _numVertices; i++) {
+									values[targetIndex] = sourceData[sourceIndex];
+									values[targetIndex + 1] = sourceData[sourceIndex + 1];
+									values[targetIndex + 2] = sourceData[sourceIndex + 2];
+									values[targetIndex + 3] = sourceData[sourceIndex + 3];
+									targetIndex += stride;
+									sourceIndex += sourceDataPerVertex;
+								}
+							}
 			}
 
 			notifyVerticesUpdate();
@@ -538,9 +550,9 @@ package away3d.core.base
 		 */
 		public function updatePositions(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var index:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var stride:int;
 			var positions:Vector.<Number>;
 
 			_positions = values;
@@ -549,15 +561,15 @@ package away3d.core.base
 				_positions = new Vector.<Number>();
 			}
 
-			_numVertices = _positions.length/3;
+			_numVertices = _positions.length / 3;
 
 			if (_concatenateArrays && values) {
-				var len:Number = _numVertices*getStride(VERTEX_DATA);
+				var len:Number = _numVertices * getStride(VERTEX_DATA);
 
 				if (_vertices == null)
-					_vertices = new Vector.<Number>(len);
-				else if (_vertices.length != len)
-					_vertices.length = len;
+					_vertices = new Vector.<Number>(len); else
+					if (_vertices.length != len)
+						_vertices.length = len;
 
 				i = 0;
 				index = getOffset(POSITION_DATA);
@@ -573,13 +585,13 @@ package away3d.core.base
 			}
 
 			if (_autoDeriveNormals)
-			notifyNormalsUpdate();
+				notifyNormalsUpdate();
 
 			if (_autoDeriveTangents)
 				notifyTangentsUpdate();
 
 			if (_autoDeriveUVs)
-				notifyUVsUpdate()
+				notifyUVsUpdate();
 
 			invalidateBounds();
 
@@ -593,17 +605,16 @@ package away3d.core.base
 		 */
 		public function updateVertexNormals(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var normals:Vector.<Number>;
 
 			if (!_autoDeriveNormals) {
 				if ((_vertexNormals == null || values == null) && (_vertexNormals != null || values != null)) {
 					if (_concatenateArrays)
-						notifyVerticesUpdate();
-					else
+						notifyVerticesUpdate(); else
 						_strideOffsetDirty = true;
 				}
 
@@ -622,89 +633,89 @@ package away3d.core.base
 						index += stride;
 					}
 				}
-			} else if(_positions) {
-				if (_vertexNormals == null) {
-					_vertexNormals = new Vector.<Number>(_positions.length);
+			} else
+				if (_positions) {
+					if (_vertexNormals == null) {
+						_vertexNormals = new Vector.<Number>(_positions.length);
 
-					if (_concatenateArrays)
-						notifyVerticesUpdate();
-					else
-						_strideOffsetDirty = true;
-				}
-
-				if (_faceNormalsDirty)
-					updateFaceNormals();
-
-				offset = getOffset(NORMAL_DATA);
-				stride = getStride(NORMAL_DATA);
-
-				//autoderived normals
-				normals = _concatenateArrays? _vertices : _vertexNormals;
-
-				var f1:Number = 0;
-				var f2:Number = 1;
-				var f3:Number = 2;
-
-				index = offset;
-
-				//clear normal values
-				var lenV:Number = normals.length;
-				while (index < lenV) {
-					normals[index] = 0;
-					normals[index + 1] = 0;
-					normals[index + 2] = 0;
-					index += stride;
-				}
-
-				var k:Number = 0;
-				var lenI:Number = _indices.length;
-				var weight:Number;
-
-				i = 0;
-
-				//collect face normals
-				while (i < lenI) {
-					weight = _useFaceWeights? _faceWeights[k++] : 1;
-					index = offset + _indices[i++]*stride;
-					normals[index] += _faceNormals[f1]*weight;
-					normals[index + 1] += _faceNormals[f2]*weight;
-					normals[index + 2] += _faceNormals[f3]*weight;
-					index = offset + _indices[i++]*stride;
-					normals[index] += _faceNormals[f1]*weight;
-					normals[index + 1] += _faceNormals[f2]*weight;
-					normals[index + 2] += _faceNormals[f3]*weight;
-					index = offset + _indices[i++]*stride;
-					normals[index] += _faceNormals[f1]*weight;
-					normals[index + 1] += _faceNormals[f2]*weight;
-					normals[index + 2] += _faceNormals[f3]*weight;
-					f1 += 3;
-					f2 += 3;
-					f3 += 3;
-				}
-
-				i = 0;
-				index = offset;
-
-				//average normals collections
-				while (index < lenV) {
-					var vx:Number = normals[index];
-					var vy:Number = normals[index + 1];
-					var vz:Number = normals[index + 2];
-					var d:Number = 1.0/Math.sqrt(vx*vx + vy*vy + vz*vz);
-
-					if (_concatenateArrays) {
-						_vertexNormals[i++] = normals[index] = vx*d;
-						_vertexNormals[i++] = normals[index + 1] = vy*d;
-						_vertexNormals[i++] = normals[index + 2] = vz*d;
-					} else {
-						normals[index] = vx*d;
-						normals[index + 1] = vy*d;
-						normals[index + 2] = vz*d;
+						if (_concatenateArrays)
+							notifyVerticesUpdate(); else
+							_strideOffsetDirty = true;
 					}
 
-					index += stride;
+					if (_faceNormalsDirty)
+						updateFaceNormals();
+
+					offset = getOffset(NORMAL_DATA);
+					stride = getStride(NORMAL_DATA);
+
+					//autoderived normals
+					normals = _concatenateArrays ? _vertices : _vertexNormals;
+
+					var f1:Number = 0;
+					var f2:Number = 1;
+					var f3:Number = 2;
+
+					index = offset;
+
+					//clear normal values
+					var lenV:Number = normals.length;
+					while (index < lenV) {
+						normals[index] = 0;
+						normals[index + 1] = 0;
+						normals[index + 2] = 0;
+						index += stride;
+					}
+
+					var k:Number = 0;
+					var lenI:Number = _indices.length;
+					var weight:Number;
+
+					i = 0;
+
+					//collect face normals
+					while (i < lenI) {
+						weight = _useFaceWeights ? _faceWeights[k++] : 1;
+						index = offset + _indices[i++] * stride;
+						normals[index] += _faceNormals[f1] * weight;
+						normals[index + 1] += _faceNormals[f2] * weight;
+						normals[index + 2] += _faceNormals[f3] * weight;
+						index = offset + _indices[i++] * stride;
+						normals[index] += _faceNormals[f1] * weight;
+						normals[index + 1] += _faceNormals[f2] * weight;
+						normals[index + 2] += _faceNormals[f3] * weight;
+						index = offset + _indices[i++] * stride;
+						normals[index] += _faceNormals[f1] * weight;
+						normals[index + 1] += _faceNormals[f2] * weight;
+						normals[index + 2] += _faceNormals[f3] * weight;
+						f1 += 3;
+						f2 += 3;
+						f3 += 3;
+					}
+
+					i = 0;
+					index = offset;
+
+					//average normals collections
+					while (index < lenV) {
+						var vx:Number = normals[index];
+						var vy:Number = normals[index + 1];
+						var vz:Number = normals[index + 2];
+						var d:Number = 1.0 / Math.sqrt(vx * vx + vy * vy + vz * vz);
+
+						if (_concatenateArrays) {
+							_vertexNormals[i++] = normals[index] = vx * d;
+							_vertexNormals[i++] = normals[index + 1] = vy * d;
+							_vertexNormals[i++] = normals[index + 2] = vz * d;
+						} else {
+							normals[index] = vx * d;
+							normals[index + 1] = vy * d;
+							normals[index + 2] = vz * d;
+						}
+
+						index += stride;
+					}
 				}
-			}
 
 			notifyNormalsUpdate();
 
@@ -716,17 +727,16 @@ package away3d.core.base
 		 */
 		public function updateVertexTangents(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var tangents:Vector.<Number>;
 
 			if (!_autoDeriveTangents) {
 				if ((_vertexTangents == null || values == null) && (_vertexTangents != null || values != null)) {
 					if (_concatenateArrays)
-						notifyVerticesUpdate();
-					else
+						notifyVerticesUpdate(); else
 						_strideOffsetDirty = true;
 				}
 
@@ -750,8 +760,7 @@ package away3d.core.base
 					_vertexTangents = new Vector.<Number>(_positions.length);
 
 					if (_concatenateArrays)
-						notifyVerticesUpdate();
-					else
+						notifyVerticesUpdate(); else
 						_strideOffsetDirty = true;
 				}
 
@@ -762,7 +771,7 @@ package away3d.core.base
 				stride = getStride(TANGENT_DATA);
 
 				//autoderived tangents
-				tangents = _concatenateArrays? _vertices : _vertexTangents;
+				tangents = _concatenateArrays ? _vertices : _vertexTangents;
 
 				index = offset;
 
@@ -787,19 +796,19 @@ package away3d.core.base
 				//collect face tangents
 				var lenI:Number = _indices.length;
 				while (i < lenI) {
-					weight = _useFaceWeights? _faceWeights[k++] : 1;
-					index = offset + _indices[i++]*stride;
-					tangents[index++] += _faceTangents[f1]*weight;
-					tangents[index++] += _faceTangents[f2]*weight;
-					tangents[index] += _faceTangents[f3]*weight;
-					index = offset + _indices[i++]*stride;
-					tangents[index++] += _faceTangents[f1]*weight;
-					tangents[index++] += _faceTangents[f2]*weight;
-					tangents[index] += _faceTangents[f3]*weight;
-					index = offset + _indices[i++]*stride;
-					tangents[index++] += _faceTangents[f1]*weight;
-					tangents[index++] += _faceTangents[f2]*weight;
-					tangents[index] += _faceTangents[f3]*weight;
+					weight = _useFaceWeights ? _faceWeights[k++] : 1;
+					index = offset + _indices[i++] * stride;
+					tangents[index++] += _faceTangents[f1] * weight;
+					tangents[index++] += _faceTangents[f2] * weight;
+					tangents[index] += _faceTangents[f3] * weight;
+					index = offset + _indices[i++] * stride;
+					tangents[index++] += _faceTangents[f1] * weight;
+					tangents[index++] += _faceTangents[f2] * weight;
+					tangents[index] += _faceTangents[f3] * weight;
+					index = offset + _indices[i++] * stride;
+					tangents[index++] += _faceTangents[f1] * weight;
+					tangents[index++] += _faceTangents[f2] * weight;
+					tangents[index] += _faceTangents[f3] * weight;
 					f1 += 3;
 					f2 += 3;
 					f3 += 3;
@@ -813,16 +822,16 @@ package away3d.core.base
 					var vx:Number = tangents[index];
 					var vy:Number = tangents[index + 1];
 					var vz:Number = tangents[index + 2];
-					var d:Number = 1.0/Math.sqrt(vx*vx + vy*vy + vz*vz);
+					var d:Number = 1.0 / Math.sqrt(vx * vx + vy * vy + vz * vz);
 
 					if (_concatenateArrays) {
-						_vertexTangents[i++] = tangents[index] = vx*d;
-						_vertexTangents[i++] = tangents[index + 1] = vy*d;
-						_vertexTangents[i++] = tangents[index + 2] = vz*d;
+						_vertexTangents[i++] = tangents[index] = vx * d;
+						_vertexTangents[i++] = tangents[index + 1] = vy * d;
+						_vertexTangents[i++] = tangents[index + 2] = vz * d;
 					} else {
-						tangents[index] = vx*d;
-						tangents[index + 1] = vy*d;
-						tangents[index + 2] = vz*d;
+						tangents[index] = vx * d;
+						tangents[index + 1] = vy * d;
+						tangents[index + 2] = vz * d;
 					}
 
 					index += stride;
@@ -839,17 +848,16 @@ package away3d.core.base
 		 */
 		public function updateUVs(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var uvs:Vector.<Number>;
 
 			if (!_autoDeriveUVs) {
 				if ((!_uvs || !values) && (_uvs != null || values != null)) {
 					if (_concatenateArrays)
-						notifyVerticesUpdate();
-					else
+						notifyVerticesUpdate(); else
 						_strideOffsetDirty = true;
 				}
 
@@ -870,11 +878,11 @@ package away3d.core.base
 
 			} else {
 				if (!_uvs) {
-					_uvs = new Vector.<Number>(_positions.length*2/3);
+					_uvs = new Vector.<Number>(_positions.length * 2 / 3);
 
 					if (_concatenateArrays) {
 						notifyVerticesUpdate();
-					}else {
+					} else {
 						_strideOffsetDirty = true;
 					}
 				}
@@ -893,10 +901,10 @@ package away3d.core.base
 				var lenV:Number = uvs.length;
 				while (index < lenV) {
 					if (_concatenateArrays) {
-						_uvs[i++] = uvs[index] = uvIdx*.5;
+						_uvs[i++] = uvs[index] = uvIdx * .5;
 						_uvs[i++] = uvs[index + 1] = 1.0 - (uvIdx & 1);
 					} else {
-						uvs[index] = uvIdx*.5;
+						uvs[index] = uvIdx * .5;
 						uvs[index + 1] = 1.0 - (uvIdx & 1);
 					}
 
@@ -920,10 +928,10 @@ package away3d.core.base
 		 */
 		public function updateSecondaryUVs(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var uvs:Vector.<Number>;
 
 			if (_concatenateArrays && (_secondaryUVs == null || values == null) && (_secondaryUVs != null || values != null))
@@ -956,11 +964,11 @@ package away3d.core.base
 		 */
 		public function updateJointIndices(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var j:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var j:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var jointIndices:Vector.<Number>;
 
 			if (_concatenateArrays && (_jointIndices == null || values == null) && (_jointIndices != null || values != null))
@@ -975,10 +983,10 @@ package away3d.core.base
 					i = 0;
 					j = 0;
 					index = offset;
-					jointIndices = _concatenateArrays? _vertices : _condensedJointIndices;
-					var oldIndex:Number;
-					var newIndex:Number = 0;
-					var dic:Object = new Object();
+					jointIndices = _concatenateArrays ? _vertices : _condensedJointIndices;
+					var oldIndex:int;
+					var newIndex:int = 0;
+					var dic:Object = {};
 
 					if (!_concatenateArrays)
 						_condensedJointIndices = new Vector.<Number>(values.length);
@@ -991,7 +999,7 @@ package away3d.core.base
 
 							// if we encounter a new index, assign it a new condensed index
 							if (dic[oldIndex] == undefined) {
-								dic[oldIndex] = newIndex*3; //3 required for the three vectors that store the matrix
+								dic[oldIndex] = newIndex * 3; //3 required for the three vectors that store the matrix
 								_condensedIndexLookUp[newIndex++] = oldIndex;
 							}
 							jointIndices[index + j] = dic[oldIndex];
@@ -999,19 +1007,20 @@ package away3d.core.base
 						index += stride;
 					}
 					_numCondensedJoints = newIndex;
-				} else if (_concatenateArrays) {
+				} else
+					if (_concatenateArrays) {
 
-					i = 0;
-					index = offset;
-					jointIndices = _vertices;
+						i = 0;
+						index = offset;
+						jointIndices = _vertices;
 
-					while (i < values.length) {
-						j = 0;
-						while (j < _jointsPerVertex)
-							jointIndices[index + j++] = values[i++];
-						index += stride;
+						while (i < values.length) {
+							j = 0;
+							while (j < _jointsPerVertex)
+								jointIndices[index + j++] = values[i++];
+							index += stride;
+						}
 					}
-				}
 			}
 
 			notifyJointIndicesUpdate();
@@ -1024,11 +1033,11 @@ package away3d.core.base
 		 */
 		public function updateJointWeights(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var j:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var j:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var jointWeights:Vector.<Number>;
 
 			if (_concatenateArrays && (_jointWeights == null || values == null) && (_jointWeights != null || values != null))
@@ -1110,18 +1119,15 @@ package away3d.core.base
 			clone.updatePositions(_positions.concat());
 
 			if (_vertexNormals && !_autoDeriveNormals)
-				clone.updateVertexNormals(_vertexNormals.concat());
-			else
+				clone.updateVertexNormals(_vertexNormals.concat()); else
 				clone.updateVertexNormals(null);
 
 			if (_uvs && !_autoDeriveUVs)
-				clone.updateUVs(_uvs.concat());
-			else
+				clone.updateUVs(_uvs.concat()); else
 				clone.updateUVs(null);
 
 			if (_vertexTangents && !_autoDeriveTangents)
-				clone.updateVertexTangents(_vertexTangents.concat());
-			else
+				clone.updateVertexTangents(_vertexTangents.concat()); else
 				clone.updateVertexTangents(null);
 
 			if (_secondaryUVs)
@@ -1140,15 +1146,15 @@ package away3d.core.base
 
 		override public function scaleUV(scaleU:Number = 1, scaleV:Number = 1):void
 		{
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var uvs:Vector.<Number>;
 
 			uvs = _uvs;
 
-			var ratioU:Number = scaleU/_scaleU;
-			var ratioV:Number = scaleV/_scaleV;
+			var ratioU:Number = scaleU / _scaleU;
+			var ratioV:Number = scaleV / _scaleV;
 
 			_scaleU = scaleU;
 			_scaleV = scaleV;
@@ -1175,12 +1181,12 @@ package away3d.core.base
 		 */
 		override public function scale(scale:Number):void
 		{
-			var i:uint;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var positions:Vector.<Number> = _positions;
-			if(!positions) return;
+			if (!positions) return;
 
 			var len:uint = positions.length;
 			offset = 0;
@@ -1215,10 +1221,10 @@ package away3d.core.base
 				tangents = _vertexTangents;
 			}
 
-			var len:Number = _positions.length/3;
-			var i:Number;
-			var i1:Number;
-			var i2:Number;
+			var len:Number = _positions.length / 3;
+			var i:int;
+			var i1:int;
+			var i2:int;
 			var vector:Vector3D = new Vector3D();
 
 			var bakeNormals:Boolean = _vertexNormals != null;
@@ -1295,10 +1301,10 @@ package away3d.core.base
 		private function updateFaceTangents():void
 		{
 			var i:uint = 0;
-			var index1:Number;
-			var index2:Number;
-			var index3:Number;
-			var vi:Number;
+			var index1:int;
+			var index2:int;
+			var index3:int;
+			var vi:int;
 			var v0:Number;
 			var dv1:Number;
 			var dv2:Number;
@@ -1310,7 +1316,7 @@ package away3d.core.base
 
 			var positions:Vector.<Number> = _positions
 			var uvs:Vector.<Number> = _uvs;
-			if(!uvs || !uvs.length) {
+			if (!uvs || !uvs.length) {
 				_autoDeriveUVs = true;
 				updateUVs(_uvs);
 			}
@@ -1325,31 +1331,31 @@ package away3d.core.base
 				index2 = _indices[i + 1];
 				index3 = _indices[i + 2];
 
-				v0 = uvs[index1*2 + 1];
-				dv1 = uvs[index2*2 + 1] - v0;
-				dv2 = uvs[index3*2 + 1] - v0;
+				v0 = uvs[index1 * 2 + 1];
+				dv1 = uvs[index2 * 2 + 1] - v0;
+				dv2 = uvs[index3 * 2 + 1] - v0;
 
-				vi = index1*3;
+				vi = index1 * 3;
 				x0 = positions[vi];
 				y0 = positions[vi + 1];
 				z0 = positions[vi + 2];
-				vi = index2*3;
+				vi = index2 * 3;
 				dx1 = positions[vi] - x0;
 				dy1 = positions[vi + 1] - y0;
 				dz1 = positions[vi + 2] - z0;
-				vi = index3*3;
+				vi = index3 * 3;
 				dx2 = positions[vi] - x0;
 				dy2 = positions[vi + 1] - y0;
 				dz2 = positions[vi + 2] - z0;
 
-				cx = dv2*dx1 - dv1*dx2;
-				cy = dv2*dy1 - dv1*dy2;
-				cz = dv2*dz1 - dv1*dz2;
-				denom = 1/Math.sqrt(cx*cx + cy*cy + cz*cz);
+				cx = dv2 * dx1 - dv1 * dx2;
+				cy = dv2 * dy1 - dv1 * dy2;
+				cz = dv2 * dz1 - dv1 * dz2;
+				denom = 1 / Math.sqrt(cx * cx + cy * cy + cz * cz);
 
-				_faceTangents[i++] = denom*cx;
-				_faceTangents[i++] = denom*cy;
-				_faceTangents[i++] = denom*cz;
+				_faceTangents[i++] = denom * cx;
+				_faceTangents[i++] = denom * cy;
+				_faceTangents[i++] = denom * cz;
 			}
 
 			_faceTangentsDirty = false;
@@ -1360,10 +1366,10 @@ package away3d.core.base
 		 */
 		private function updateFaceNormals():void
 		{
-			var i:uint = 0;
-			var j:Number = 0;
-			var k:Number = 0;
-			var index:Number;
+			var i:int = 0;
+			var j:int = 0;
+			var k:int = 0;
+			var index:int;
 
 			var x1:Number, x2:Number, x3:Number;
 			var y1:Number, y2:Number, y3:Number;
@@ -1382,19 +1388,19 @@ package away3d.core.base
 			}
 
 			if (_useFaceWeights && !_faceWeights) {
-				_faceWeights = new Vector.<Number>(len/3);
+				_faceWeights = new Vector.<Number>(len / 3);
 			}
 
 			while (i < len) {
-				index = _indices[i++]*3;
+				index = _indices[i++] * 3;
 				x1 = positions[index];
 				y1 = positions[index + 1];
 				z1 = positions[index + 2];
-				index = _indices[i++]*3;
+				index = _indices[i++] * 3;
 				x2 = positions[index];
 				y2 = positions[index + 1];
 				z2 = positions[index + 2];
-				index = _indices[i++]*3;
+				index = _indices[i++] * 3;
 				x3 = positions[index];
 				y3 = positions[index + 1];
 				z3 = positions[index + 2];
@@ -1404,23 +1410,23 @@ package away3d.core.base
 				dx2 = x2 - x1;
 				dy2 = y2 - y1;
 				dz2 = z2 - z1;
-				cx = dz1*dy2 - dy1*dz2;
-				cy = dx1*dz2 - dz1*dx2;
-				cz = dy1*dx2 - dx1*dy2;
-				d = Math.sqrt(cx*cx + cy*cy + cz*cz);
+				cx = dz1 * dy2 - dy1 * dz2;
+				cy = dx1 * dz2 - dz1 * dx2;
+				cz = dy1 * dx2 - dx1 * dy2;
+				d = Math.sqrt(cx * cx + cy * cy + cz * cz);
 				// length of cross product = 2*triangle area
 
 				if (_useFaceWeights) {
-					var w:Number = d*10000;
+					var w:Number = d * 10000;
 					if (w < 1) w = 1;
 					_faceWeights[k++] = w;
 				}
 
-				d = 1/d;
+				d = 1 / d;
 
-				_faceNormals[j++] = cx*d;
-				_faceNormals[j++] = cy*d;
-				_faceNormals[j++] = cz*d;
+				_faceNormals[j++] = cx * d;
+				_faceNormals[j++] = cy * d;
+				_faceNormals[j++] = cz * d;
 			}
 
 			_faceNormalsDirty = false;

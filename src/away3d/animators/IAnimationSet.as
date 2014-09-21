@@ -1,7 +1,7 @@
 package away3d.animators
 {
 	import away3d.animators.nodes.*;
-	import away3d.core.managers.*;
+	import away3d.managers.*;
 	import away3d.materials.passes.*;
 	
 	/**
@@ -14,14 +14,14 @@ package away3d.animators
 		/**
 		 * Check to determine whether a state is registered in the animation set under the given name.
 		 *
-		 * @param stateName The name of the animation state object to be checked.
+		 * @param name The name of the animation state object to be checked.
 		 */
 		function hasAnimation(name:String):Boolean;
 		
 		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
 		 *
-		 * @param stateName The name of the animation state object to be retrieved.
+		 * @param name The name of the animation state object to be retrieved.
 		 */
 		function getAnimation(name:String):AnimationNodeBase;
 		

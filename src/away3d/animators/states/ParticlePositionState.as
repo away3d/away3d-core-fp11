@@ -8,7 +8,7 @@ package away3d.animators.states
 	import away3d.arcane;
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;

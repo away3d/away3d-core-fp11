@@ -1,7 +1,7 @@
 package away3d.core.render
 {
 	import away3d.arcane;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Plane3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.EntityCollector;

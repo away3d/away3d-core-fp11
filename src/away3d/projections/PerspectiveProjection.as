@@ -1,6 +1,6 @@
 package away3d.projections
 {
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 
 	import flash.geom.Vector3D;
 

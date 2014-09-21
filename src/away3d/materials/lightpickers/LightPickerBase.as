@@ -1,14 +1,18 @@
 package away3d.materials.lightpickers
 {
-	import away3d.*;
-	import away3d.core.pool.RenderableBase;
-	import away3d.core.traverse.*;
-	import away3d.library.assets.*;
-	import away3d.lights.*;
-	
-	import flash.geom.*;
-	
-	use namespace arcane;
+    import away3d.arcane;
+    import away3d.core.pool.IRenderable;
+    import away3d.core.library.AssetType;
+    import away3d.core.library.IAsset;
+    import away3d.core.library.NamedAssetBase;
+    import away3d.entities.DirectionalLight;
+    import away3d.core.base.LightBase;
+    import away3d.entities.LightProbe;
+    import away3d.entities.PointLight;
+
+    import flash.geom.Vector3D;
+
+    use namespace arcane;
 
 	/**
 	 * LightPickerBase provides an abstract base clase for light picker classes. These classes are responsible for
@@ -158,7 +162,7 @@ package away3d.materials.lightpickers
 		/**
 		 * Updates set of lights for a given renderable and EntityCollector. Always call super.collectLights() after custom overridden code.
 		 */
-		public function collectLights(renderable:RenderableBase, entityCollector:EntityCollector):void
+		public function collectLights(renderable:IRenderable):void
 		{
 			updateProbeWeights(renderable);
 		}
@@ -167,7 +171,7 @@ package away3d.materials.lightpickers
 		 * Updates the weights for the light probes, based on the renderable's position relative to them.
 		 * @param renderable The renderble for which to calculate the light probes' influence.
 		 */
-		private function updateProbeWeights(renderable:RenderableBase):void
+		private function updateProbeWeights(renderable:IRenderable):void
 		{
 			// todo: this will cause the same calculations to occur per TriangleSubMesh. See if this can be improved.
 			var objectPos:Vector3D = renderable.sourceEntity.scenePosition;

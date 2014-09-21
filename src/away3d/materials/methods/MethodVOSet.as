@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+    import away3d.materials.compilation.MethodVO;
 
-	/**
+    /**
 	 * MethodVOSet provides a EffectMethodBase and MethodVO combination to be used by a material, allowing methods
 	 * to be shared across different materials while their internal state changes.
 	 */

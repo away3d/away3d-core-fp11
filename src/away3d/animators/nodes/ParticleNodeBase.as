@@ -4,7 +4,8 @@ package away3d.animators.nodes
 	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.materials.passes.MaterialPassBase;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.passes.MaterialPassBase;
 	
 	import flash.utils.getQualifiedClassName;
 	
@@ -123,30 +124,24 @@ package away3d.animators.nodes
 		/**
 		 * Returns the AGAL code of the particle animation node for use in the vertex shader.
 		 */
-		public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		public function getAGALVertexCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
-			animationRegisterCache = animationRegisterCache;
 			return "";
 		}
 		
 		/**
 		 * Returns the AGAL code of the particle animation node for use in the fragment shader.
 		 */
-		public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		public function getAGALFragmentCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
-			animationRegisterCache = animationRegisterCache;
 			return "";
 		}
 		
 		/**
 		 * Returns the AGAL code of the particle animation node for use in the fragment shader when UV coordinates are required.
 		 */
-		public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		public function getAGALUVCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
-			animationRegisterCache = animationRegisterCache;
 			return "";
 		}
 		

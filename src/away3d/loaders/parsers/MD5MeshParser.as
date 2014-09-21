@@ -6,7 +6,7 @@ package away3d.loaders.parsers
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.math.Quaternion;
+	import away3d.core.geom.Quaternion;
 	import away3d.entities.Mesh;
 	
 	import flash.geom.Matrix3D;

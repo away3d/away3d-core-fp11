@@ -5,7 +5,7 @@ package away3d.tools.commands
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.math.Box;
+	import away3d.core.geom.Box;
 	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;

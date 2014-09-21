@@ -1,7 +1,7 @@
 package away3d.core.render {
-	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.LineSubMesh;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.core.sort.IEntitySorter;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Billboard;

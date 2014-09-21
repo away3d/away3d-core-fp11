@@ -6,8 +6,8 @@ package away3d.loaders.parsers
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
@@ -15,7 +15,7 @@ package away3d.loaders.parsers
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.methods.SpecularBasicMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
 
@@ -569,7 +569,7 @@ package away3d.loaders.parsers
 			var trunk:Array;
 			var j:uint;
 			
-			var basicSpecularMethod:BasicSpecularMethod;
+			var basicSpecularMethod:SpecularBasicMethod;
 			var useSpecular:Boolean;
 			var useColor:Boolean;
 			var diffuseColor:uint;
@@ -654,7 +654,7 @@ package away3d.loaders.parsers
 					
 					if (useSpecular) {
 						
-						basicSpecularMethod = new BasicSpecularMethod();
+						basicSpecularMethod = new SpecularBasicMethod();
 						basicSpecularMethod.specularColor = specularColor;
 						basicSpecularMethod.specular = specular;
 						
@@ -858,7 +858,7 @@ package away3d.loaders.parsers
 }
 
 import away3d.materials.MaterialBase;
-import away3d.materials.methods.BasicSpecularMethod;
+import away3d.materials.methods.SpecularBasicMethod;
 import away3d.textures.Texture2DBase;
 
 class ObjectGroup
@@ -895,7 +895,7 @@ class MaterialGroup
 class SpecularData
 {
 	public var materialID:String;
-	public var basicSpecularMethod:BasicSpecularMethod;
+	public var basicSpecularMethod:SpecularBasicMethod;
 	public var ambientColor:uint = 0xFFFFFF;
 	public var alpha:Number = 1;
 	
@@ -911,7 +911,7 @@ class LoadedMaterial
 	public var materialID:String;
 	public var texture:Texture2DBase;
 	public var cm:MaterialBase;
-	public var specularMethod:BasicSpecularMethod;
+	public var specularMethod:SpecularBasicMethod;
 	public var ambientColor:uint = 0xFFFFFF;
 	public var alpha:Number = 1;
 	

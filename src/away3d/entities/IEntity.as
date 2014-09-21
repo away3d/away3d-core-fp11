@@ -7,7 +7,7 @@ package away3d.entities {
 	import away3d.core.pick.IPickingCollider;
 	import away3d.core.pick.PickingCollisionVO;
 	import away3d.core.render.IRenderer;
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.IAsset;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;

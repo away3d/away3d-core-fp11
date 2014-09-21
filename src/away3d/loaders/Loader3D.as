@@ -1,21 +1,30 @@
 package away3d.loaders
 {
-	import away3d.*;
-	import away3d.containers.*;
-	import away3d.core.base.Object3D;
-	import away3d.entities.*;
-	import away3d.events.*;
-	import away3d.library.*;
-	import away3d.library.assets.*;
-	import away3d.lights.*;
-	import away3d.loaders.misc.*;
-	import away3d.loaders.parsers.*;
-	import away3d.prefabs.*;
-	
-	import flash.events.*;
-	import flash.net.*;
-	
-	use namespace arcane;
+    import away3d.arcane;
+    import away3d.containers.ObjectContainer3D;
+    import away3d.core.base.LightBase;
+    import away3d.core.base.Object3D;
+    import away3d.core.library.AssetLibraryBundle;
+    import away3d.core.library.AssetType;
+    import away3d.entities.Camera3D;
+    import away3d.entities.Mesh;
+    import away3d.entities.SkyBox;
+    import away3d.entities.TextureProjector;
+    import away3d.events.AssetEvent;
+    import away3d.events.LoaderEvent;
+    import away3d.events.ParserEvent;
+    import away3d.loaders.misc.AssetLoaderContext;
+    import away3d.loaders.misc.AssetLoaderToken;
+    import away3d.loaders.misc.SingleFileLoader;
+    import away3d.loaders.parsers.ParserBase;
+
+    import flash.events.Event;
+
+    import flash.events.EventDispatcher;
+
+    import flash.net.URLRequest;
+
+    use namespace arcane;
 	
 	/**
 	 * Dispatched when any asset finishes parsing. Also see specific events for each
@@ -222,7 +231,7 @@ package away3d.loaders
 	 * AssetLibrary in which case it will use the AssetLoader directly.
 	 *
 	 * @see away3d.loaders.AssetLoader
-	 * @see away3d.library.AssetLibrary
+	 * @see away3d.core.library.AssetLibrary
 	 */
 	public class Loader3D extends ObjectContainer3D
 	{

@@ -5,7 +5,7 @@ package away3d.prefabs
 	import away3d.core.base.TriangleSubGeometry;
 
 	use namespace arcane;
-	
+
 	/**
 	 * A UV Cylinder primitive mesh.
 	 */
@@ -24,10 +24,10 @@ package away3d.prefabs
 		private var _numVertices:uint;
 		private var _vertexStride:uint;
 		private var _vertexOffset:int;
-		
+
 		private function addVertex(px:Number, py:Number, pz:Number, nx:Number, ny:Number, nz:Number, tx:Number, ty:Number, tz:Number):void
 		{
-			var compVertInd:uint = _vertexOffset + _nextVertexIndex*_vertexStride; // current component vertex index
+			var compVertInd:uint = _vertexOffset + _nextVertexIndex * _vertexStride; // current component vertex index
 			_rawVertexData[compVertInd++] = px;
 			_rawVertexData[compVertInd++] = py;
 			_rawVertexData[compVertInd++] = pz;
@@ -39,7 +39,7 @@ package away3d.prefabs
 			_rawVertexData[compVertInd] = tz;
 			_nextVertexIndex++;
 		}
-		
+
 		private function addTriangleClockWise(cwVertexIndex0:uint, cwVertexIndex1:uint, cwVertexIndex2:uint):void
 		{
 			_rawIndices[_currentIndex++] = cwVertexIndex0;
@@ -47,7 +47,7 @@ package away3d.prefabs
 			_rawIndices[_currentIndex++] = cwVertexIndex2;
 			_currentTriangleIndex++;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -185,11 +185,12 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == GeometryType.LINE) {
-				//TODO
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//TODO
+				}
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -225,11 +226,12 @@ package away3d.prefabs
 				// build real data from raw data
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == GeometryType.LINE) {
-				//nothing to do here
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//nothing to do here
+				}
 		}
-		
+
 		/**
 		 * The radius of the torus.
 		 */
@@ -237,13 +239,13 @@ package away3d.prefabs
 		{
 			return _radius;
 		}
-		
+
 		public function set radius(value:Number):void
 		{
 			_radius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The radius of the inner tube of the torus.
 		 */
@@ -251,13 +253,13 @@ package away3d.prefabs
 		{
 			return _tubeRadius;
 		}
-		
+
 		public function set tubeRadius(value:Number):void
 		{
 			_tubeRadius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines the number of horizontal segments that make up the torus. Defaults to 16.
 		 */
@@ -265,14 +267,14 @@ package away3d.prefabs
 		{
 			return _segmentsR;
 		}
-		
+
 		public function set segmentsR(value:uint):void
 		{
 			_segmentsR = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines the number of vertical segments that make up the torus. Defaults to 8.
 		 */
@@ -280,14 +282,14 @@ package away3d.prefabs
 		{
 			return _segmentsT;
 		}
-		
+
 		public function set segmentsT(value:uint):void
 		{
 			_segmentsT = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines whether the torus poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
@@ -295,13 +297,13 @@ package away3d.prefabs
 		{
 			return _yUp;
 		}
-		
+
 		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Creates a new <code>Torus</code> object.
 		 * @param radius The radius of the torus.
@@ -313,7 +315,7 @@ package away3d.prefabs
 		public function PrimitiveTorusPrefab(radius:Number = 50, tubeRadius:Number = 50, segmentsR:uint = 16, segmentsT:uint = 8, yUp:Boolean = true)
 		{
 			super();
-			
+
 			_radius = radius;
 			_tubeRadius = tubeRadius;
 			_segmentsR = segmentsR;

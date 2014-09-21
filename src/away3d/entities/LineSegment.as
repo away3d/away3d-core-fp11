@@ -1,15 +1,15 @@
 ﻿package away3d.entities
 {
-	import away3d.arcane;
 	import away3d.animators.IAnimator;
+	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.UVTransform;
+	import away3d.core.geom.UVTransform;
+	import away3d.core.library.AssetType;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.render.IRenderer;
 	import away3d.events.MaterialEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.materials.IMaterial;
+	import away3d.materials.MaterialBase;
 
 	import flash.geom.Vector3D;
 
@@ -18,7 +18,7 @@
 	public class LineSegment extends Object3D implements IEntity, IMaterialOwner
 	{
 		private var _animator:IAnimator;
-		private var _material:IMaterial;
+		private var _material:MaterialBase;
 		private var _uvTransform:UVTransform;
 		public var _startPosition:Vector3D;
 		public var _endPosition:Vector3D;
@@ -79,12 +79,12 @@
 		/**
 		 *
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
 			return _material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (value == _material)
 				return;
@@ -103,7 +103,8 @@
 			}
 		}
 
-		private function onSizeChangedDelegate(event:MaterialEvent):void {
+		private function onSizeChangedDelegate(event:MaterialEvent):void
+		{
 			notifyRenderableUpdate();
 		}
 
@@ -112,7 +113,7 @@
 		 */
 		public function get thickness():Number
 		{
-			return _halfThickness*2;
+			return _halfThickness * 2;
 		}
 
 		public function set thickness(value:Number):void
@@ -120,7 +121,7 @@
 			if (_halfThickness == value)
 				return;
 
-			_halfThickness = value*0.5;
+			_halfThickness = value * 0.5;
 
 			notifyRenderableUpdate();
 		}
@@ -145,7 +146,7 @@
 		 * @param endPosition Ending position of the line segment
 		 * @param thickness Thickness of the line
 		 */
-		public function LineSegment(material:IMaterial, startPosition:Vector3D, endPosition:Vector3D, thickness:Number = 1)
+		public function LineSegment(material:MaterialBase, startPosition:Vector3D, endPosition:Vector3D, thickness:Number = 1)
 		{
 			super();
 
@@ -155,7 +156,7 @@
 
 			_startPosition = startPosition;
 			_endPosition = endPosition;
-			_halfThickness = thickness*0.5;
+			_halfThickness = thickness * 0.5;
 		}
 
 		override public function dispose():void
@@ -213,7 +214,7 @@
 		public function collectRenderable(renderer:IRenderer):void
 		{
 			//TODO
-//			renderer.applyLineSubMesh()
+			//			renderer.applyLineSubMesh()
 		}
 	}
 }

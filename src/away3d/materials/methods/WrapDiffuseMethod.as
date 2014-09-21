@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
@@ -11,7 +12,7 @@ package away3d.materials.methods
 	 * WrapDiffuseMethod is an alternative to BasicDiffuseMethod in which the light is allowed to be "wrapped around" the normally dark area, to some extent.
 	 * It can be used as a crude approximation to Oren-Nayar or simple subsurface scattering.
 	 */
-	public class WrapDiffuseMethod extends BasicDiffuseMethod
+	public class WrapDiffuseMethod extends DiffuseBasicMethod
 	{
 		private var _wrapDataRegister:ShaderRegisterElement;
 		private var _wrapFactor:Number;

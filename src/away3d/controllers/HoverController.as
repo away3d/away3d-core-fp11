@@ -4,7 +4,7 @@ package away3d.controllers
 	import away3d.containers.*;
 	import away3d.core.base.Object3D;
 	import away3d.entities.*;
-	import away3d.core.math.*;
+	import away3d.core.geom.*;
 	
 	import flash.geom.Vector3D;
 	

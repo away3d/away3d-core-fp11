@@ -7,11 +7,11 @@ package away3d.containers
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.IEntity;
 	import away3d.events.Scene3DEvent;
-	
+
 	import flash.events.EventDispatcher;
-	
+
 	use namespace arcane;
-	
+
 	/**
 	 * The Scene3D class represents an independent 3D scene in which 3D objects can be created and manipulated.
 	 * Multiple Scene3D instances can be created in the same SWF file.
@@ -38,7 +38,7 @@ package away3d.containers
 			_sceneGraphRoot.isRoot = true;
 			_sceneGraphRoot.partition = new Partition3D(new NodeBase());
 		}
-		
+
 		/**
 		 * Sends a PartitionTraverser object down the scene partitions
 		 * @param traverser The traverser which will pass through the partitions.
@@ -48,17 +48,17 @@ package away3d.containers
 		 */
 		public function traversePartitions(traverser:ICollector):void
 		{
-			var i:uint;
-			var len:uint = _partitions.length;
-			
+			var i:int;
+			var len:int = _partitions.length;
+
 			traverser.scene = this;
-			
+
 			while (i < len) {
 				_collectionMark++;
 				_partitions[i++].traverse(traverser);
 			}
 		}
-		
+
 		/**
 		 * The root partition to be used by the Scene3D.
 		 */
@@ -66,19 +66,19 @@ package away3d.containers
 		{
 			return _sceneGraphRoot.partition;
 		}
-		
+
 		public function set partition(value:Partition3D):void
 		{
 			_sceneGraphRoot.partition = value;
-			
+
 			dispatchEvent(new Scene3DEvent(Scene3DEvent.PARTITION_CHANGED, _sceneGraphRoot));
 		}
-		
+
 		public function contains(child:Object3D):Boolean
 		{
 			return _sceneGraphRoot.contains(child);
 		}
-		
+
 		/**
 		 * Adds a child to the scene's root.
 		 * @param child The child to be added to the scene
@@ -88,7 +88,7 @@ package away3d.containers
 		{
 			return _sceneGraphRoot.addChild(child);
 		}
-		
+
 		/**
 		 * Removes a child from the scene's root.
 		 * @param child The child to be removed from the scene.
@@ -97,7 +97,7 @@ package away3d.containers
 		{
 			_sceneGraphRoot.removeChild(child);
 		}
-		
+
 		/**
 		 * Removes a child from the scene's root.
 		 * @param index Index of child to be removed from the scene.
@@ -106,7 +106,7 @@ package away3d.containers
 		{
 			_sceneGraphRoot.removeChildAt(index);
 		}
-		
+
 		/**
 		 * Retrieves the child with the given index
 		 * @param index The index for the child to be retrieved.
@@ -116,7 +116,7 @@ package away3d.containers
 		{
 			return _sceneGraphRoot.getChildAt(index);
 		}
-		
+
 		/**
 		 * The amount of children directly contained by the scene.
 		 */
@@ -124,7 +124,7 @@ package away3d.containers
 		{
 			return _sceneGraphRoot.numChildren;
 		}
-		
+
 		/**
 		 * When an entity is added to the scene, or to one of its children, add it to the partition tree.
 		 * @private
@@ -137,7 +137,7 @@ package away3d.containers
 			if (object.isEntity)
 				object.assignedPartition.markForUpdate(object);
 		}
-		
+
 		/**
 		 * When an entity is removed from the scene, or from one of its children, remove it from its former partition tree.
 		 * @private
@@ -160,7 +160,7 @@ package away3d.containers
 			if (_partitions.indexOf(partition) == -1)
 				_partitions.push(partition);
 		}
-		
+
 		/**
 		 * When a partition is removed from an object somewhere in the scene graph, remove the partition from the list
 		 */

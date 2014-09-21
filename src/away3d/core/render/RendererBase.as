@@ -2,12 +2,12 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.LineSubMesh;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DProxy;
-    import away3d.core.math.Matrix3DUtils;
-    import away3d.core.pool.BillboardRenderable;
+	import away3d.managers.RTTBufferManager;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.Matrix3DUtils;
+	import away3d.core.pool.BillboardRenderable;
 	import away3d.core.pool.EntityListItem;
 	import away3d.core.pool.LineSubMeshRenderable;
 	import away3d.core.pool.RenderableBase;
@@ -88,7 +88,6 @@ package away3d.core.render
 		protected var _width:Number;
 		protected var _height:Number;
 
-		protected var _renderToTexture:Boolean;
 		protected var _textureRatioX:Number = 1;
 		protected var _textureRatioY:Number = 1;
 
@@ -241,7 +240,7 @@ package away3d.core.render
 		/**
 		 * Creates a new RendererBase object.
 		 */
-		public function RendererBase(renderToTexture:Boolean = false)
+		public function RendererBase()
 		{
 			super();
 
@@ -250,24 +249,18 @@ package away3d.core.render
 			_triangleSubMeshRenderablePool = RenderablePool.getPool(TriangleSubMeshRenderable);
 			_lineSubMeshRenderablePool = RenderablePool.getPool(LineSubMeshRenderable);
 
-			_renderToTexture = renderToTexture;
-
 			//default sorting algorithm
 			_renderableSorter = new RenderableMergeSort();
 		}
 
-		public function init(stage:Stage):void {
+		public function init(stage:Stage):void
+		{
 
 		}
 
 		public function createEntityCollector():ICollector
 		{
 			return new EntityCollector();
-		}
-
-		arcane function get renderToTexture():Boolean
-		{
-			return _renderToTexture;
 		}
 
 		/**
@@ -282,7 +275,7 @@ package away3d.core.render
 
 		public function set backgroundR(value:Number):void
 		{
-			if(_backgroundR == value) return;
+			if (_backgroundR == value) return;
 			_backgroundR = value;
 			_backBufferInvalid = true;
 		}
@@ -299,7 +292,7 @@ package away3d.core.render
 
 		public function set backgroundG(value:Number):void
 		{
-			if(_backgroundG == value) return;
+			if (_backgroundG == value) return;
 			_backgroundG = value;
 			_backBufferInvalid = true;
 		}
@@ -316,7 +309,7 @@ package away3d.core.render
 
 		public function set backgroundB(value:Number):void
 		{
-			if(_backgroundB == value) return;
+			if (_backgroundB == value) return;
 			_backgroundB = value;
 			_backBufferInvalid = true;
 		}
@@ -373,7 +366,7 @@ package away3d.core.render
 
 		public function set shareContext(value:Boolean):void
 		{
-			if(_shareContext == value) return;
+			if (_shareContext == value) return;
 			_shareContext = value;
 			updateGlobalPos();
 		}
@@ -466,9 +459,6 @@ package away3d.core.render
 		{
 			_renderTarget = target;
 			_renderTargetSurface = surfaceSelector;
-
-			if (_renderToTexture)
-				executeRenderToTexturePass(entityCollector);
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
@@ -705,22 +695,22 @@ package away3d.core.render
 			renderable.cascaded = false;
 
 			// project onto camera's z-axis
-            var positionX:Number = _entryPoint.x - position.x;
-            var positionY:Number = _entryPoint.y - position.y;
-            var positionZ:Number = _entryPoint.z - position.z;
-            var dotProduct:Number = positionX * cameraForward.x + positionY * camera.y + positionZ * camera.z;
-            renderable.zIndex = entity.zOffset + dotProduct;
+			var positionX:Number = _entryPoint.x - position.x;
+			var positionY:Number = _entryPoint.y - position.y;
+			var positionZ:Number = _entryPoint.z - position.z;
+			var dotProduct:Number = positionX * cameraForward.x + positionY * camera.y + positionZ * camera.z;
+			renderable.zIndex = entity.zOffset + dotProduct;
 
 			//store reference to scene transform
 			renderable.renderSceneTransform = renderable.sourceEntity.getRenderSceneTransform(camera);
 
-            if (material.requiresBlending && blendedRenderableHead!=renderable) {
-                renderable.next = blendedRenderableHead;
-                blendedRenderableHead = renderable;
-            }else{
-                renderable.next = opaqueRenderableHead;
-                opaqueRenderableHead = renderable;
-            }
+			if (material.requiresBlending && blendedRenderableHead != renderable) {
+				renderable.next = blendedRenderableHead;
+				blendedRenderableHead = renderable;
+			} else {
+				renderable.next = opaqueRenderableHead;
+				opaqueRenderableHead = renderable;
+			}
 
 			_numTriangles += renderable.numTriangles;
 
@@ -729,7 +719,8 @@ package away3d.core.render
 				applyRenderable(renderable.overflow);
 		}
 
-		public function get renderableSorter():IEntitySorter {
+		public function get renderableSorter():IEntitySorter
+		{
 			return _renderableSorter;
 		}
 
@@ -771,7 +762,7 @@ package away3d.core.render
 		private function addCamera(rotationX:Number, rotationY:Number, rotationZ:Number):void
 		{
 			var cam:Camera3D = new Camera3D();
-			cam.position = new Vector3D(0,0,0);
+			cam.position = new Vector3D(0, 0, 0);
 			_container.addChild(cam);
 			cam.rotationX = rotationX;
 			cam.rotationY = rotationY;
@@ -783,19 +774,23 @@ package away3d.core.render
 			_cameras.push(cam);
 		}
 
-		public function get wantsBestResolution():Boolean {
+		public function get wantsBestResolution():Boolean
+		{
 			return _wantsBestResolution;
 		}
 
-		public function set wantsBestResolution(value:Boolean):void {
+		public function set wantsBestResolution(value:Boolean):void
+		{
 			_wantsBestResolution = value;
 		}
 
-		public function get layeredView():Boolean {
+		public function get layeredView():Boolean
+		{
 			return _layeredView;
 		}
 
-		public function set layeredView(value:Boolean):void {
+		public function set layeredView(value:Boolean):void
+		{
 			_layeredView = value;
 		}
 	}

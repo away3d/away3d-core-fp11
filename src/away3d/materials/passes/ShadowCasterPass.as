@@ -4,12 +4,12 @@ package away3d.materials.passes
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.PointLight;
+	import away3d.managers.Stage3DProxy;
+	import away3d.entities.DirectionalLight;
+	import away3d.entities.PointLight;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.compilation.LightingShaderCompiler;
-	import away3d.materials.compilation.ShaderCompiler;
+	import away3d.materials.compilation.ShaderLightingCompiler;
+	import away3d.materials.compilation.ShaderCompilerBase;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -23,7 +23,7 @@ package away3d.materials.passes
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
 	
-	public class ShadowCasterPass extends CompiledPass
+	public class ShadowCasterPass extends TriangleBasicPass
 	{
 		private var _tangentSpace:Boolean;
 		private var _lightVertexConstantIndex:int;
@@ -42,9 +42,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function createCompiler(profile:String):ShaderCompiler
+		override protected function createCompiler(profile:String):ShaderCompilerBase
 		{
-			return new LightingShaderCompiler(profile);
+			return new ShaderLightingCompiler(profile);
 		}
 
 		/**
@@ -83,7 +83,7 @@ package away3d.materials.passes
 		override protected function updateShaderProperties():void
 		{
 			super.updateShaderProperties();
-			_tangentSpace = LightingShaderCompiler(_compiler).tangentSpace;
+			_tangentSpace = ShaderLightingCompiler(_compiler).tangentSpace;
 		}
 
 		/**
@@ -92,7 +92,7 @@ package away3d.materials.passes
 		override protected function updateRegisterIndices():void
 		{
 			super.updateRegisterIndices();
-			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
+			_lightVertexConstantIndex = ShaderLightingCompiler(_compiler).lightVertexConstantIndex;
 		}
 
 		/**

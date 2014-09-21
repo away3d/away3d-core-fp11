@@ -1,24 +1,28 @@
-package away3d.core.pool {
+package away3d.core.pool
+{
 	import away3d.core.base.SubGeometryBase;
 
-	public class VertexDataPool {
+	public class VertexDataPool
+	{
 		private static const _pool:Object = {};
 
-		public function VertexDataPool() {
+		public function VertexDataPool()
+		{
 		}
 
-		public static function getItem(subGeometry:SubGeometryBase, indexData:IndexData, dataType:String):VertexData {
+		public static function getItem(subGeometry:SubGeometryBase, indexData:IndexData, dataType:String):VertexData
+		{
 			if (subGeometry.concatenateArrays) {
 				dataType = SubGeometryBase.VERTEX_DATA;
 			}
 
 			var subGeometryDictionary:Object = _pool[subGeometry.id];
-			if(!subGeometryDictionary) {
+			if (!subGeometryDictionary) {
 				subGeometryDictionary = _pool[subGeometry.id] = {};
 			}
 
 			var subGeometryData:Vector.<VertexData> = subGeometryDictionary[dataType];
-			if(!subGeometryData) {
+			if (!subGeometryData) {
 				subGeometryData = subGeometryDictionary[dataType] = new Vector.<VertexData>();
 			}
 
@@ -32,14 +36,16 @@ package away3d.core.pool {
 			return vertexData;
 		}
 
-		public static function disposeItem(subGeometry:SubGeometryBase, level:Number, dataType:String):void {
+		public static function disposeItem(subGeometry:SubGeometryBase, level:Number, dataType:String):void
+		{
 			var subGeometryDictionary:Object = _pool[subGeometry.id];
 			var subGeometryData:Vector.<VertexData> = subGeometryDictionary[dataType];
 			subGeometryData[level].dispose();
 			subGeometryData[level] = null;
 		}
 
-		public static function disposeData(subGeometry:SubGeometryBase):void {
+		public static function disposeData(subGeometry:SubGeometryBase):void
+		{
 			var subGeometryDictionary:Object = _pool[subGeometry.id];
 
 			for (var key:* in subGeometryDictionary) {

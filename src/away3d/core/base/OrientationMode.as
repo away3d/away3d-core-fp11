@@ -1,5 +1,7 @@
-package away3d.core.base {
-	public class OrientationMode {
+package away3d.core.base
+{
+	public class OrientationMode
+	{
 		/**
 		 *
 		 */

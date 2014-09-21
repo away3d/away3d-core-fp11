@@ -6,7 +6,7 @@ package away3d.extrusions
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
-	import away3d.core.math.Vector3DUtils;
+	import away3d.core.geom.Vector3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.materials.IMaterial;
 	import away3d.materials.MaterialBase;

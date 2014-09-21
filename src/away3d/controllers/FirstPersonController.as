@@ -2,7 +2,7 @@ package away3d.controllers
 {
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.MathConsts;
+	import away3d.core.geom.MathConsts;
 
 	use namespace arcane;
 	

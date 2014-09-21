@@ -8,7 +8,7 @@ package away3d.materials.methods
 	/**
 	 * PhongSpecularMethod provides a specular method that provides Phong highlights.
 	 */
-	public class PhongSpecularMethod extends BasicSpecularMethod
+	public class PhongSpecularMethod extends SpecularBasicMethod
 	{
 		/**
 		 * Creates a new PhongSpecularMethod object.

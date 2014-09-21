@@ -5,7 +5,7 @@ package away3d.tools.commands
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.math.MathConsts;
+	import away3d.core.geom.MathConsts;
 	import away3d.entities.Mesh;
 	
 	import flash.geom.Vector3D;

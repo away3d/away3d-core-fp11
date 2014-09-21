@@ -8,7 +8,7 @@ package away3d.tools.helpers
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
-	import away3d.core.math.Box;
+	import away3d.core.geom.Box;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.DefaultMaterialManager;

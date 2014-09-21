@@ -1,8 +1,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
+	import away3d.managers.Stage3DProxy;
+	import away3d.materials.compilation.MethodVO;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
@@ -13,7 +13,7 @@ package away3d.materials.methods
 	 * EnvMapDiffuseMethod provides a diffuse shading method that uses a diffuse irradiance environment map to
 	 * approximate global lighting rather than lights.
 	 */
-	public class EnvMapAmbientMethod extends BasicAmbientMethod
+	public class EnvMapAmbientMethod extends AmbientBasicMethod
 	{
 		private var _cubeTexture:CubeTextureBase;
 		

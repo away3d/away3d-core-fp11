@@ -1,48 +1,35 @@
-package away3d.core.pool {
-	import away3d.core.TriangleSubMesh;
+package away3d.core.pool
+{
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 
 	import flash.display3D.Context3DVertexBufferFormat;
 
-	public class TriangleSubMeshRenderable extends RenderableBase {
-		/**
-		 *
-		 */
+	public class TriangleSubMeshRenderable extends RenderableBase
+	{
+		public static var JOINT_INDEX_FORMAT:String;
+		public static var JOINT_WEIGHT_FORMAT:String;
+
 		public static var id:String = "trianglesubmesh";
 
-		/**
-		 *
-		 */
 		public var subMesh:TriangleSubMesh;
 
-		/**
-		 * //TODO
-		 *
-		 * @param pool
-		 * @param subMesh
-		 * @param level
-		 * @param indexOffset
-		 */
-		public function TriangleSubMeshRenderable(pool:RenderablePool, subMesh:TriangleSubMesh, level:Number = 0, indexOffset:Number = 0) {
+		public function TriangleSubMeshRenderable(pool:RenderablePool, subMesh:TriangleSubMesh, level:Number = 0, indexOffset:Number = 0)
+		{
 			super(pool, subMesh.parentMesh, subMesh, level, indexOffset);
 
 			this.subMesh = subMesh;
 		}
 
-		/**
-		 *
-		 * @returns {away.base.SubGeometryBase}
-		 * @protected
-		 */
-		override protected function getSubGeometry():SubGeometryBase {
+		override protected function getSubGeometry():SubGeometryBase
+		{
 			var subGeometry:TriangleSubGeometry;
 
 			if (subMesh.animator) {
 				subGeometry = subMesh.animator.getRenderableSubGeometry(this, subMesh.subGeometry) as TriangleSubGeometry;
-			}
-			else {
+			} else {
 				subGeometry = subMesh.subGeometry as TriangleSubGeometry;
 			}
 			_vertexDataDirty[TriangleSubGeometry.POSITION_DATA] = true;
@@ -84,17 +71,8 @@ package away3d.core.pool {
 			return subGeometry;
 		}
 
-		/**
-		 * //TODO
-		 *
-		 * @param pool
-		 * @param materialOwner
-		 * @param level
-		 * @param indexOffset
-		 * @returns {away.pool.TriangleSubMeshRenderable}
-		 * @protected
-		 */
-		override public function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase {
+		override protected function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase
+		{
 			return new TriangleSubMeshRenderable(pool, materialOwner as TriangleSubMesh, level, indexOffset);
 		}
 	}

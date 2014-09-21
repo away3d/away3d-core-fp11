@@ -2,7 +2,7 @@ package away3d.core.render
 {
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.pool.RenderableBase;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.traverse.ICollector;
 	import away3d.debug.Debug;
 	

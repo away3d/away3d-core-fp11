@@ -1,7 +1,7 @@
 package away3d.projections
 {
 	import away3d.entities.Camera3D;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix3D;

@@ -6,7 +6,7 @@ package away3d.prefabs
 	import away3d.core.base.TriangleSubGeometry;
 
 	use namespace arcane;
-	
+
 	/**
 	 * A Cube primitive mesh.
 	 */
@@ -16,11 +16,11 @@ package away3d.prefabs
 		private var _height:Number;
 		private var _depth:Number;
 		private var _tile6:Boolean;
-		
+
 		private var _segmentsW:Number;
 		private var _segmentsH:Number;
 		private var _segmentsD:Number;
-		
+
 		/**
 		 * Creates a new Cube object.
 		 * @param width The size of the cube along its X-axis.
@@ -34,7 +34,7 @@ package away3d.prefabs
 		public function PrimitiveCubePrefab(width:Number = 100, height:Number = 100, depth:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, segmentsD:uint = 1, tile6:Boolean = true)
 		{
 			super();
-			
+
 			_width = width;
 			_height = height;
 			_depth = depth;
@@ -43,7 +43,7 @@ package away3d.prefabs
 			_segmentsD = segmentsD;
 			_tile6 = tile6;
 		}
-		
+
 		/**
 		 * The size of the cube along its X-axis.
 		 */
@@ -51,13 +51,13 @@ package away3d.prefabs
 		{
 			return _width;
 		}
-		
+
 		public function set width(value:Number):void
 		{
 			_width = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The size of the cube along its Y-axis.
 		 */
@@ -65,13 +65,13 @@ package away3d.prefabs
 		{
 			return _height;
 		}
-		
+
 		public function set height(value:Number):void
 		{
 			_height = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The size of the cube along its Z-axis.
 		 */
@@ -79,13 +79,13 @@ package away3d.prefabs
 		{
 			return _depth;
 		}
-		
+
 		public function set depth(value:Number):void
 		{
 			_depth = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The type of uv mapping to use. When false, the entire image is mapped on each face.
 		 * When true, a texture will be subdivided in a 3x2 grid, each used for a single face.
@@ -98,13 +98,13 @@ package away3d.prefabs
 		{
 			return _tile6;
 		}
-		
+
 		public function set tile6(value:Boolean):void
 		{
 			_tile6 = value;
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * The Number of segments that make up the cube along the X-axis. Defaults to 1.
 		 */
@@ -112,14 +112,14 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set segmentsW(value:Number):void
 		{
 			_segmentsW = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * The Number of segments that make up the cube along the Y-axis. Defaults to 1.
 		 */
@@ -127,14 +127,14 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set segmentsH(value:Number):void
 		{
 			_segmentsH = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * The Number of segments that make up the cube along the Z-axis. Defaults to 1.
 		 */
@@ -142,14 +142,14 @@ package away3d.prefabs
 		{
 			return _segmentsD;
 		}
-		
+
 		public function set segmentsD(value:Number):void
 		{
 			_segmentsD = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -366,198 +366,200 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == GeometryType.LINE) {
-				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+			} else
+				if (geometryType == GeometryType.LINE) {
+					var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
-				var numSegments:Number = _segmentsH * 4 + _segmentsW * 4 + _segmentsD * 4;
-				var startPositions:Vector.<Number>;
-				var endPositions:Vector.<Number>;
-				var thickness:Vector.<Number>;
+					var numSegments:Number = _segmentsH * 4 + _segmentsW * 4 + _segmentsD * 4;
+					var startPositions:Vector.<Number>;
+					var endPositions:Vector.<Number>;
+					var thickness:Vector.<Number>;
 
-				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
-					startPositions = lineGeometry.startPositions;
-					endPositions = lineGeometry.endPositions;
-					thickness = lineGeometry.thickness;
-				} else {
-					startPositions = new Vector.<Number>(numSegments * 3);
-					endPositions = new Vector.<Number>(numSegments * 3);
-					thickness = new Vector.<Number>(numSegments);
+					if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+						startPositions = lineGeometry.startPositions;
+						endPositions = lineGeometry.endPositions;
+						thickness = lineGeometry.thickness;
+					} else {
+						startPositions = new Vector.<Number>(numSegments * 3);
+						endPositions = new Vector.<Number>(numSegments * 3);
+						thickness = new Vector.<Number>(numSegments);
+					}
+
+					vidx = 0;
+
+					fidx = 0;
+
+					//front/back face
+					for (i = 0; i < _segmentsH; ++i) {
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = i * _height / _segmentsH - hh;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = i * _height / _segmentsH - hh
+						endPositions[vidx + 2] = -hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = hh - i * _height / _segmentsH;
+						startPositions[vidx + 2] = hd;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = hh - i * _height / _segmentsH;
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					for (i = 0; i < _segmentsW; ++i) {
+						startPositions[vidx] = i * _width / _segmentsW - hw;
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = i * _width / _segmentsW - hw;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = -hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = hw - i * _width / _segmentsW;
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = hd;
+
+						endPositions[vidx] = hw - i * _width / _segmentsW;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					//left/right face
+					for (i = 0; i < _segmentsH; ++i) {
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = i * _height / _segmentsH - hh;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = -hw;
+						endPositions[vidx + 1] = i * _height / _segmentsH - hh
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = hw;
+						startPositions[vidx + 1] = hh - i * _height / _segmentsH;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = hh - i * _height / _segmentsH;
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					for (i = 0; i < _segmentsD; ++i) {
+						startPositions[vidx] = hw
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = i * _depth / _segmentsD - hd;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = i * _depth / _segmentsD - hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = hd - i * _depth / _segmentsD;
+
+						endPositions[vidx] = -hw;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = hd - i * _depth / _segmentsD;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+
+					//top/bottom face
+					for (i = 0; i < _segmentsD; ++i) {
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = hd - i * _depth / _segmentsD;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = -hh;
+						endPositions[vidx + 2] = hd - i * _depth / _segmentsD;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = hh;
+						startPositions[vidx + 2] = i * _depth / _segmentsD - hd;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = i * _depth / _segmentsD - hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					for (i = 0; i < _segmentsW; ++i) {
+						startPositions[vidx] = hw - i * _width / _segmentsW;
+						startPositions[vidx + 1] = -hh;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = hw - i * _width / _segmentsW;
+						endPositions[vidx + 1] = -hh;
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+
+						startPositions[vidx] = i * _width / _segmentsW - hw;
+						startPositions[vidx + 1] = hh;
+						startPositions[vidx + 2] = -hd;
+
+						endPositions[vidx] = i * _width / _segmentsW - hw;
+						endPositions[vidx + 1] = hh;
+						endPositions[vidx + 2] = hd;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					// build real data from raw data
+					lineGeometry.updatePositions(startPositions, endPositions);
+					lineGeometry.updateThickness(thickness);
 				}
-
-				vidx = 0;
-
-				fidx = 0;
-
-				//front/back face
-				for (i = 0; i < _segmentsH; ++i) {
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = i * _height / _segmentsH - hh;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = i * _height / _segmentsH - hh
-					endPositions[vidx + 2] = -hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = hh - i * _height / _segmentsH;
-					startPositions[vidx + 2] = hd;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = hh - i * _height / _segmentsH;
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				for (i = 0; i < _segmentsW; ++i) {
-					startPositions[vidx] = i * _width / _segmentsW - hw;
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = i * _width / _segmentsW - hw;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = -hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = hw - i * _width / _segmentsW;
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = hd;
-
-					endPositions[vidx] = hw - i * _width / _segmentsW;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				//left/right face
-				for (i = 0; i < _segmentsH; ++i) {
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = i * _height / _segmentsH - hh;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = -hw;
-					endPositions[vidx + 1] = i * _height / _segmentsH - hh
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = hw;
-					startPositions[vidx + 1] = hh - i * _height / _segmentsH;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = hh - i * _height / _segmentsH;
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				for (i = 0; i < _segmentsD; ++i) {
-					startPositions[vidx] = hw
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = i * _depth / _segmentsD - hd;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = i * _depth / _segmentsD - hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = hd - i * _depth / _segmentsD;
-
-					endPositions[vidx] = -hw;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = hd - i * _depth / _segmentsD;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-
-				//top/bottom face
-				for (i = 0; i < _segmentsD; ++i) {
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = hd - i * _depth / _segmentsD;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = -hh;
-					endPositions[vidx + 2] = hd - i * _depth / _segmentsD;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = hh;
-					startPositions[vidx + 2] = i * _depth / _segmentsD - hd;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = i * _depth / _segmentsD - hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				for (i = 0; i < _segmentsW; ++i) {
-					startPositions[vidx] = hw - i * _width / _segmentsW;
-					startPositions[vidx + 1] = -hh;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = hw - i * _width / _segmentsW;
-					endPositions[vidx + 1] = -hh;
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-
-					startPositions[vidx] = i * _width / _segmentsW - hw;
-					startPositions[vidx + 1] = hh;
-					startPositions[vidx + 2] = -hd;
-
-					endPositions[vidx] = i * _width / _segmentsW - hw;
-					endPositions[vidx + 1] = hh;
-					endPositions[vidx + 2] = hd;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				// build real data from raw data
-				lineGeometry.updatePositions(startPositions, endPositions);
-				lineGeometry.updateThickness(thickness);
-			}
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		override protected function buildUVs(target:SubGeometryBase, geometryType:String):void {
+		override protected function buildUVs(target:SubGeometryBase, geometryType:String):void
+		{
 			var i:Number, j:Number, index:Number;
 			var uvs:Vector.<Number>;
 
@@ -655,9 +657,10 @@ package away3d.prefabs
 
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == GeometryType.LINE) {
-				//nothing to do here
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//nothing to do here
+				}
 		}
 	}
 }

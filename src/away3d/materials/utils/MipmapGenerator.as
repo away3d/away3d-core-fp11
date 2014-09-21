@@ -11,50 +11,88 @@ package away3d.materials.utils
 	 */
 	public class MipmapGenerator
 	{
+        private static const _mipMaps:Array = [];
+        private static const _mipMapUses:Array = [];
+
 		private static var _matrix:Matrix = new Matrix();
 		private static var _rect:Rectangle = new Rectangle();
 		
 		/**
 		 * Uploads a BitmapData with mip maps to a target Texture object.
 		 * @param source The source BitmapData to upload.
-		 * @param target The target Texture to upload to.
+		 * @param output The target Texture to upload to.
 		 * @param mipmap An optional mip map holder to avoids creating new instances for fe animated materials.
 		 * @param alpha Indicate whether or not the uploaded bitmapData is transparent.
 		 */
-		public static function generateMipMaps(source:BitmapData, target:TextureBase, mipmap:BitmapData = null, alpha:Boolean = false, side:int = -1):void
+		public static function generateMipMaps(source:BitmapData, output:Vector.<BitmapData> = null, alpha:Boolean = false):void
 		{
 			var w:uint = source.width,
 				h:uint = source.height;
-			var i:uint;
-			var regen:Boolean = mipmap != null;
-			mipmap ||= new BitmapData(w, h, alpha);
-			
-			_rect.width = w;
-			_rect.height = h;
-			
+			var i:int = 0;
+
+            _rect.width = w;
+            _rect.height = h;
+
+            var mipmap:BitmapData;
+
 			while (w >= 1 || h >= 1) {
+
+                mipmap = output[i] = getMipmapHolder(output[i], w, h);
+
 				if (alpha)
 					mipmap.fillRect(_rect, 0);
-				
+
 				_matrix.a = _rect.width/source.width;
 				_matrix.d = _rect.height/source.height;
-				
+
 				mipmap.draw(source, _matrix, null, null, null, true);
-				
-				if (target is Texture)
-					Texture(target).uploadFromBitmapData(mipmap, i++);
-				else
-					CubeTexture(target).uploadFromBitmapData(mipmap, side, i++);
-				
+
 				w >>= 1;
 				h >>= 1;
-				
+
 				_rect.width = w > 1? w : 1;
 				_rect.height = h > 1? h : 1;
+
+                i++;
 			}
-			
-			if (!regen)
-				mipmap.dispose();
+
 		}
+
+        private static function getMipmapHolder(mipMapHolder:BitmapData, newW:int, newH:int):BitmapData
+        {
+            if (mipMapHolder) {
+                if (mipMapHolder.width == newW && mipMapHolder.height == newH)
+                    return mipMapHolder;
+
+                freeMipMapHolder(mipMapHolder);
+            }
+
+            if (!_mipMaps[newW]) {
+                _mipMaps[newW] = [];
+                _mipMapUses[newW] = [];
+            }
+
+            if (!_mipMaps[newW][newH]) {
+                mipMapHolder = _mipMaps[newW][newH] = new BitmapData(newW, newH, true);
+                _mipMapUses[newW][newH] = 1;
+            } else {
+                _mipMapUses[newW][newH] = _mipMapUses[newW][newH] + 1;
+                mipMapHolder = _mipMaps[newW][newH];
+            }
+
+            return mipMapHolder;
+        }
+
+        public static function freeMipMapHolder(mipMapHolder:BitmapData):void
+        {
+            var holderWidth:int = mipMapHolder.width;
+            var holderHeight:int = mipMapHolder.height;
+
+            if (--_mipMapUses[holderWidth][holderHeight] == 0) {
+                _mipMaps[holderWidth][holderHeight].dispose();
+                _mipMaps[holderWidth][holderHeight] = null;
+            }
+        }
+
 	}
 }

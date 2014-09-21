@@ -12,7 +12,7 @@ package away3d.animators.states
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleOrbitNode;
 	import away3d.animators.ParticleAnimator;
 	

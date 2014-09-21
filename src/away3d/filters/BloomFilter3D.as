@@ -1,6 +1,6 @@
 package away3d.filters
 {
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.filters.tasks.Filter3DBloomCompositeTask;
 	import away3d.filters.tasks.Filter3DBrightPassTask;
 	import away3d.filters.tasks.Filter3DHBlurTask;

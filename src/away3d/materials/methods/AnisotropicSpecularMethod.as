@@ -4,7 +4,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
@@ -14,7 +15,7 @@ package away3d.materials.methods
 	 * surfaces with microfacet details such as tiny grooves. In particular, this uses the Heidrich-Seidel distrubution.
 	 * The tangent vectors are used as the surface groove directions.
 	 */
-	public class AnisotropicSpecularMethod extends BasicSpecularMethod
+	public class AnisotropicSpecularMethod extends SpecularBasicMethod
 	{
 		/**
 		 * Creates a new AnisotropicSpecularMethod object.

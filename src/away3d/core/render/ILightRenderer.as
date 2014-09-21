@@ -1,5 +1,5 @@
 package away3d.core.render {
-    import away3d.core.managers.Stage3DProxy;
+    import away3d.managers.Stage3DProxy;
     import away3d.core.traverse.EntityCollector;
     import away3d.textures.RenderTexture;
     import away3d.textures.Texture2DBase;

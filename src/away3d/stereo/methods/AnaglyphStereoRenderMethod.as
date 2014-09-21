@@ -1,6 +1,6 @@
 package away3d.stereo.methods
 {
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	
 	import flash.display3D.Context3DProgramType;
 	

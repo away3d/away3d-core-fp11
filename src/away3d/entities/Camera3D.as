@@ -6,14 +6,14 @@ package away3d.entities
 	import away3d.projections.IProjection;
 	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Matrix3DUtils;
+	import away3d.core.geom.Plane3D;
 	import away3d.core.partition.CameraNode;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.render.IRenderer;
 	import away3d.events.CameraEvent;
 	import away3d.events.ProjectionEvent;
-	import away3d.library.assets.AssetType;
+	import away3d.core.library.AssetType;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -54,6 +54,7 @@ package away3d.entities
 				_frustumPlanes[i] = new Plane3D();
 			
 			z = -1000;
+            lookAt()
 		}
 		
 		override protected function createDefaultBoundingVolume():BoundingVolumeBase

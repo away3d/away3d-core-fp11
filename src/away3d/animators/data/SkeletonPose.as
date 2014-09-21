@@ -1,6 +1,9 @@
 package away3d.animators.data
 {
-	import away3d.library.assets.*;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
+	import away3d.core.library.NamedAssetBase;
+	import away3d.core.library.assets.*;
 	
 	/**
 	 * A collection of pose objects, determining the pose for an entire skeleton.

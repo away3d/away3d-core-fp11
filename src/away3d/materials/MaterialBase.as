@@ -1,32 +1,32 @@
 package away3d.materials
 {
-	import away3d.animators.AnimationSetBase;
-	import away3d.animators.AnimatorBase;
+	import away3d.animators.IAnimationSet;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.pool.RenderableBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.entities.Camera3D;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.materials.lightpickers.LightPickerBase;
-	import away3d.materials.passes.DepthMapPass;
-	import away3d.materials.passes.DistanceMapPass;
-	import away3d.materials.passes.GBufferPass;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.passes.WorldNormalPass;
-    import away3d.textures.Texture2DBase;
+	import away3d.core.pool.IMaterialData;
+	import away3d.core.pool.IMaterialPassData;
+	import away3d.core.pool.IRenderable;
+    import away3d.core.pool.MaterialPassData;
+    import away3d.core.pool.RenderableBase;
+    import away3d.entities.Camera3D;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
+	import away3d.core.library.NamedAssetBase;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.lightpickers.LightPickerBase;
+	import away3d.materials.passes.IMaterialPass;
+	import away3d.textures.Texture2DBase;
 
-    import flash.display.BlendMode;
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DCompareMode;
+	import flash.display.BlendMode;
 	import flash.events.Event;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
-	
+
 	/**
 	 * MaterialBase forms an abstract base class for any material.
 	 * A material consists of several passes, each of which constitutes at least one render call. Several passes could
@@ -34,17 +34,20 @@ package away3d.materials
 	 * pass) or to provide additional render-to-texture passes (rendering diffuse light to texture for texture-space
 	 * subsurface scattering, or rendering a depth map for specialized self-shadowing).
 	 *
-	 * Away3D provides default materials trough SinglePassMaterialBase and MultiPassMaterialBase, which use modular
+	 * Away3D provides default materials trough SinglePassMaterialBase and TriangleMaterial, which use modular
 	 * methods to build the shader code. MaterialBase can be extended to build specific and high-performant custom
 	 * shaders, or entire new material frameworks.
 	 */
-	public class MaterialBase extends NamedAssetBase implements IAsset, IMaterial
+	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
-		/**
-		 * A counter used to assign unique ids per material, which is used to sort per material while rendering.
-		 * This reduces state changes.
-		 */
-		private static var MATERIAL_ID_COUNT:uint = 0;
+		private var _materialPassData:Vector.<IMaterialPassData> = new Vector.<IMaterialPassData>();
+		private var _materialData:Vector.<IMaterialData> = new Vector.<IMaterialData>();
+
+		protected var _alphaThreshold:Number = 0;
+		protected var _animateUVs:Boolean = false;
+		private var _enableLightFallOff:Boolean = true;
+		private var _specularLightSources:Number = 0x01;
+		private var _diffuseLightSources:Number = 0x03;
 
 		/**
 		 * An object to contain any extra data.
@@ -58,97 +61,57 @@ package away3d.materials
 		 *
 		 * @private
 		 */
-		arcane var _classification:String;
+		arcane var classification:String;
 
-		/**
-		 * An id for this material used to sort the renderables by material, which reduces render state changes across
-		 * materials using the same Program3D.
-		 *
-		 * @private
-		 */
-		arcane var _uniqueId:uint;
 
 		/**
 		 * An id for this material used to sort the renderables by shader program, which reduces Program state changes.
 		 *
 		 * @private
 		 */
-		arcane var _materialId:Number;
+		arcane var materialId:uint = 0;
 
-		/**
-		 * An id for this material used to sort the renderables by shader program, which reduces Program3D state changes.
-		 *
-		 * @private
-		 */
-		arcane var _renderOrderId:int;
+		arcane var baseScreenPassIndex:Number = 0;
 
-		/**
-		 * The same as _renderOrderId, but applied to the depth shader passes.
-		 *
-		 * @private
-		 */
-		arcane var _depthPassId:int;
-
-		private var _bothSides:Boolean;
-		private var _animationSet:AnimationSetBase;
+		private var _bothSides:Boolean = false; // update
+		private var _animationSet:IAnimationSet;
+		protected var _screenPassesInvalid:Boolean = true;
 
 		/**
 		 * A list of material owners, renderables or custom Entities.
 		 */
 		private var _owners:Vector.<IMaterialOwner>;
-		
-		private var _alphaPremultiplied:Boolean;
-		
-		private var _blendMode:String = BlendMode.NORMAL;
-		
-		protected var _numPasses:uint;
-		protected var _passes:Vector.<MaterialPassBase>;
-		
-		protected var _mipmap:Boolean = true;
-		protected var _smooth:Boolean = true;
-		protected var _repeat:Boolean;
 
-		//TODO: these passes can be moved to renderer as single object
-		protected var _depthPass:DepthMapPass;
-		protected var _distancePass:DistanceMapPass;
-		protected var _worldNormalPass:WorldNormalPass;
-		protected var _gBufferPass:GBufferPass;
+		private var _alphaPremultiplied:Boolean;
+
+		protected var _blendMode:String = BlendMode.NORMAL;
+
+		private var _numPasses:Number = 0;
+		private var _passes:Vector.<IMaterialPass>;
+
+		private var _mipmap:Boolean = false;
+		private var _smooth:Boolean = true;
+		private var _repeat:Boolean = false;
+		private var _color:Number = 0xFFFFFF;
+		protected var _texture:Texture2DBase;
 
 		protected var _lightPicker:LightPickerBase;
 
-		private var _distanceBasedDepthRender:Boolean;
-		private var _depthCompareMode:String = Context3DCompareMode.LESS_EQUAL;
-
 		protected var _width:Number = 1;
 		protected var _height:Number = 1;
-
-        arcane var lightAccumulation:Texture2DBase;
-        arcane var lightAccumulationSpecular:Texture2DBase;
-        arcane var useDeferredLighting:Boolean;
-        arcane var useDeferredSpecularLighting:Boolean;
-        arcane var useDeferredDiffuseLighting:Boolean;
-        arcane var useDeferredColoredSpecular:Boolean;
+		protected var _requiresBlending:Boolean = false;
 
 		/**
 		 * Creates a new MaterialBase object.
 		 */
 		public function MaterialBase()
 		{
-			_materialId = Number(id);
+			materialId = id;
 
 			_owners = new Vector.<IMaterialOwner>();
-			_passes = new Vector.<MaterialPassBase>();
-			_depthPass = new DepthMapPass();
-			_worldNormalPass = new WorldNormalPass();
-			_gBufferPass = new GBufferPass();
-			_distancePass = new DistanceMapPass();
-			_depthPass.addEventListener(Event.CHANGE, onDepthPassChange);
-			_distancePass.addEventListener(Event.CHANGE, onDistancePassChange);
-			
-			// Default to considering pre-multiplied textures while blending
-			alphaPremultiplied = true;
-			
-			_uniqueId = MATERIAL_ID_COUNT++;
+			_passes = new Vector.<IMaterialPass>();
+
+			alphaPremultiplied = false; //TODO: work out why this is different for WebGL
 		}
 
 		/**
@@ -159,37 +122,50 @@ package away3d.materials
 			return AssetType.MATERIAL;
 		}
 
-		public function get width():Number
-		{
-			return _width;
-		}
-
+		/**
+		 *
+		 */
 		public function get height():Number
 		{
 			return _height;
 		}
 
 		/**
+		 *
+		 */
+		public function get animationSet():IAnimationSet
+		{
+			return _animationSet;
+		}
+
+
+		/**
 		 * The light picker used by the material to provide lights to the material if it supports lighting.
 		 *
-		 * @see away3d.materials.lightpickers.LightPickerBase
-		 * @see away3d.materials.lightpickers.StaticLightPicker
+		 * @see LightPickerBase
+		 * @see StaticLightPicker
 		 */
 		public function get lightPicker():LightPickerBase
 		{
 			return _lightPicker;
 		}
-		
+
 		public function set lightPicker(value:LightPickerBase):void
 		{
-			if (value != _lightPicker) {
-				_lightPicker = value;
-				var len:uint = _passes.length;
-				for (var i:uint = 0; i < len; ++i)
-					_passes[i].lightPicker = _lightPicker;
-			}
+			if (_lightPicker == value)
+				return;
+
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+
+			_lightPicker = value;
+
+			if (_lightPicker)
+				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+
+			invalidateScreenPasses();
 		}
-		
+
 		/**
 		 * Indicates whether or not any used textures should use mipmapping. Defaults to true.
 		 */
@@ -197,14 +173,17 @@ package away3d.materials
 		{
 			return _mipmap;
 		}
-		
+
 		public function set mipmap(value:Boolean):void
 		{
+			if (_mipmap == value)
+				return;
+
 			_mipmap = value;
-			for (var i:int = 0; i < _numPasses; ++i)
-				_passes[i].mipmap = value;
+
+			invalidatePasses();
 		}
-		
+
 		/**
 		 * Indicates whether or not any used textures should use smoothing.
 		 */
@@ -212,29 +191,17 @@ package away3d.materials
 		{
 			return _smooth;
 		}
-		
+
 		public function set smooth(value:Boolean):void
 		{
+			if (_smooth == value)
+				return;
+
 			_smooth = value;
-			for (var i:int = 0; i < _numPasses; ++i)
-				_passes[i].smooth = value;
+
+			invalidatePasses();
 		}
 
-		/**
-		 * The depth compare mode used to render the renderables using this material.
-		 *
-		 * @see flash.display3D.Context3DCompareMode
-		 */
-		public function get depthCompareMode():String
-		{
-			return _depthCompareMode;
-		}
-		
-		public function set depthCompareMode(value:String):void
-		{
-			_depthCompareMode = value;
-		}
-		
 		/**
 		 * Indicates whether or not any used textures should be tiled. If set to false, texture samples are clamped to
 		 * the texture's borders when the uv coordinates are outside the [0, 1] interval.
@@ -243,33 +210,156 @@ package away3d.materials
 		{
 			return _repeat;
 		}
-		
+
 		public function set repeat(value:Boolean):void
 		{
+			if (_repeat == value)
+				return;
+
 			_repeat = value;
-			for (var i:int = 0; i < _numPasses; ++i)
-				_passes[i].repeat = value;
+
+			invalidatePasses();
 		}
-		
+
+		/**
+		 * The diffuse reflectivity color of the surface.
+		 */
+		public function get color():Number
+		{
+			return _color;
+		}
+
+		public function set color(value:Number):void
+		{
+			if (_color == value)
+				return;
+
+			_color = value;
+
+			invalidatePasses();
+		}
+
+		/**
+		 * The texture object to use for the albedo colour.
+		 */
+		public function get texture():Texture2DBase
+		{
+			return _texture;
+		}
+
+		public function set texture(value:Texture2DBase):void
+		{
+			if (_texture == value)
+				return;
+
+			_texture = value;
+
+			invalidatePasses();
+		}
+
+		/**
+		 * Specifies whether or not the UV coordinates should be animated using a transformation matrix.
+		 */
+		public function get animateUVs():Boolean
+		{
+			return  _animateUVs;
+		}
+
+		public function set animateUVs(value:Boolean):void
+		{
+			if (_animateUVs == value)
+				return;
+
+			_animateUVs = value;
+
+			invalidatePasses();
+		}
+
+		/**
+		 * Whether or not to use fallOff and radius properties for lights. This can be used to improve performance and
+		 * compatibility for constrained mode.
+		 */
+		public function get enableLightFallOff():Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value:Boolean):void
+		{
+			if (_enableLightFallOff == value)
+				return;
+
+			_enableLightFallOff = value;
+
+			invalidatePasses();
+		}
+
+		/**
+		 * Define which light source types to use for diffuse reflections. This allows choosing between regular lights
+		 * and/or light probes for diffuse reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
+		public function get diffuseLightSources():Number
+		{
+			return _diffuseLightSources;
+		}
+
+		public function set diffuseLightSources(value:Number):void
+		{
+			if (_diffuseLightSources == value)
+				return;
+
+			_diffuseLightSources = value;
+
+			invalidatePasses();
+		}
+
+		/**
+		 * Define which light source types to use for specular reflections. This allows choosing between regular lights
+		 * and/or light probes for specular reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
+		public function get specularLightSources():Number
+		{
+			return _specularLightSources;
+		}
+
+		public function set specularLightSources(value:Number):void
+		{
+			if (_specularLightSources == value)
+				return;
+
+			_specularLightSources = value;
+
+			invalidatePasses();
+		}
+
 		/**
 		 * Cleans up resources owned by the material, including passes. Textures are not owned by the material since they
 		 * could be used by other materials and will not be disposed.
 		 */
 		override public function dispose():void
 		{
-			var i:uint;
-			
-			for (i = 0; i < _numPasses; ++i)
-				_passes[i].dispose();
-			
-			_depthPass.dispose();
-			_distancePass.dispose();
-			_worldNormalPass.dispose();
-			_gBufferPass.dispose();
-			_depthPass.removeEventListener(Event.CHANGE, onDepthPassChange);
-			_distancePass.removeEventListener(Event.CHANGE, onDistancePassChange);
+			var i:Number;
+			var len:Number;
+
+			clearScreenPasses();
+
+			len = _materialData.length;
+			for (i = 0; i < len; i++)
+				_materialData[i].dispose();
+
+			_materialData = new Vector.<IMaterialData>();
+
+			len = _materialPassData.length;
+			for (i = 0; i < len; i++)
+				_materialPassData[i].dispose();
+
+			_materialPassData = new Vector.<IMaterialPassData>();
 		}
-		
+
 		/**
 		 * Defines whether or not the material should cull triangles facing away from the camera.
 		 */
@@ -277,20 +367,17 @@ package away3d.materials
 		{
 			return _bothSides;
 		}
-		
+
 		public function set bothSides(value:Boolean):void
 		{
-			_bothSides = value;
-			
-			for (var i:int = 0; i < _numPasses; ++i)
-				_passes[i].bothSides = value;
+			if (_bothSides = value)
+				return;
 
-			_depthPass.bothSides = value;
-			_distancePass.bothSides = value;
-			_worldNormalPass.bothSides = value;
-			_gBufferPass.bothSides = value;
+			_bothSides = value;
+
+			invalidatePasses();
 		}
-		
+
 		/**
 		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
 		 * <ul>
@@ -305,12 +392,17 @@ package away3d.materials
 		{
 			return _blendMode;
 		}
-		
+
 		public function set blendMode(value:String):void
 		{
+			if (_blendMode == value)
+				return;
+
 			_blendMode = value;
+
+			invalidatePasses();
 		}
-		
+
 		/**
 		 * Indicates whether visible textures (or other pixels) used by this material have
 		 * already been premultiplied. Toggle this if you are seeing black halos around your
@@ -320,266 +412,152 @@ package away3d.materials
 		{
 			return _alphaPremultiplied;
 		}
-		
+
 		public function set alphaPremultiplied(value:Boolean):void
 		{
+			if (_alphaPremultiplied == value)
+				return;
+
 			_alphaPremultiplied = value;
-			
-			for (var i:int = 0; i < _numPasses; ++i)
-				_passes[i].alphaPremultiplied = value;
+
+			invalidatePasses();
 		}
-		
+
+		/**
+		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
+		 * invisible or entirely opaque, often used with textures for foliage, etc.
+		 * Recommended values are 0 to disable alpha, or 0.5 to create smooth edges. Default value is 0 (disabled).
+		 */
+		public function get alphaThreshold():Number
+		{
+			return _alphaThreshold;
+		}
+
+		public function set alphaThreshold(value:Number):void
+		{
+			if (value < 0)
+				value = 0; else
+				if (value > 1)
+					value = 1;
+
+			if (_alphaThreshold == value)
+				return;
+
+			_alphaThreshold = value;
+
+			invalidatePasses();
+		}
+
 		/**
 		 * Indicates whether or not the material requires alpha blending during rendering.
 		 */
 		public function get requiresBlending():Boolean
 		{
-			return _blendMode != BlendMode.NORMAL;
+			return _requiresBlending;
 		}
 
 		/**
-		 * An id for this material used to sort the renderables by material, which reduces render state changes across
-		 * materials using the same Program3D.
+		 *
 		 */
-		public function get uniqueId():uint
+		public function get width():Number
 		{
-			return _uniqueId;
-		}
-		
-		/**
-		 * The amount of passes used by the material.
-		 *
-		 * @private
-		 */
-		arcane function get numPasses():uint
-		{
-			return _numPasses;
+			return _width;
 		}
 
-		/**
-		 * Indicates that the depth pass uses transparency testing to discard pixels.
-		 *
-		 * @private
-		 */
-		arcane function hasDepthAlphaThreshold():Boolean
-		{
-			return _depthPass.alphaThreshold > 0;
-		}
-
-		/**
-		 * Sets the render state for the depth pass that is independent of the rendered object. Used when rendering
-		 * depth or distances (fe: shadow maps, depth pre-pass).
-		 *
-		 * @param stage3DProxy The Stage3DProxy used for rendering.
-		 * @param camera The camera from which the scene is viewed.
-		 * @param distanceBased Whether or not the depth pass or distance pass should be activated. The distance pass
-		 * is required for shadow cube maps.
-		 *
-		 * @private
-		 */
-		arcane function activateForDepth(stage3DProxy:Stage3DProxy, camera:Camera3D, distanceBased:Boolean = false):void
-		{
-			_distanceBasedDepthRender = distanceBased;
-
-			if (distanceBased)
-				_distancePass.activate(stage3DProxy, camera);
-			else
-				_depthPass.activate(stage3DProxy, camera);
-		}
-
-		/**
-		 * Clears the render state for the depth pass.
-		 *
-		 * @param stage3DProxy The Stage3DProxy used for rendering.
-		 *
-		 * @private
-		 */
-		arcane function deactivateForDepth(stage3DProxy:Stage3DProxy):void
-		{
-			if (_distanceBasedDepthRender)
-				_distancePass.deactivate(stage3DProxy);
-			else
-				_depthPass.deactivate(stage3DProxy);
-		}
-
-		/**
-		 * Renders a renderable using the depth pass.
-		 *
-		 * @param renderable The IRenderable instance that needs to be rendered.
-		 * @param stage3DProxy The Stage3DProxy used for rendering.
-		 * @param camera The camera from which the scene is viewed.
-		 * @param viewProjection The view-projection matrix used to project to the screen. This is not the same as
-		 * camera.viewProjection as it includes the scaling factors when rendering to textures.
-		 *
-		 * @private
-		 */
-		arcane function renderDepth(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
-		{
-			if (_distanceBasedDepthRender) {
-				if (renderable.materialOwner.animator)
-					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
-				_distancePass.render(renderable, stage3DProxy, camera, viewProjection);
-			} else {
-				if (renderable.materialOwner.animator)
-					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
-				_depthPass.render(renderable, stage3DProxy, camera, viewProjection);
-			}
-		}
-
-		arcane function activateForWorldNormal(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
-			_worldNormalPass.activate(stage3DProxy,camera);
-		}
-
-		arcane function renderWorldNormal(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void{
-			if (renderable.materialOwner.animator)
-				_worldNormalPass.updateAnimationState(renderable, stage3DProxy, camera);
-			_worldNormalPass.render(renderable, stage3DProxy, camera, viewProjection);
-		}
-
-		arcane function deactivateForWorldNormal(stage3DProxy:Stage3DProxy):void {
-			_worldNormalPass.deactivate(stage3DProxy);
-		}
-
-		arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawPosition:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
-			_gBufferPass.drawDepth = drawDepth;
-			_gBufferPass.drawWorldNormal = drawWorldNormals;
-			_gBufferPass.drawWorldPosition = drawPosition;
-			_gBufferPass.drawAlbedo = drawAlbedo;
-			_gBufferPass.drawSpecular = drawSpecular;
-			_gBufferPass.activate(stage3DProxy,camera);
-		}
-
-		arcane function renderGBuffer(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void{
-			if (renderable.materialOwner.animator)
-				_gBufferPass.updateAnimationState(renderable, stage3DProxy, camera);
-			_gBufferPass.render(renderable, stage3DProxy, camera, viewProjection);
-		}
-
-		arcane function deactivateGBuffer(stage3DProxy:Stage3DProxy):void {
-			_gBufferPass.deactivate(stage3DProxy);
-		}
-
-		/**
-		 * Indicates whether or not the pass with the given index renders to texture or not.
-		 * @param index The index of the pass.
-		 * @return True if the pass renders to texture, false otherwise.
-		 *
-		 * @private
-		 */
-		arcane function passRendersToTexture(index:uint):Boolean
-		{
-			return _passes[index].renderToTexture;
-		}
-		
 		/**
 		 * Sets the render state for a pass that is independent of the rendered object. This needs to be called before
 		 * calling renderPass. Before activating a pass, the previously used pass needs to be deactivated.
-		 * @param index The index of the pass to activate.
-		 * @param stage3DProxy The Stage3DProxy object which is currently used for rendering.
+		 * @param pass The pass data to activate.
+		 * @param stage The Stage object which is currently used for rendering.
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */
-		arcane function activatePass(index:uint, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		arcane function activatePass(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void // ARCANE
 		{
-			_passes[index].activate(stage3DProxy, camera);
+			pass.materialPass.activate(pass, stage, camera);
 		}
-
 
 		/**
 		 * Clears the render state for a pass. This needs to be called before activating another pass.
-		 * @param index The index of the pass to deactivate.
-		 * @param stage3DProxy The Stage3DProxy used for rendering
+		 * @param pass The pass to deactivate.
+		 * @param stage The Stage used for rendering
 		 *
-		 * @private
+		 * @internal
 		 */
-		arcane function deactivatePass(index:uint, stage3DProxy:Stage3DProxy):void
+		arcane function deactivatePass(pass:MaterialPassData, stage:Stage3DProxy):void // ARCANE
 		{
-			_passes[index].deactivate(stage3DProxy);
+			pass.materialPass.deactivate(pass, stage);
 		}
 
 		/**
 		 * Renders the current pass. Before calling renderPass, activatePass needs to be called with the same index.
-		 * @param index The index of the pass used to render the renderable.
+		 * @param pass The pass used to render the renderable.
 		 * @param renderable The IRenderable object to draw.
-		 * @param stage3DProxy The Stage3DProxy object used for rendering.
+		 * @param stage The Stage object used for rendering.
 		 * @param entityCollector The EntityCollector object that contains the visible scene data.
 		 * @param viewProjection The view-projection matrix used to project to the screen. This is not the same as
 		 * camera.viewProjection as it includes the scaling factors when rendering to textures.
+		 *
+		 * @internal
 		 */
-		arcane function renderPass(index:uint, renderable:RenderableBase, stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, viewProjection:Matrix3D):void
+		arcane function renderPass(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			if (_lightPicker)
-				_lightPicker.collectLights(renderable, entityCollector);
-			
-			var pass:MaterialPassBase = _passes[index];
-			
-			if (renderable.materialOwner.animator)
-				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
-			
-			pass.render(renderable, stage3DProxy, entityCollector.camera, viewProjection);
+				_lightPicker.collectLights(renderable);
+
+			pass.materialPass.render(pass, renderable, stage, camera, viewProjection);
 		}
-		
+
 		//
 		// MATERIAL MANAGEMENT
 		//
 		/**
 		 * Mark an IMaterialOwner as owner of this material.
 		 * Assures we're not using the same material across renderables with different animations, since the
-		 * Program3Ds depend on animation. This method needs to be called when a material is assigned.
+		 * Programs depend on animation. This method needs to be called when a material is assigned.
 		 *
 		 * @param owner The IMaterialOwner that had this material assigned
 		 *
-		 * @private
+		 * @internal
 		 */
-		public function addOwner(owner:IMaterialOwner):void
+		arcane function addOwner(owner:IMaterialOwner):void
 		{
 			_owners.push(owner);
 
-			var animationSet:AnimationSetBase;
-			var animator:AnimatorBase = owner.animator as AnimatorBase;
+			var animationSet:IAnimationSet;
+			var animator:IAnimator = owner.animator;
 
-			if (animator) {
-				animationSet = animator.animationSet as AnimationSetBase;
-			}
+			if (animator)
+				animationSet = animator.animationSet as IAnimationSet;
 
 			if (owner.animator) {
-				if (_animationSet && animationSet != _animationSet)
+				if (_animationSet && animationSet != _animationSet) {
 					throw new Error("A Material instance cannot be shared across material owners with different animation sets");
-				else {
+				} else {
 					if (_animationSet != animationSet) {
 						_animationSet = animationSet;
-						for (var i:int = 0; i < _numPasses; ++i)
-							_passes[i].animationSet = _animationSet;
-						_depthPass.animationSet = _animationSet;
-						_distancePass.animationSet = _animationSet;
-						_worldNormalPass.animationSet = _animationSet;
-						_gBufferPass.animationSet = _animationSet;
-						invalidatePasses(null);
+						invalidateAnimation();
 					}
 				}
 			}
 		}
-		
+
 		/**
 		 * Removes an IMaterialOwner as owner.
 		 * @param owner
-		 * @private
+		 *
+		 * @internal
 		 */
-		public function removeOwner(owner:IMaterialOwner):void
+		arcane function removeOwner(owner:IMaterialOwner):void
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
+
 			if (_owners.length == 0) {
 				_animationSet = null;
-				for (var i:int = 0; i < _numPasses; ++i)
-					_passes[i].animationSet = _animationSet;
-				_depthPass.animationSet = _animationSet;
-				_distancePass.animationSet = _animationSet;
-				_worldNormalPass.animationSet = _animationSet;
-				_gBufferPass.animationSet = _animationSet;
-				invalidatePasses(null);
+				invalidateAnimation();
 			}
 		}
-		
+
 		/**
 		 * A list of the IMaterialOwners that use this material
 		 *
@@ -589,118 +567,107 @@ package away3d.materials
 		{
 			return _owners;
 		}
-		
+
 		/**
-		 * Performs any processing that needs to occur before any of its passes are used.
+		 * The amount of passes used by the material.
 		 *
 		 * @private
 		 */
-		arcane function updateMaterial(context:Context3D):void
+		arcane function numScreenPasses():Number
 		{
-		
+			return _numPasses;
 		}
-		
+
 		/**
-		 * Deactivates the last pass of the material.
+		 * A list of the screen passes used in this material
 		 *
 		 * @private
 		 */
-		arcane function deactivate(stage3DProxy:Stage3DProxy):void
+		arcane function get screenPasses():Vector.<IMaterialPass>
 		{
-			_passes[_numPasses - 1].deactivate(stage3DProxy);
+			return _passes;
 		}
-		
+
 		/**
 		 * Marks the shader programs for all passes as invalid, so they will be recompiled before the next use.
-		 * @param triggerPass The pass triggering the invalidation, if any. This is passed to prevent invalidating the
-		 * triggering pass, which would result in an infinite loop.
 		 *
 		 * @private
 		 */
-		arcane function invalidatePasses(triggerPass:MaterialPassBase):void
+		protected function invalidatePasses():void
 		{
-			var animator:AnimatorBase;
-			var owner:IMaterialOwner;
-			
-			_depthPass.invalidateShaderProgram();
-			_distancePass.invalidateShaderProgram();
-			_worldNormalPass.invalidateShaderProgram();
-			_gBufferPass.invalidateShaderProgram();
+			var len:int = _materialPassData.length;
+			for (var i:int = 0; i < len; i++)
+				_materialPassData[i].invalidate();
 
-			// test if the depth and distance passes support animating the animation set in the vertex shader
-			// if any object using this material fails to support accelerated animations for any of the passes,
-			// we should do everything on cpu (otherwise we have the cost of both gpu + cpu animations)
-			if (_animationSet) {
-				_animationSet.resetGPUCompatibility();
-				for each (owner in _owners) {
-					animator = owner.animator as AnimatorBase;
+			invalidateMaterial();
+		}
 
-					if (animator) {
-						animator.testGPUCompatibility(_depthPass);
-						animator.testGPUCompatibility(_distancePass);
-						animator.testGPUCompatibility(_worldNormalPass);
-						animator.testGPUCompatibility(_gBufferPass);
-					}
-				}
-			}
-			
-			for (var i:int = 0; i < _numPasses; ++i) {
-				// only invalidate the pass if it wasn't the triggering pass
-				if (_passes[i] != triggerPass)
-					_passes[i].invalidateShaderProgram(false);
-
-				// test if animation will be able to run on gpu BEFORE compiling materials
-				// test if the pass supports animating the animation set in the vertex shader
-				// if any object using this material fails to support accelerated animations for any of the passes,
-				// we should do everything on cpu (otherwise we have the cost of both gpu + cpu animations)
-				if (_animationSet) {
-					for each (owner in _owners) {
-						animator = owner.animator as AnimatorBase;
-						if (animator)
-							animator.testGPUCompatibility(_passes[i]);
-					}
-				}
-			}
+		/**
+		 * Flags that the screen passes have become invalid and need possible re-ordering / adding / deleting
+		 */
+		protected function invalidateScreenPasses():void
+		{
+			_screenPassesInvalid = true;
 		}
 
 		/**
 		 * Removes a pass from the material.
 		 * @param pass The pass to be removed.
 		 */
-		protected function removePass(pass:MaterialPassBase):void
+		protected function removeScreenPass(pass:IMaterialPass):void
 		{
+			pass.removeEventListener(Event.CHANGE, onPassChange);
 			_passes.splice(_passes.indexOf(pass), 1);
-			--_numPasses;
+
+			_numPasses--;
 		}
-		
+
 		/**
 		 * Removes all passes from the material
 		 */
-		protected function clearPasses():void
+		protected function clearScreenPasses():void
 		{
-			for (var i:int = 0; i < _numPasses; ++i)
+			for (var i:Number = 0; i < _numPasses; ++i)
 				_passes[i].removeEventListener(Event.CHANGE, onPassChange);
-			
-			_passes.length = 0;
-			_numPasses = 0;
+
+			_passes.length = _numPasses = 0;
 		}
-		
+
 		/**
 		 * Adds a pass to the material
 		 * @param pass
 		 */
-		protected function addPass(pass:MaterialPassBase):void
+		protected function addScreenPass(pass:IMaterialPass):void
 		{
 			_passes[_numPasses++] = pass;
-			pass.animationSet = _animationSet;
-			pass.alphaPremultiplied = _alphaPremultiplied;
-			pass.mipmap = _mipmap;
-			pass.smooth = _smooth;
-			pass.repeat = _repeat;
+
 			pass.lightPicker = _lightPicker;
-			pass.bothSides = _bothSides;
 			pass.addEventListener(Event.CHANGE, onPassChange);
-			invalidatePasses(null);
+
+			invalidateMaterial();
+		}
+
+		arcane function addMaterialData(materialData:IMaterialData):IMaterialData
+		{
+			_materialData.push(materialData);
+
+			return materialData;
+		}
+
+		arcane function removeMaterialData(materialData:IMaterialData):IMaterialData
+		{
+			_materialData.splice(_materialData.indexOf(materialData), 1);
+
+			return materialData;
+		}
+
+		/**
+		 * Performs any processing that needs to occur before any of its passes are used.
+		 *
+		 * @private
+		 */
+		arcane function updateMaterial():void
+		{
 		}
 
 		/**
@@ -708,67 +675,53 @@ package away3d.materials
 		 */
 		private function onPassChange(event:Event):void
 		{
-			var mult:Number = 1;
-			var ids:Vector.<int>;
-			var len:int;
-			
-			_renderOrderId = 0;
-			
-			for (var i:int = 0; i < _numPasses; ++i) {
-				ids = _passes[i]._program3Dids;
-				len = ids.length;
-				for (var j:int = 0; j < len; ++j) {
-					if (ids[j] != -1) {
-						_renderOrderId += mult*ids[j];
-						j = len;
-					}
-				}
-				mult *= 1000;
-			}
+			invalidateMaterial();
+		}
+
+		private function invalidateAnimation():void
+		{
+			var len:int = _materialData.length;
+			for (var i:int = 0; i < len; i++)
+				_materialData[i].invalidateAnimation();
+		}
+
+		private function invalidateMaterial():void
+		{
+			var len:int = _materialData.length;
+			for (var i:int = 0; i < len; i++)
+				_materialData[i].invalidateMaterial();
 		}
 
 		/**
-		 * Listener for when the distance pass's shader code changes. It recalculates the depth pass id.
+		 * Called when the light picker's configuration changed.
 		 */
-		private function onDistancePassChange(event:Event):void
+		private function onLightsChange(event:Event):void
 		{
-			var ids:Vector.<int> = _distancePass._program3Dids;
-			var len:uint = ids.length;
-			
-			_depthPassId = 0;
-			
-			for (var j:int = 0; j < len; ++j) {
-				if (ids[j] != -1) {
-					_depthPassId += ids[j];
-					j = len;
-				}
-			}
+			invalidateScreenPasses();
 		}
 
-		/**
-		 * Listener for when the depth pass's shader code changes. It recalculates the depth pass id.
-		 */
-		private function onDepthPassChange(event:Event):void
+
+		arcane function addMaterialPassData(materialPassData:IMaterialPassData):IMaterialPassData
 		{
-			var ids:Vector.<int> = _depthPass._program3Dids;
-			var len:uint = ids.length;
-			
-			_depthPassId = 0;
-			
-			for (var j:int = 0; j < len; ++j) {
-				if (ids[j] != -1) {
-					_depthPassId += ids[j];
-					j = len;
-				}
-			}
+			_materialPassData.push(materialPassData);
+
+			return materialPassData;
 		}
 
-		public function get materialId():Number {
-			return _materialId;
+		arcane function removeMaterialPassData(materialPassData:IMaterialPassData):IMaterialPassData
+		{
+			_materialPassData.splice(_materialPassData.indexOf(materialPassData), 1);
+			return materialPassData;
 		}
 
-		public function get renderOrderId():int {
-			return _renderOrderId;
-		}
+        arcane function getVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        {
+            return "";
+        }
+
+        arcane function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        {
+            return "";
+        }
 	}
 }

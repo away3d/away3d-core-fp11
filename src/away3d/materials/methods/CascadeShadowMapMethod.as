@@ -1,7 +1,8 @@
 package away3d.materials.methods
 {
 	import away3d.*;
-	import away3d.core.managers.*;
+	import away3d.entities.DirectionalLight;
+	import away3d.managers.*;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
@@ -9,6 +10,7 @@ package away3d.materials.methods
 	import away3d.lights.*;
 	import away3d.lights.shadowmaps.*;
 	import away3d.materials.compilation.*;
+	import away3d.materials.shadowmappers.CascadeShadowMapper;
 
 	import flash.events.*;
 
@@ -18,11 +20,11 @@ package away3d.materials.methods
 	 * CascadeShadowMapMethod is a shadow map method to apply cascade shadow mapping on materials.
 	 * Must be used with a DirectionalLight with a CascadeShadowMapper assigned to its shadowMapper property.
 	 *
-	 * @see away3d.lights.shadowmaps.CascadeShadowMapper
+	 * @see away3d.materials.shadowmappers.CascadeShadowMapper
 	 */
 	public class CascadeShadowMapMethod extends ShadowMapMethodBase
 	{
-		private var _baseMethod:SimpleShadowMapMethodBase;
+		private var _baseMethod:ShadowMethodBase;
 		private var _cascadeShadowMapper:CascadeShadowMapper;
 		private var _depthMapCoordVaryings:Vector.<ShaderRegisterElement>;
 		private var _cascadeProjections:Vector.<ShaderRegisterElement>;
@@ -32,7 +34,7 @@ package away3d.materials.methods
 		 *
 		 * @param shadowMethodBase The shadow map sampling method used to sample individual cascades (fe: HardShadowMapMethod, SoftShadowMapMethod)
 		 */
-		public function CascadeShadowMapMethod(shadowMethodBase:SimpleShadowMapMethodBase)
+		public function CascadeShadowMapMethod(shadowMethodBase:ShadowMethodBase)
 		{
 			super(shadowMethodBase.castingLight);
 			_baseMethod = shadowMethodBase;
@@ -51,15 +53,15 @@ package away3d.materials.methods
 		 * The shadow map sampling method used to sample individual cascades. These are typically those used in conjunction
 		 * with a DirectionalShadowMapper.
 		 *
-		 * @see HardShadowMapMethod
+		 * @see ShadowHardMethod
 		 * @see SoftShadowMapMethod
 		 */
-		public function get baseMethod():SimpleShadowMapMethodBase
+		public function get baseMethod():ShadowMethodBase
 		{
 			return _baseMethod;
 		}
 		
-		public function set baseMethod(value:SimpleShadowMapMethodBase):void
+		public function set baseMethod(value:ShadowMethodBase):void
 		{
 			if (_baseMethod == value)
 				return;

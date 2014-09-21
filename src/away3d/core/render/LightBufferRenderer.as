@@ -1,13 +1,13 @@
 package away3d.core.render {
     import away3d.arcane;
-    import away3d.core.managers.RTTBufferManager;
-    import away3d.core.managers.Stage3DProxy;
-    import away3d.core.math.Matrix3DUtils;
+    import away3d.managers.RTTBufferManager;
+    import away3d.managers.Stage3DProxy;
+    import away3d.core.geom.Matrix3DUtils;
     import away3d.core.traverse.EntityCollector;
     import away3d.entities.Camera3D;
-    import away3d.lights.DirectionalLight;
-    import away3d.lights.LightBase;
-    import away3d.lights.PointLight;
+    import away3d.entities.DirectionalLight;
+    import away3d.core.base.LightBase;
+    import away3d.entities.PointLight;
     import away3d.materials.compilation.ShaderState;
     import away3d.textures.Texture2DBase;
 

@@ -28,8 +28,8 @@
 		 */
 		function Face(vertices:Vector.<Number> = null, uvs:Vector.<Number> = null)
 		{
-			_vertices = vertices || Vector.<Number>([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
-			_uvs = uvs || Vector.<Number>([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+			_vertices = vertices || Vector.<Number>([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+			_uvs = uvs || Vector.<Number>([0, 0, 0, 0, 0, 0]);
 		}
 		
 		//uvs

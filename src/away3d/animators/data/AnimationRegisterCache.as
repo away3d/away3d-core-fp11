@@ -1,7 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	

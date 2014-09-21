@@ -1,15 +1,15 @@
-package away3d.entities {
-	import away3d.core.partition.SkyBoxNode;
+package away3d.entities
+{
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.UVTransform;
+	import away3d.core.geom.UVTransform;
+	import away3d.core.library.AssetType;
 	import away3d.core.partition.EntityNode;
+	import away3d.core.partition.SkyBoxNode;
 	import away3d.core.render.IRenderer;
-	import away3d.library.assets.AssetType;
-	import away3d.materials.IMaterial;
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
 
@@ -21,7 +21,7 @@ package away3d.entities {
 	public class SkyBox extends Object3D implements IEntity, IMaterialOwner
 	{
 		private var _uvTransform:UVTransform = new UVTransform();
-		private var _material:IMaterial;
+		private var _material:MaterialBase;
 		private var _animator:IAnimator;
 
 		public function get animator():IAnimator
@@ -34,7 +34,7 @@ package away3d.entities {
 		 *
 		 * @param material    The material with which to render the Skybox.
 		 */
-		public function SkyBox(material:IMaterial)
+		public function SkyBox(material:MaterialBase)
 		{
 			_isEntity = true;
 			this.material = material;
@@ -43,12 +43,12 @@ package away3d.entities {
 		/**
 		 * The material with which to render the Skybox.
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
 			return this._material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (value == _material)
 				return;
@@ -94,6 +94,7 @@ package away3d.entities {
 		{
 			return new SkyBoxNode(this);
 		}
+
 		/**
 		 * @protected
 		 */
@@ -108,7 +109,8 @@ package away3d.entities {
 		}
 
 
-		public function collectRenderables(renderer:IRenderer):void {
+		public function collectRenderables(renderer:IRenderer):void
+		{
 			// Since this getter is invoked every iteration of the render loop, and
 			// the prefab construct could affect the sub-meshes, the prefab is
 			// validated here to give it a chance to rebuild.
@@ -118,7 +120,8 @@ package away3d.entities {
 			collectRenderable(renderer);
 		}
 
-		public function collectRenderable(renderer:IRenderer):void {
+		public function collectRenderable(renderer:IRenderer):void
+		{
 			renderer.applySkybox(this);
 		}
 	}

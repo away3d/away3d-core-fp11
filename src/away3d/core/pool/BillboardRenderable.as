@@ -1,11 +1,13 @@
-package away3d.core.pool {
+package away3d.core.pool
+{
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Billboard;
-	import away3d.materials.IMaterial;
+	import away3d.materials.MaterialBase;
 
-	public class BillboardRenderable extends RenderableBase {
-	private static const _materialGeometry:Object = {};
+	public class BillboardRenderable extends RenderableBase
+	{
+		private static const _materialGeometry:Object = {};
 
 		public static const id:String = "billboard";
 
@@ -20,7 +22,7 @@ package away3d.core.pool {
 
 		override protected function getSubGeometry():SubGeometryBase
 		{
-			var material:IMaterial = _billboard.material;
+			var material:MaterialBase = _billboard.material;
 
 			var geometry:TriangleSubGeometry = _materialGeometry[material.id];
 

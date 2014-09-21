@@ -1,6 +1,6 @@
 package away3d.core.render
 {
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 	import away3d.textures.Texture2DBase;
 	

@@ -4,7 +4,7 @@ package away3d.tools.utils
 	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.materials.ColorMaterial;
 	import away3d.prefabs.PrimitivePlanePrefab;

@@ -2,15 +2,15 @@ package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightProbe;
-	import away3d.lights.PointLight;
+	import away3d.managers.Stage3DProxy;
+	import away3d.entities.DirectionalLight;
+	import away3d.entities.LightProbe;
+	import away3d.entities.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.compilation.ShaderCompiler;
+	import away3d.materials.compilation.ShaderCompilerBase;
 	import away3d.materials.compilation.SuperShaderCompiler;
-	import away3d.materials.methods.ColorTransformMethod;
+	import away3d.materials.methods.EffectColorTransformMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.MethodVOSet;
 	
@@ -27,7 +27,7 @@ package away3d.materials.passes
 	 *
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
-	public class SuperShaderPass extends CompiledPass
+	public class SuperShaderPass extends TriangleBasicPass
 	{
 		private var _includeCasters:Boolean = true;
 		private var _ignoreLights:Boolean;
@@ -46,7 +46,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function createCompiler(profile:String):ShaderCompiler
+		override protected function createCompiler(profile:String):ShaderCompilerBase
 		{
 			return new SuperShaderCompiler(profile);
 		}
@@ -78,7 +78,7 @@ package away3d.materials.passes
 		public function set colorTransform(value:ColorTransform):void
 		{
 			if (value) {
-				colorTransformMethod ||= new ColorTransformMethod();
+				colorTransformMethod ||= new EffectColorTransformMethod();
 				_methodSetup._colorTransformMethod.colorTransform = value;
 			} else if (!value) {
 				if (_methodSetup._colorTransformMethod)
@@ -90,12 +90,12 @@ package away3d.materials.passes
 		/**
 		 * The ColorTransformMethod object to transform the colour of the material with. Defaults to null.
 		 */
-		public function get colorTransformMethod():ColorTransformMethod
+		public function get colorTransformMethod():EffectColorTransformMethod
 		{
 			return _methodSetup.colorTransformMethod;
 		}
 		
-		public function set colorTransformMethod(value:ColorTransformMethod):void
+		public function set colorTransformMethod(value:EffectColorTransformMethod):void
 		{
 			_methodSetup.colorTransformMethod = value;
 		}

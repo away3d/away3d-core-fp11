@@ -6,7 +6,7 @@ package away3d.animators.states
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.nodes.ParticleRotateToPositionNode;
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 

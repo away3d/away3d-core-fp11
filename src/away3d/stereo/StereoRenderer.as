@@ -1,7 +1,7 @@
 package away3d.stereo
 {
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.RTTBufferManager;
+	import away3d.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 	import away3d.stereo.methods.InterleavedStereoRenderMethod;
 	import away3d.stereo.methods.StereoRenderMethodBase;

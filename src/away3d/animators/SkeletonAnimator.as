@@ -9,14 +9,16 @@ package away3d.animators
 	import away3d.arcane;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Quaternion;
+	import away3d.core.pool.RenderableBase;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.Quaternion;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.events.AnimationStateEvent;
 	import away3d.events.SubGeometryEvent;
+	import away3d.materials.compilation.ShaderObjectBase;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3DProgramType;
@@ -194,7 +196,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		override public function setRenderState(shaderObject:ShaderObjectBase, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, vertexConstantOffset:int, vertexStreamOffset:int):void
 		{
 			// do on request of globalProperties
 			if (_globalPropertiesDirty)
@@ -216,16 +218,16 @@ package away3d.animators
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
 			}
 
-			stage3DProxy.activateBuffer(vertexStreamOffset, renderable.getVertexData(TriangleSubGeometry.JOINT_INDEX_DATA), renderable.getVertexOffset(TriangleSubGeometry.JOINT_INDEX_DATA), renderable.JOINT_INDEX_FORMAT);
-			stage3DProxy.activateBuffer(vertexStreamOffset + 1, renderable.getVertexData(TriangleSubGeometry.JOINT_WEIGHT_DATA), renderable.getVertexOffset(TriangleSubGeometry.JOINT_WEIGHT_DATA), renderable.JOINT_WEIGHT_FORMAT);
+			stage3DProxy.activateBuffer(vertexStreamOffset, renderable.getVertexData(TriangleSubGeometry.JOINT_INDEX_DATA), renderable.getVertexOffset(TriangleSubGeometry.JOINT_INDEX_DATA), TriangleSubMeshRenderable.JOINT_INDEX_FORMAT);
+			stage3DProxy.activateBuffer(vertexStreamOffset + 1, renderable.getVertexData(TriangleSubGeometry.JOINT_WEIGHT_DATA), renderable.getVertexOffset(TriangleSubGeometry.JOINT_WEIGHT_DATA), TriangleSubMeshRenderable.JOINT_WEIGHT_FORMAT);
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function testGPUCompatibility(pass:MaterialPassBase):void
+		override public function testGPUCompatibility(shaderObject:ShaderObjectBase):void
 		{
-			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints*3 > 128))
+			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || shaderObject.numUsedVertexConstants + _numJoints*3 > 128))
 				_animationSet.cancelGPUCompatibility();
 		}
 		
@@ -358,7 +360,7 @@ package away3d.animators
 
 		override public function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):SubGeometryBase
 		{
-			this._morphedSubGeometryDirty[sourceSubGeometry.id] = true;
+			_morphedSubGeometryDirty[sourceSubGeometry.id] = true;
 
 			//early out for GPU animations
 			if (!_animationSet.usesCPU)

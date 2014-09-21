@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
@@ -22,7 +23,7 @@ package away3d.materials.methods
 		 * @param specularCutOff The threshold at which the specular highlight should be shown.
 		 * @param baseSpecularMethod An optional specular method on which the cartoon shading is based. If ommitted, BasicSpecularMethod is used.
 		 */
-		public function CelSpecularMethod(specularCutOff:Number = .5, baseSpecularMethod:BasicSpecularMethod = null)
+		public function CelSpecularMethod(specularCutOff:Number = .5, baseSpecularMethod:SpecularBasicMethod = null)
 		{
 			super(clampSpecular, baseSpecularMethod);
 			_specularCutOff = specularCutOff;

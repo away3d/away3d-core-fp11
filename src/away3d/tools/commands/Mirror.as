@@ -6,7 +6,7 @@ package away3d.tools.commands
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.math.Box;
+	import away3d.core.geom.Box;
 	import away3d.entities.Mesh;
 	import away3d.tools.utils.GeomUtil;
 	

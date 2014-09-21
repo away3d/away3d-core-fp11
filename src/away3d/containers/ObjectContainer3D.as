@@ -3,8 +3,8 @@ package away3d.containers
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
 	import away3d.core.partition.Partition3D;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
 
 	use namespace arcane;
 
@@ -64,8 +64,7 @@ package away3d.containers
 	 *
 	 * ObjectContainer3D can have its own scene partition assigned. However, when assigned to a different scene,
 	 * it will loose any partition information, since partitions are tied to a scene.
-	 */
-	public class ObjectContainer3D extends Object3D implements IAsset
+	 */ public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		private var _mouseChildren:Boolean = true;
 		private var _children:Vector.<Object3D> = new Vector.<Object3D>();
@@ -77,7 +76,7 @@ package away3d.containers
 		}
 
 
-		 /**
+		/**
 		 * Determines whether or not the children of the object are mouse, or user
 		 * input device, enabled. If an object is enabled, a user can interact with
 		 * it by using a mouse or user input device. The default is
@@ -109,10 +108,11 @@ package away3d.containers
 
 			_mouseChildren = value;
 
-			updateImplicitMouseEnabled(_parent? _parent.mouseChildren : true);
+			updateImplicitMouseEnabled(_parent ? _parent.mouseChildren : true);
 		}
 
-		function ObjectContainer3D(){
+		function ObjectContainer3D()
+		{
 
 		}
 
@@ -159,8 +159,8 @@ package away3d.containers
 			clone.partition = partition;
 			clone.name = name;
 
-			var len:Number = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				clone.addChild(_children[i].clone());
 
 			// todo: implement for all subtypes
@@ -208,8 +208,8 @@ package away3d.containers
 		 */
 		public function getChildByName(name:String):Object3D
 		{
-			var len:Number = _children.length;
-			for (var i:Number = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				if (_children[i].name == name)
 					return _children[i];
 
@@ -277,6 +277,7 @@ package away3d.containers
 		{
 			return removeChild(_children[index]);
 		}
+
 		/**
 		 * Removes all <code>child</code> DisplayObject instances from the child list
 		 * of the DisplayObjectContainer instance. The <code>parent</code> property
@@ -301,7 +302,7 @@ package away3d.containers
 			if (endIndex > _children.length)
 				throw new RangeError("endIndex is out of range of the child list");
 
-			for(var i:uint = beginIndex; i < endIndex; i++)
+			for (var i:int = beginIndex; i < endIndex; i++)
 				removeChild(_children[i]);
 		}
 
@@ -312,8 +313,8 @@ package away3d.containers
 		{
 			super.invalidateSceneTransform();
 
-			var len:uint = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				_children[i].invalidateSceneTransform();
 		}
 
@@ -324,8 +325,8 @@ package away3d.containers
 		{
 			super.updateScene(value);
 
-			var len:uint = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				_children[i].updateScene(value);
 		}
 
@@ -336,8 +337,8 @@ package away3d.containers
 		{
 			super.updateImplicitMouseEnabled(value);
 
-			var len:uint = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				_children[i].updateImplicitMouseEnabled(_mouseChildren);
 		}
 
@@ -348,8 +349,8 @@ package away3d.containers
 		{
 			super.updateImplicitVisibility(value);
 
-			var len:uint = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				_children[i].updateImplicitVisibility(_implicitVisibility);
 		}
 
@@ -360,8 +361,8 @@ package away3d.containers
 		{
 			super.updateImplicitPartition(value);
 
-			var len:uint = _children.length;
-			for (var i:uint = 0; i < len; ++i)
+			var len:int = _children.length;
+			for (var i:int = 0; i < len; ++i)
 				_children[i].updateImplicitPartition(_implicitPartition);
 		}
 

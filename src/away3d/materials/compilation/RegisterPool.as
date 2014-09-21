@@ -140,8 +140,8 @@ package away3d.materials.compilation
 			_registerComponents = RegisterPool._regCompsPool[hash];
 			
 			_usedVectorCount = new Vector.<uint>(regCount, true);
+
 			_usedSingleCount = new Vector.<Vector.<uint>>(4, true);
-			
 			_usedSingleCount[0] = new Vector.<uint>(regCount, true);
 			_usedSingleCount[1] = new Vector.<uint>(regCount, true);
 			_usedSingleCount[2] = new Vector.<uint>(regCount, true);

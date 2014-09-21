@@ -1,7 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.*;
-	import away3d.core.managers.*;
+	import away3d.managers.*;
 	import away3d.events.*;
 	import away3d.materials.compilation.*;
 	import away3d.materials.passes.*;
@@ -13,19 +13,19 @@ package away3d.materials.methods
 	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the
 	 * calculated specular reflection strength.
 	 */
-	public class CompositeSpecularMethod extends BasicSpecularMethod
+	public class CompositeSpecularMethod extends SpecularBasicMethod
 	{
-		private var _baseMethod:BasicSpecularMethod;
+		private var _baseMethod:SpecularBasicMethod;
 		
 		/**
 		 * Creates a new WrapSpecularMethod object.
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature modSpecular(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the specular strength and t.xyz will contain the half-vector or the reflection vector.
 		 * @param baseSpecularMethod The base specular method on which this method's shading is based.
 		 */
-		public function CompositeSpecularMethod(modulateMethod:Function, baseSpecularMethod:BasicSpecularMethod = null)
+		public function CompositeSpecularMethod(modulateMethod:Function, baseSpecularMethod:SpecularBasicMethod = null)
 		{
 			super();
-			_baseMethod = baseSpecularMethod || new BasicSpecularMethod();
+			_baseMethod = baseSpecularMethod || new SpecularBasicMethod();
 			_baseMethod._modulateMethod = modulateMethod;
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
@@ -49,12 +49,12 @@ package away3d.materials.methods
 		/**
 		 * The base specular method on which this method's shading is based.
 		 */
-		public function get baseMethod():BasicSpecularMethod
+		public function get baseMethod():SpecularBasicMethod
 		{
 			return _baseMethod;
 		}
 		
-		public function set baseMethod(value:BasicSpecularMethod):void
+		public function set baseMethod(value:SpecularBasicMethod):void
 		{
 			if (_baseMethod == value)
 				return;

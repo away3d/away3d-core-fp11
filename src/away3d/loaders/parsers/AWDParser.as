@@ -1,6 +1,6 @@
 package away3d.loaders.parsers
 {
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.IAsset;
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.ParserEvent;

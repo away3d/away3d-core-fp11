@@ -5,7 +5,7 @@ package away3d.events
 	import away3d.containers.View3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.IRenderable;
 	import away3d.materials.MaterialBase;
 

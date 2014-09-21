@@ -1,8 +1,9 @@
 package away3d.animators
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.passes.MaterialPassBase;
 	
 	import flash.display3D.Context3D;
 	
@@ -39,25 +40,25 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase):String
 		{
-			var len:uint = sourceRegisters.length;
+			var len:uint = shaderObject.animatableAttributes.length;
 			
-			var indexOffset0:uint = pass.numUsedVertexConstants;
+			var indexOffset0:uint = shaderObject.numUsedVertexConstants;
 			var indexOffset1:uint = indexOffset0 + 1;
 			var indexOffset2:uint = indexOffset0 + 2;
-			var indexStream:String = "va" + pass.numUsedStreams;
-			var weightStream:String = "va" + (pass.numUsedStreams + 1);
+			var indexStream:String = "va" + shaderObject.numUsedStreams;
+			var weightStream:String = "va" + (shaderObject.numUsedStreams + 1);
 			var indices:Array = [ indexStream + ".x", indexStream + ".y", indexStream + ".z", indexStream + ".w" ];
 			var weights:Array = [ weightStream + ".x", weightStream + ".y", weightStream + ".z", weightStream + ".w" ];
-			var temp1:String = findTempReg(targetRegisters);
-			var temp2:String = findTempReg(targetRegisters, temp1);
+			var temp1:String = findTempReg(shaderObject.animationTargetRegisters);
+			var temp2:String = findTempReg(shaderObject.animationTargetRegisters, temp1);
 			var dot:String = "dp4";
 			var code:String = "";
 			
 			for (var i:uint = 0; i < len; ++i) {
 				
-				var src:String = sourceRegisters[i];
+				var src:String = shaderObject.animatableAttributes[i];
 				
 				for (var j:uint = 0; j < _jointsPerVertex; ++j) {
 					code += dot + " " + temp1 + ".x, " + src + ", vc[" + indices[j] + "+" + indexOffset0 + "]		\n" +
@@ -74,7 +75,7 @@ package away3d.animators
 				}
 				// switch to dp3 once positions have been transformed, from now on, it should only be vectors instead of points
 				dot = "dp3";
-				code += "mov " + targetRegisters[i] + ", " + temp2 + "\n";
+				code += "mov " + shaderObject.animationTargetRegisters[i] + ", " + temp2 + "\n";
 			}
 			
 			return code;
@@ -83,25 +84,25 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function activate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function deactivate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
-			var streamOffset:uint = pass.numUsedStreams;
-			var context:Context3D = stage3DProxy._context3D;
-			context.setVertexBufferAt(streamOffset, null);
-			context.setVertexBufferAt(streamOffset + 1, null);
+//			var streamOffset:uint = shaderObject.numUsedStreams;
+//			var context:Context3D = stage3DProxy._context3D;
+//			context.setVertexBufferAt(streamOffset, null);
+//			context.setVertexBufferAt(streamOffset + 1, null);
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		override public function getAGALFragmentCode(shaderObject:ShaderObjectBase, shadedTarget:String):String
 		{
 			return "";
 		}
@@ -109,15 +110,15 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		override public function getAGALUVCode(shaderObject:ShaderObjectBase):String
 		{
-			return "mov " + UVTarget + "," + UVSource + "\n";
+			return "mov " + shaderObject.uvTarget + "," + shaderObject.uvSource + "\n";
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function doneAGALCode(pass:MaterialPassBase):void
+		override public function doneAGALCode(shaderObject:ShaderObjectBase):void
 		{
 		
 		}

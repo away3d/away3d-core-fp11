@@ -1,6 +1,6 @@
 package away3d.core.partition
 {
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Plane3D;
 	import away3d.entities.IEntity;
 
 	/**
@@ -9,7 +9,7 @@ package away3d.core.partition
 	public class SkyBoxNode extends EntityNode
 	{
 		private var _skyBox:IEntity;
-		
+
 		/**
 		 * Creates a new SkyBoxNode object.
 		 * @param skyBox The SkyBox to be contained in the node.

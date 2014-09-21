@@ -6,11 +6,11 @@ package away3d.animators.states
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleFollowNode;
 	import away3d.animators.ParticleAnimator;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.MathConsts;
+	import away3d.core.geom.MathConsts;
 	
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;

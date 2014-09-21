@@ -9,7 +9,7 @@ package away3d.core.partition
 	public class DirectionalLightNode extends EntityNode
 	{
 		private var _light:IEntity;
-		
+
 		/**
 		 * Creates a new LightNode object.
 		 * @param directionalLight The light to be contained in the node.

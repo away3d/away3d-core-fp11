@@ -4,8 +4,8 @@ package away3d.loaders.parsers
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AssetEvent;
 	import away3d.events.ParserEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.tools.utils.TextureUtils;

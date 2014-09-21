@@ -1,8 +1,8 @@
 package away3d.projections
 {
 	import away3d.arcane;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Matrix3DUtils;
+	import away3d.core.geom.Plane3D;
 	import away3d.events.ProjectionEvent;
 	
 	import flash.geom.Matrix3D;

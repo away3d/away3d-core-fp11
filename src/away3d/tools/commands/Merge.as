@@ -3,7 +3,7 @@ package away3d.tools.commands
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.materials.*;
 	import away3d.tools.utils.*;

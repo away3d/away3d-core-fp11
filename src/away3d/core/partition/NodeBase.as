@@ -1,15 +1,14 @@
 package away3d.core.partition
 {
-	import away3d.core.math.Plane3D;
+	import away3d.arcane;
+	import away3d.core.geom.Plane3D;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.IEntity;
 
 	import flash.geom.Vector3D;
-	
-	import away3d.arcane;
 
 	use namespace arcane;
-	
+
 	/**
 	 * The NodeBase class is an abstract base class for any type of space partition tree node. The concrete
 	 * subtype will control the creation of its child nodes, which are necessarily of the same type. The exception is
@@ -31,7 +30,7 @@ package away3d.core.partition
 
 		arcane var _numEntities:int;
 		arcane var _collectionMark:uint;
-		
+
 		/**
 		 * Creates a new NodeBase object.
 		 */
@@ -51,7 +50,7 @@ package away3d.core.partition
 
 			_explicitBoundsVisible = value;
 
-			updateImplicitBoundsVisible(_parent? _parent.boundsChildrenVisible : false);
+			updateImplicitBoundsVisible(_parent ? _parent.boundsChildrenVisible : false);
 
 		}
 
@@ -62,7 +61,7 @@ package away3d.core.partition
 
 		public function set boundsChildrenVisible(value:Boolean):void
 		{
-			if (_boundsChildrenVisible == value)	return;
+			if (_boundsChildrenVisible == value)    return;
 
 			_boundsChildrenVisible = value;
 
@@ -70,7 +69,7 @@ package away3d.core.partition
 				_childNodes[i].updateImplicitBoundsVisible(_boundsChildrenVisible);
 		}
 
-		
+
 		/**
 		 * The parent node. Null if this node is the root.
 		 */
@@ -78,7 +77,7 @@ package away3d.core.partition
 		{
 			return _parent;
 		}
-		
+
 		/**
 		 * Adds a node to the tree. By default, this is used for both static as dynamic nodes, but for some data
 		 * structures such as BSP trees, it can be more efficient to only use this for dynamic nodes, and add the
@@ -93,16 +92,15 @@ package away3d.core.partition
 			_childNodes[_numChildNodes++] = node;
 
 			node.updateImplicitBoundsVisible(this.boundsChildrenVisible);
-			
+
 			// update numEntities in the tree
 			var numEntities:int = node._numEntities;
 			node = this;
-			
+
 			do
-				node._numEntities += numEntities;
-			while ((node = node._parent) != null);
+				node._numEntities += numEntities; while ((node = node._parent) != null);
 		}
-		
+
 		/**
 		 * Removes a child node from the tree.
 		 * @param node The child node to be removed.
@@ -116,14 +114,13 @@ package away3d.core.partition
 			var index:uint = _childNodes.indexOf(node);
 			_childNodes[index] = _childNodes[--_numChildNodes];
 			_childNodes.pop();
-			
+
 			// update numEntities in the tree
 			var numEntities:int = node._numEntities;
 			node = this;
-			
+
 			do
-				node._numEntities -= numEntities;
-			while ((node = node._parent) != null);
+				node._numEntities -= numEntities; while ((node = node._parent) != null);
 		}
 
 		arcane function updateImplicitBoundsVisible(value:Boolean):void
@@ -148,7 +145,7 @@ package away3d.core.partition
 		{
 			return true;
 		}
-		
+
 		/**
 		 * Tests if the current node is intersecting with a ray.
 		 * @param rayPosition The starting position of the ray
@@ -165,7 +162,7 @@ package away3d.core.partition
 		{
 			return true;
 		}
-		
+
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.
 		 */
@@ -173,7 +170,7 @@ package away3d.core.partition
 		{
 			return this;
 		}
-		
+
 		/**
 		 * Allows the traverser to visit the current node. If the traverser's enterNode method returns true, the
 		 * traverser will be sent down the child nodes of the tree.
@@ -187,7 +184,7 @@ package away3d.core.partition
 		public function acceptTraverser(traverser:ICollector):void
 		{
 			if (_numEntities == 0 && !_implicitBoundsVisible) return;
-			
+
 			if (traverser.enterNode(this)) {
 				var i:uint;
 				while (i < _numChildNodes)
@@ -197,12 +194,12 @@ package away3d.core.partition
 					_boundsPrimitive.partitionNode.acceptTraverser(traverser);
 			}
 		}
-		
+
 		protected function createBoundsPrimitive():IEntity
 		{
 			return null;
 		}
-		
+
 		protected function get numEntities():int
 		{
 			return _numEntities;
@@ -215,7 +212,7 @@ package away3d.core.partition
 				_boundsPrimitive = null;
 			}
 
-			if (_implicitBoundsVisible)	{
+			if (_implicitBoundsVisible) {
 				_boundsPrimitive = createBoundsPrimitive();
 			}
 		}
@@ -226,8 +223,7 @@ package away3d.core.partition
 			var node:NodeBase = this;
 
 			do
-				node._numEntities += diff;
-			while ((node = node._parent) != null);
+				node._numEntities += diff; while ((node = node._parent) != null);
 		}
 	}
 }

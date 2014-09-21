@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
+	import away3d.core.library.NamedAssetBase;
 
 	/**
 	 * Provides an abstract base class for nodes in an animation blend tree.

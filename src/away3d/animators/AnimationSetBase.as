@@ -1,13 +1,14 @@
 package away3d.animators
 {
 	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
 	import away3d.errors.AnimationSetError;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
+	import away3d.core.library.NamedAssetBase;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.passes.MaterialPassBase;
 
 	import flash.utils.Dictionary;
 
@@ -79,7 +80,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		public function getAGALVertexCode(shaderObject:ShaderObjectBase):String
 		{
 			throw new AbstractMethodError();
 		}
@@ -87,7 +88,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		public function activate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
 			throw new AbstractMethodError();
 		}
@@ -95,7 +96,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		public function deactivate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
 			throw new AbstractMethodError();
 		}
@@ -103,7 +104,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		public function getAGALFragmentCode(shaderObject:ShaderObjectBase, shadedTarget:String):String
 		{
 			throw new AbstractMethodError();
 		}
@@ -111,7 +112,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		public function getAGALUVCode(shaderObject:ShaderObjectBase):String
 		{
 			throw new AbstractMethodError();
 		}
@@ -119,7 +120,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function doneAGALCode(pass:MaterialPassBase):void
+		public function doneAGALCode(shaderObject:ShaderObjectBase):void
 		{
 			throw new AbstractMethodError();
 		}

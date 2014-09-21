@@ -1,14 +1,14 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
-	import away3d.core.math.Plane3D;
+	import away3d.core.geom.Plane3D;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.IEntity;
 
 	import flash.geom.Vector3D;
-	
+
 	use namespace arcane;
-	
+
 	/**
 	 * The EntityNode class provides an abstract base class for leaf nodes in a partition tree, containing
 	 * entities to be fed to the EntityCollector traverser.
@@ -20,13 +20,13 @@ package away3d.core.partition
 	public class EntityNode extends NodeBase
 	{
 		private var _entity:IEntity;
-		
+
 		/**
 		 * The link to the next object in the list to be updated
 		 * @private
 		 */
 		arcane var _updateQueueNext:EntityNode;
-		
+
 		/**
 		 * Creates a new EntityNode object.
 		 * @param entity The Entity to be contained in this leaf node.
@@ -37,7 +37,7 @@ package away3d.core.partition
 			_entity = entity;
 			_numEntities = 1;
 		}
-		
+
 		/**
 		 * The entity contained in this leaf node.
 		 */
@@ -45,7 +45,7 @@ package away3d.core.partition
 		{
 			return _entity;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -53,7 +53,7 @@ package away3d.core.partition
 		{
 			traverser.applyEntity(_entity);
 		}
-		
+
 		/**
 		 * Detaches the node from its parent.
 		 */
@@ -61,10 +61,10 @@ package away3d.core.partition
 		{
 			if (_parent)
 				_parent.removeNode(this);
-			
+
 			_parent = null;
 		}
-		
+
 		override public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
 		{
 			if (!_entity.isVisible())
@@ -72,7 +72,7 @@ package away3d.core.partition
 
 			return _entity.worldBounds.isInFrustum(planes, numPlanes);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -80,11 +80,12 @@ package away3d.core.partition
 		{
 			if (!_entity.isVisible)
 				return false;
-			
+
 			return _entity.isIntersectingRay(rayPosition, rayDirection);
 		}
 
-		override protected function createBoundsPrimitive():IEntity {
+		override protected function createBoundsPrimitive():IEntity
+		{
 			return _entity.bounds.boundingEntity;
 		}
 	}

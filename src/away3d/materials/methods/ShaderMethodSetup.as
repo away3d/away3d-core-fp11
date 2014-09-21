@@ -2,8 +2,9 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.events.ShadingMethodEvent;
-	
-	import flash.events.EventDispatcher;
+    import away3d.materials.compilation.MethodVO;
+
+    import flash.events.EventDispatcher;
 	
 	use namespace arcane;
 
@@ -12,17 +13,17 @@ package away3d.materials.methods
 	 */
 	public class ShaderMethodSetup extends EventDispatcher
 	{
-		arcane var _colorTransformMethod:ColorTransformMethod;
+		arcane var _colorTransformMethod:EffectColorTransformMethod;
 		arcane var _colorTransformMethodVO:MethodVO;
-		arcane var _normalMethod:BasicNormalMethod;
+		arcane var _normalMethod:NormalBasicMethod;
 		arcane var _normalMethodVO:MethodVO;
-		arcane var _ambientMethod:BasicAmbientMethod;
+		arcane var _ambientMethod:AmbientBasicMethod;
 		arcane var _ambientMethodVO:MethodVO;
 		arcane var _shadowMethod:ShadowMapMethodBase;
 		arcane var _shadowMethodVO:MethodVO;
-		arcane var _diffuseMethod:BasicDiffuseMethod;
+		arcane var _diffuseMethod:DiffuseBasicMethod;
 		arcane var _diffuseMethodVO:MethodVO;
-		arcane var _specularMethod:BasicSpecularMethod;
+		arcane var _specularMethod:SpecularBasicMethod;
 		arcane var _specularMethodVO:MethodVO;
 		arcane var _methods:Vector.<MethodVOSet>;
 
@@ -32,10 +33,10 @@ package away3d.materials.methods
 		public function ShaderMethodSetup()
 		{
 			_methods = new Vector.<MethodVOSet>();
-			_normalMethod = new BasicNormalMethod();
-			_ambientMethod = new BasicAmbientMethod();
-			_diffuseMethod = new BasicDiffuseMethod();
-			_specularMethod = new BasicSpecularMethod();
+			_normalMethod = new NormalBasicMethod();
+			_ambientMethod = new AmbientBasicMethod();
+			_diffuseMethod = new DiffuseBasicMethod();
+			_specularMethod = new SpecularBasicMethod();
 			_normalMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_diffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_specularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
@@ -65,12 +66,12 @@ package away3d.materials.methods
 		/**
 		 *  The method used to generate the per-pixel normals.
 		 */
-		public function get normalMethod():BasicNormalMethod
+		public function get normalMethod():NormalBasicMethod
 		{
 			return _normalMethod;
 		}
 		
-		public function set normalMethod(value:BasicNormalMethod):void
+		public function set normalMethod(value:NormalBasicMethod):void
 		{
 			if (_normalMethod)
 				_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
@@ -91,12 +92,12 @@ package away3d.materials.methods
 		/**
 		 * The method that provides the ambient lighting contribution.
 		 */
-		public function get ambientMethod():BasicAmbientMethod
+		public function get ambientMethod():AmbientBasicMethod
 		{
 			return _ambientMethod;
 		}
 		
-		public function set ambientMethod(value:BasicAmbientMethod):void
+		public function set ambientMethod(value:AmbientBasicMethod):void
 		{
 			if (_ambientMethod)
 				_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
@@ -136,12 +137,12 @@ package away3d.materials.methods
 		/**
 		 * The method that provides the diffuse lighting contribution.
 		 */
-		 public function get diffuseMethod():BasicDiffuseMethod
+		 public function get diffuseMethod():DiffuseBasicMethod
 		{
 			return _diffuseMethod;
 		}
 		
-		public function set diffuseMethod(value:BasicDiffuseMethod):void
+		public function set diffuseMethod(value:DiffuseBasicMethod):void
 		{
 			if (_diffuseMethod)
 				_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
@@ -162,12 +163,12 @@ package away3d.materials.methods
 		/**
 		 * The method to perform specular shading.
 		 */
-		public function get specularMethod():BasicSpecularMethod
+		public function get specularMethod():SpecularBasicMethod
 		{
 			return _specularMethod;
 		}
 		
-		public function set specularMethod(value:BasicSpecularMethod):void
+		public function set specularMethod(value:SpecularBasicMethod):void
 		{
 			if (_specularMethod) {
 				_specularMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
@@ -188,12 +189,12 @@ package away3d.materials.methods
 		/**
 		 * @private
 		 */
-		arcane function get colorTransformMethod():ColorTransformMethod
+		arcane function get colorTransformMethod():EffectColorTransformMethod
 		{
 			return _colorTransformMethod;
 		}
 		
-		arcane function set colorTransformMethod(value:ColorTransformMethod):void
+		arcane function set colorTransformMethod(value:EffectColorTransformMethod):void
 		{
 			if (_colorTransformMethod == value)
 				return;

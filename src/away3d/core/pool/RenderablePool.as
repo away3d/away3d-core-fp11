@@ -1,5 +1,8 @@
-package away3d.core.pool {
+package away3d.core.pool
+{
 	import away3d.core.base.IMaterialOwner;
+
+	import flash.utils.Dictionary;
 
 	public class RenderablePool
 	{
@@ -27,7 +30,7 @@ package away3d.core.pool {
 		public function getItem(materialOwner:IMaterialOwner):IRenderable
 		{
 			var renderable:IRenderable = _pool[materialOwner.id];
-			if(!renderable) {
+			if (!renderable) {
 				renderable = materialOwner.addRenderable(new _renderableClass(this, materialOwner));
 				_pool[materialOwner.id] = renderable;
 			}

@@ -4,10 +4,9 @@ package away3d.prefabs
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
 
 	use namespace arcane;
-	
+
 	/**
 	 * A Plane primitive mesh.
 	 */
@@ -19,7 +18,7 @@ package away3d.prefabs
 		private var _width:Number;
 		private var _height:Number;
 		private var _doubleSided:Boolean;
-		
+
 		/**
 		 * Creates a new Plane object.
 		 * @param width The width of the plane.
@@ -32,7 +31,7 @@ package away3d.prefabs
 		public function PrimitivePlanePrefab(width:Number = 100, height:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, yUp:Boolean = true, doubleSided:Boolean = false)
 		{
 			super();
-			
+
 			_segmentsW = segmentsW;
 			_segmentsH = segmentsH;
 			_yUp = yUp;
@@ -40,7 +39,7 @@ package away3d.prefabs
 			_height = height;
 			_doubleSided = doubleSided;
 		}
-		
+
 		/**
 		 * The Number of segments that make up the plane along the X-axis. Defaults to 1.
 		 */
@@ -48,14 +47,14 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set segmentsW(value:uint):void
 		{
 			_segmentsW = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * The Number of segments that make up the plane along the Y or Z-axis, depending on whether yUp is true or
 		 * false, respectively. Defaults to 1.
@@ -64,14 +63,14 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set segmentsH(value:uint):void
 		{
 			_segmentsH = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 *  Defines whether the normal vector of the plane should point along the Y-axis (true) or Z-axis (false). Defaults to true.
 		 */
@@ -79,13 +78,13 @@ package away3d.prefabs
 		{
 			return _yUp;
 		}
-		
+
 		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines whether the plane will be visible from both sides, with correct vertex normals (as opposed to bothSides on Material). Defaults to false.
 		 */
@@ -93,13 +92,13 @@ package away3d.prefabs
 		{
 			return _doubleSided;
 		}
-		
+
 		public function set doubleSided(value:Boolean):void
 		{
 			_doubleSided = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The width of the plane.
 		 */
@@ -107,13 +106,13 @@ package away3d.prefabs
 		{
 			return _width;
 		}
-		
+
 		public function set width(value:Number):void
 		{
 			_width = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The height of the plane.
 		 */
@@ -121,13 +120,13 @@ package away3d.prefabs
 		{
 			return _height;
 		}
-		
+
 		public function set height(value:Number):void
 		{
 			_height = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -262,67 +261,68 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == GeometryType.LINE) {
-				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+			} else
+				if (geometryType == GeometryType.LINE) {
+					var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
-				var numSegments:Number = (_segmentsH + 1) + tw;
-				var startPositions:Vector.<Number>;
-				var endPositions:Vector.<Number>;
-				var thickness:Vector.<Number>;
+					var numSegments:Number = (_segmentsH + 1) + tw;
+					var startPositions:Vector.<Number>;
+					var endPositions:Vector.<Number>;
+					var thickness:Vector.<Number>;
 
-				var hw:Number = _width / 2;
-				var hh:Number = _height / 2;
+					var hw:Number = _width / 2;
+					var hh:Number = _height / 2;
 
 
-				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
-					startPositions = lineGeometry.startPositions;
-					endPositions = lineGeometry.endPositions;
-					thickness = lineGeometry.thickness;
-				} else {
-					startPositions = new Vector.<Number>(numSegments * 3);
-					endPositions = new Vector.<Number>(numSegments * 3);
-					thickness = new Vector.<Number>(numSegments);
+					if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+						startPositions = lineGeometry.startPositions;
+						endPositions = lineGeometry.endPositions;
+						thickness = lineGeometry.thickness;
+					} else {
+						startPositions = new Vector.<Number>(numSegments * 3);
+						endPositions = new Vector.<Number>(numSegments * 3);
+						thickness = new Vector.<Number>(numSegments);
+					}
+
+					fidx = 0;
+
+					vidx = 0;
+
+					for (yi = 0; yi <= _segmentsH; ++yi) {
+						startPositions[vidx] = -hw;
+						startPositions[vidx + 1] = 0;
+						startPositions[vidx + 2] = yi * _height - hh;
+
+						endPositions[vidx] = hw;
+						endPositions[vidx + 1] = 0;
+						endPositions[vidx + 2] = yi * _height - hh;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+
+					for (xi = 0; xi <= _segmentsW; ++xi) {
+						startPositions[vidx] = xi * _width - hw;
+						startPositions[vidx + 1] = 0;
+						startPositions[vidx + 2] = -hh;
+
+						endPositions[vidx] = xi * _width - hw;
+						endPositions[vidx + 1] = 0;
+						endPositions[vidx + 2] = hh;
+
+						thickness[fidx++] = 1;
+
+						vidx += 3;
+					}
+
+					// build real data from raw data
+					lineGeometry.updatePositions(startPositions, endPositions);
+					lineGeometry.updateThickness(thickness);
 				}
-
-				fidx = 0;
-
-				vidx = 0;
-
-				for (yi = 0; yi <= _segmentsH; ++yi) {
-					startPositions[vidx] = -hw;
-					startPositions[vidx + 1] = 0;
-					startPositions[vidx + 2] = yi * _height - hh;
-
-					endPositions[vidx] = hw;
-					endPositions[vidx + 1] = 0;
-					endPositions[vidx + 2] = yi * _height - hh;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-
-				for (xi = 0; xi <= _segmentsW; ++xi) {
-					startPositions[vidx] = xi * _width - hw;
-					startPositions[vidx + 1] = 0;
-					startPositions[vidx + 2] = -hh;
-
-					endPositions[vidx] = xi * _width - hw;
-					endPositions[vidx + 1] = 0;
-					endPositions[vidx + 2] = hh;
-
-					thickness[fidx++] = 1;
-
-					vidx += 3;
-				}
-
-				// build real data from raw data
-				lineGeometry.updatePositions(startPositions, endPositions);
-				lineGeometry.updateThickness(thickness);
-			}
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -367,9 +367,10 @@ package away3d.prefabs
 				triangleGeometry.updateUVs(uvs);
 
 
-			} else if (geometryType == GeometryType.LINE) {
-				//nothing to do here
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//nothing to do here
+				}
 		}
 	}
 }

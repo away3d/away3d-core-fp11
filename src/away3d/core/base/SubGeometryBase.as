@@ -1,27 +1,32 @@
-package away3d.core.base {
+package away3d.core.base
+{
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.SubGeometryEvent;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.core.library.NamedAssetBase;
 
 	import flash.geom.Matrix3D;
 
 	use namespace  arcane;
 
-	public class SubGeometryBase extends NamedAssetBase {
+	public class SubGeometryBase extends NamedAssetBase
+	{
 		public static const VERTEX_DATA:String = "vertices";
 
 		protected var _strideOffsetDirty:Boolean = true;
+
 		protected var _indices:Vector.<uint>;
 		protected var _vertices:Vector.<Number>;
+
 		protected var _numVertices:Number;
+
 		protected var _concatenateArrays:Boolean = true;
 		protected var _subMeshClass:Class;
 		protected var _stride:Object = {};
 		protected var _offset:Object = {};
 
-		private var _numIndices:Number;
-		private var _numTriangles:Number;
+		private var _numIndices:int;
+		private var _numTriangles:int;
 		private var _indicesUpdated:SubGeometryEvent;
 
 		/**
@@ -31,22 +36,26 @@ package away3d.core.base {
 		 */
 		public var parentGeometry:Geometry;
 
-		protected function updateStrideOffset():void {
+		protected function updateStrideOffset():void
+		{
 			throw new AbstractMethodError();
 		}
 
-		public function get subMeshClass():Class {
+		public function get subMeshClass():Class
+		{
 			return _subMeshClass;
 		}
 
 		/**
 		 *
 		 */
-		public function get concatenateArrays():Boolean {
+		public function get concatenateArrays():Boolean
+		{
 			return _concatenateArrays;
 		}
 
-		public function set concatenateArrays(value:Boolean):void {
+		public function set concatenateArrays(value:Boolean):void
+		{
 			if (_concatenateArrays == value)
 				return;
 
@@ -61,14 +70,16 @@ package away3d.core.base {
 		/**
 		 * The raw index data that define the faces.
 		 */
-		public function get indices():Vector.<uint> {
+		public function get indices():Vector.<uint>
+		{
 			return _indices;
 		}
 
 		/**
 		 *
 		 */
-		public function get vertices():Vector.<Number> {
+		public function get vertices():Vector.<Number>
+		{
 			updateVertices();
 
 			return _vertices;
@@ -77,25 +88,29 @@ package away3d.core.base {
 		/**
 		 * The total amount of triangles in the TriangleSubGeometry.
 		 */
-		public function get numTriangles():Number {
+		public function get numTriangles():Number
+		{
 			return _numTriangles;
 		}
 
-		public function get numVertices():Number {
+		public function get numVertices():Number
+		{
 			return _numVertices;
 		}
 
 		/**
 		 *
 		 */
-		public function SubGeometryBase(concatenatedArrays:Boolean):void {
+		public function SubGeometryBase(concatenatedArrays:Boolean):void
+		{
 			_concatenateArrays = concatenatedArrays;
 		}
 
 		/**
 		 *
 		 */
-		public function getStride(dataType:String):uint {
+		public function getStride(dataType:String):uint
+		{
 			if (_strideOffsetDirty)
 				updateStrideOffset();
 
@@ -103,25 +118,27 @@ package away3d.core.base {
 		}
 
 
-
 		/**
 		 *
 		 */
-		public function getOffset(dataType:String):uint {
+		public function getOffset(dataType:String):uint
+		{
 			if (_strideOffsetDirty)
 				updateStrideOffset();
 
 			return _offset[dataType];
 		}
 
-		public function updateVertices():void {
+		public function updateVertices():void
+		{
 			throw new AbstractMethodError();
 		}
 
 		/**
 		 *
 		 */
-		override public function dispose():void {
+		override public function dispose():void
+		{
 			_indices = null;
 			_vertices = null;
 		}
@@ -131,7 +148,8 @@ package away3d.core.base {
 		 *
 		 * @param indices The face indices to upload.
 		 */
-		public function updateIndices(indices:Vector.<uint>):void {
+		public function updateIndices(indices:Vector.<uint>):void
+		{
 			_indices = indices;
 			_numIndices = indices.length;
 
@@ -143,7 +161,8 @@ package away3d.core.base {
 		/**
 		 * @protected
 		 */
-		protected function invalidateBounds():void {
+		protected function invalidateBounds():void
+		{
 			if (parentGeometry)
 				parentGeometry.invalidateBounds(this);
 		}
@@ -153,11 +172,13 @@ package away3d.core.base {
 		 * Clones the current object
 		 * @return An exact duplicate of the current object.
 		 */
-		public function clone():SubGeometryBase {
+		public function clone():SubGeometryBase
+		{
 			throw new AbstractMethodError();
 		}
 
-		public function applyTransformation(transform:Matrix3D):void {
+		public function applyTransformation(transform:Matrix3D):void
+		{
 
 		}
 
@@ -165,26 +186,31 @@ package away3d.core.base {
 		 * Scales the geometry.
 		 * @param scale The amount by which to scale.
 		 */
-		public function scale(scale:Number):void {
+		public function scale(scale:Number):void
+		{
 
 		}
 
-		public function scaleUV(scaleU:Number = 1, scaleV:Number = 1):void {
+		public function scaleUV(scaleU:Number = 1, scaleV:Number = 1):void
+		{
 
 		}
 
-		public function getBoundingPositions():Vector.<Number> {
+		public function getBoundingPositions():Vector.<Number>
+		{
 			throw new AbstractMethodError();
 		}
 
-		private function notifyIndicesUpdate():void {
+		private function notifyIndicesUpdate():void
+		{
 			if (!_indicesUpdated)
 				_indicesUpdated = new SubGeometryEvent(SubGeometryEvent.INDICES_UPDATED);
 
 			dispatchEvent(_indicesUpdated);
 		}
 
-		protected function notifyVerticesUpdate():void {
+		protected function notifyVerticesUpdate():void
+		{
 			throw new AbstractMethodError();
 		}
 	}

@@ -8,10 +8,11 @@ package away3d.animators
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
-	import away3d.core.managers.*;
-	import away3d.core.math.MathConsts;
+	import away3d.managers.*;
+	import away3d.core.geom.MathConsts;
 	import away3d.materials.*;
-	import away3d.materials.passes.*;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.passes.*;
 	
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix;
@@ -114,7 +115,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		override public function setRenderState(shaderObject:ShaderObjectBase, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, vertexConstantOffset:int, vertexStreamOffset:int):void
 		{
 			var material:MaterialBase = (renderable as TriangleSubMeshRenderable).material;
 			if (!material)
@@ -198,7 +199,7 @@ package away3d.animators
 		 * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
 		 * Needs to be called if gpu code is potentially required.
 		 */
-		override public function testGPUCompatibility(pass:MaterialPassBase):void
+		override public function testGPUCompatibility(shaderObject:ShaderObjectBase):void
 		{
 		}
 		

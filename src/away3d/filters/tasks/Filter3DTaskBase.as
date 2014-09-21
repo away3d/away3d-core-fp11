@@ -6,7 +6,7 @@ package away3d.filters.tasks
 
 	import com.adobe.utils.*;
 	
-	import away3d.core.managers.*;
+	import away3d.managers.*;
 	import away3d.debug.*;
 	import away3d.errors.*;
 	

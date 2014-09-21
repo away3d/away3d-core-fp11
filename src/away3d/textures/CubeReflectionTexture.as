@@ -5,7 +5,7 @@ package away3d.textures
 	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
@@ -48,7 +48,7 @@ package away3d.textures
 			initMockTexture();
 			initCameras();
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -56,7 +56,7 @@ package away3d.textures
 		{
 			return _isRendering? _mockTexture.getTextureForStage3D(stage3DProxy) : super.getTextureForStage3D(stage3DProxy);
 		}
-		
+
 		/**
 		 * The origin where the environment map will be rendered. This is usually in the centre of the reflective object.
 		 */

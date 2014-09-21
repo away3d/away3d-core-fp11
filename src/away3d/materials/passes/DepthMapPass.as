@@ -1,190 +1,135 @@
-﻿package away3d.materials.passes
-{
-	import away3d.arcane;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.pool.RenderableBase;
-	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.textures.Texture2DBase;
+﻿package away3d.materials.passes {
+    import away3d.arcane;
+    import away3d.core.pool.MaterialPassData;
+    import away3d.core.pool.RenderableBase;
+    import away3d.entities.Camera3D;
+    import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.utils.ShaderCompilerHelper;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DTextureFormat;
-	import flash.geom.Matrix3D;
+    import flash.display3D.Context3DMipFilter;
+    import flash.display3D.Context3DTextureFilter;
+    import flash.display3D.Context3DWrapMode;
+    import flash.geom.Matrix3D;
 
-	use namespace arcane;
+    use namespace arcane;
 
-	/**
-	 * DepthMapPass is a pass that writes depth values to a depth map as a 32-bit value exploded over the 4 texture channels.
-	 * This is used to render shadow maps, depth maps, etc.
-	 */
-	public class DepthMapPass extends MaterialPassBase
-	{
-		private var _data:Vector.<Number>;
-		private var _alphaThreshold:Number = 0;
-		private var _alphaMask:Texture2DBase;
-		private var _alphaMaskChannel:String = "w";
+    /**
+     * DepthMapPass is a pass that writes depth values to a depth map as a 32-bit value exploded over the 4 texture channels.
+     * This is used to render shadow maps, depth maps, etc.
+     */
+    public class DepthMapPass extends MaterialPassBase {
+        private var _fragmentConstantsIndex:int;
+        private var _texturesIndex:int;
 
-		/**
-		 * Creates a new DepthMapPass object.
-		 */
-		public function DepthMapPass()
-		{
-			super();
-			_data = Vector.<Number>([1.0, 255.0, 65025.0, 16581375.0,
-				1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0,
-				0.0, 0.0, 0.0, 1]);
-		}
+        /**
+         * Creates a new DepthMapPass object.
+         *
+         * @param material The material to which this pass belongs.
+         */
+        public function DepthMapPass()
+        {
+        }
 
-		/**
-		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
-		 * invisible or entirely opaque, often used with textures for foliage, etc.
-		 * Recommended values are 0 to disable alpha, or 0.5 to create smooth edges. Default value is 0 (disabled).
-		 */
-		public function get alphaThreshold():Number
-		{
-			return _alphaThreshold;
-		}
+        /**
+         * Initializes the unchanging constant data for this material.
+         */
+        override arcane function initConstantData(shaderObject:ShaderObjectBase):void
+        {
+            super.initConstantData(shaderObject);
 
-		public function set alphaThreshold(value:Number):void
-		{
-			if (value < 0)
-				value = 0;
-			else if (value > 1)
-				value = 1;
-			if (value == _alphaThreshold)
-				return;
+            var index:int = _fragmentConstantsIndex;
+            var data:Vector.<Number> = shaderObject.fragmentConstantData;
+            data[index] = 1.0;
+            data[index + 1] = 255.0;
+            data[index + 2] = 65025.0;
+            data[index + 3] = 16581375.0;
+            data[index + 4] = 1.0 / 255.0;
+            data[index + 5] = 1.0 / 255.0;
+            data[index + 6] = 1.0 / 255.0;
+            data[index + 7] = 0.0;
+        }
 
-			if (value == 0 || _alphaThreshold == 0)
-				invalidateShaderProgram();
+        override arcane function includeDependencies(shaderObject:ShaderObjectBase):void
+        {
+            shaderObject.projectionDependencies++;
 
-			_alphaThreshold = value;
-			_data[8] = _alphaThreshold;
-		}
+            if (shaderObject.alphaThreshold > 0)
+                shaderObject.uvDependencies++;
+        }
 
-		/**
-		 * A texture providing alpha data to be able to prevent semi-transparent pixels to write to the alpha mask.
-		 * Usually the diffuse texture when alphaThreshold is used.
-		 */
-		public function get alphaMask():Texture2DBase
-		{
-			return _alphaMask;
-		}
+        /**
+         * @inheritDoc
+         */
+        override arcane function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        {
+            var code:String = "";
+            var targetReg:ShaderRegisterElement = sharedRegisters.shadedTarget;
+            var diffuseInputReg:ShaderRegisterElement = registerCache.getFreeTextureReg();
+            var dataReg1:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
+            var dataReg2:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
 
-		public function set alphaMask(value:Texture2DBase):void
-		{
-			_alphaMask = value;
-		}
+            _fragmentConstantsIndex = dataReg1.index * 4;
 
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function getVertexCode():String
-		{
-			var code:String;
-			// project
-			code = "m44 vt1, vt0, vc0		\n" +
-				"mov op, vt1	\n";
+            var temp1:ShaderRegisterElement = registerCache.getFreeFragmentVectorTemp();
+            registerCache.addFragmentTempUsages(temp1, 1);
+            var temp2:ShaderRegisterElement = registerCache.getFreeFragmentVectorTemp();
+            registerCache.addFragmentTempUsages(temp2, 1);
 
-			if (_alphaThreshold > 0) {
-				_numUsedTextures = 1;
-				_numUsedStreams = 2;
-				code += "mov v0, vt1\n" +
-					"mov v1, va1\n";
+            code += "div " + temp1 + ", " + sharedRegisters.projectionFragment + ", " + sharedRegisters.projectionFragment + ".w\n" + //"sub ft2.z, fc0.x, ft2.z\n" +    //invert
+                    "mul " + temp1 + ", " + dataReg1 + ", " + temp1 + ".z\n" +
+                    "frc " + temp1 + ", " + temp1 + "\n" +
+                    "mul " + temp2 + ", " + temp1 + ".yzww, " + dataReg2 + "\n";
 
-			} else {
-				_numUsedTextures = 0;
-				_numUsedStreams = 1;
-				code += "mov v0, vt1\n";
-			}
+            //codeF += "mov ft1.w, fc1.w	\n" +
+            //    "mov ft0.w, fc0.x	\n";
 
-			return code;
-		}
+            if (shaderObject.alphaThreshold > 0) {
+                diffuseInputReg = registerCache.getFreeTextureReg();
 
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function getFragmentCode(code:String):String
-		{
-			var codeF:String =
-				"div ft2, v0, v0.w		\n" +
-				"mul ft0, fc0, ft2.z	\n" +
-				"frc ft0, ft0			\n" +
-				"mul ft1, ft0.yzww, fc1	\n";
+                _texturesIndex = diffuseInputReg.index;
 
-			if (_alphaThreshold > 0) {
-				var wrap:String = _repeat ? "wrap" : "clamp";
-				var filter:String, format:String;
-				var enableMipMaps:Boolean = _mipmap && _alphaMask.hasMipMaps;
+                var albedo:ShaderRegisterElement = registerCache.getFreeFragmentVectorTemp();
+                code += ShaderCompilerHelper.getTex2DSampleCode(albedo, sharedRegisters, diffuseInputReg, shaderObject.texture, shaderObject.useSmoothTextures, shaderObject.repeatTextures, shaderObject.useMipmapping);
 
-				if (_smooth)
-					filter = enableMipMaps ? "linear,miplinear" : "linear";
-				else
-					filter = enableMipMaps ? "nearest,mipnearest" : "nearest";
+                var cutOffReg:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
 
-				switch (_alphaMask.format) {
-					case Context3DTextureFormat.COMPRESSED:
-						format = "dxt1,";
-						break;
-					case "compressedAlpha":
-						format = "dxt5,";
-						break;
-					default:
-						format = "";
-				}
-				codeF += "tex ft3, v1, fs0 <2d," + filter + "," + format + wrap + ">\n" +
-					"sub ft3."+_alphaMaskChannel+", ft3."+_alphaMaskChannel+", fc2.x\n" +
-					"kil ft3."+_alphaMaskChannel+"\n";
-			}
+                code += "sub " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n" +
+                        "kil " + albedo + ".w\n";
+            }
 
-			codeF += "sub oc, ft0, ft1		\n";
+            code += "sub " + targetReg + ", " + temp1 + ", " + temp2 + "\n";
 
-			return codeF;
-		}
+            registerCache.removeFragmentTempUsage(temp1);
+            registerCache.removeFragmentTempUsage(temp2);
 
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
-		{
-			if (_alphaThreshold > 0)
-				stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
+            return code;
+        }
 
-			var context:Context3D = stage3DProxy._context3D;
-			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			matrix.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
-			matrix.append(viewProjection);
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
+        arcane function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D)
+        {
+            //this.setRenderState(pass, renderable, stage, camera, viewProjection);
+        }
 
-			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA),  renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
-			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
-		}
+        /**
+         * @inheritDoc
+         */
+        arcane function activate(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void
+        {
+            super.activate(pass, stage, camera);
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void
-		{
-			var context:Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
 
-			if (_alphaThreshold > 0) {
-				context.setTextureAt(0, _alphaMask.getTextureForStage3D(stage3DProxy));
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 3);
-			} else
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 2);
-		}
+            var shaderObject:ShaderObjectBase = pass.shaderObject;
 
-		public function get alphaMaskChannel():String {
-			return _alphaMaskChannel;
-		}
+            if (shaderObject.alphaThreshold > 0) {
+                stage.context3D.setSamplerStateAt(_texturesIndex, shaderObject.repeatTextures ? Context3DWrapMode.REPEAT : Context3DWrapMode.CLAMP, shaderObject.useSmoothTextures ? Context3DTextureFilter.LINEAR : Context3DTextureFilter.NEAREST, shaderObject.useMipmapping ? Context3DMipFilter.MIPLINEAR : Context3DMipFilter.MIPNONE);
+                stage.activateTexture(_texturesIndex, shaderObject.texture);
 
-		public function set alphaMaskChannel(value:String):void {
-			if(_alphaMaskChannel == value) return;
-			_alphaMaskChannel = value;
-			invalidateShaderProgram();
-		}
-	}
+                shaderObject.fragmentConstantData[_fragmentConstantsIndex + 8] = pass.shaderObject.alphaThreshold;
+            }
+        }
+    }
 }

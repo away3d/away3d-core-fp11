@@ -4,7 +4,7 @@ package away3d.entities
 	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.events.ProjectionEvent;
-	import away3d.library.assets.AssetType;
+	import away3d.core.library.AssetType;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Matrix3D;

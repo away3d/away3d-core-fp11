@@ -1,15 +1,18 @@
-package away3d.core.base {
+package away3d.core.base
+{
 	import away3d.animators.IAnimator;
-	import away3d.core.math.UVTransform;
+	import away3d.core.geom.UVTransform;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.render.IRenderer;
-	import away3d.library.assets.IAsset;
-	import away3d.materials.IMaterial;
+	import away3d.core.library.IAsset;
+	import away3d.materials.MaterialBase;
 
 	/**
 	 * IMaterialOwner provides an interface for objects that can use materials.
+	 * @interface away3d.core.base.IMaterialOwner
 	 */
-	public interface IMaterialOwner extends IAsset {
+	public interface IMaterialOwner extends IAsset
+	{
 		/**
 		 * The animation used by the material to assemble the vertex code.
 		 */
@@ -22,9 +25,9 @@ package away3d.core.base {
 		/**
 		 * The material with which to render the object.
 		 */
-		function get material():IMaterial;
+		function get material():MaterialBase;
 
-		function set material(value:IMaterial):void;
+		function set material(value:MaterialBase):void;
 
 		function addRenderable(renderable:IRenderable):IRenderable;
 

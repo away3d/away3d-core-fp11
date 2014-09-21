@@ -1,6 +1,6 @@
 package away3d.tools.serialize
 {
-	import away3d.core.math.Quaternion;
+	import away3d.core.geom.Quaternion;
 	import away3d.errors.AbstractMethodError;
 	
 	import flash.geom.Vector3D;

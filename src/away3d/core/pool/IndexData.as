@@ -1,5 +1,5 @@
 package away3d.core.pool {
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 
 	public class IndexData {
 		private static const LIMIT_VERTS:uint = 0xffff;

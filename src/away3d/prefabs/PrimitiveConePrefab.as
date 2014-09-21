@@ -1,13 +1,11 @@
 package away3d.prefabs
 {
-	import away3d.library.assets.IAsset;
-
 	/**
 	 * A UV Cone primitive mesh.
 	 */
 	public class PrimitiveConePrefab extends PrimitiveCylinderPrefab
 	{
-		
+
 		/**
 		 * The radius of the bottom end of the cone.
 		 */
@@ -15,13 +13,13 @@ package away3d.prefabs
 		{
 			return _bottomRadius;
 		}
-		
+
 		public function set radius(value:Number):void
 		{
 			_bottomRadius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Creates a new Cone object.
 		 * @param radius The radius of the bottom end of the cone

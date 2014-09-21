@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 	
@@ -38,7 +39,7 @@ package away3d.materials.methods
 		 * @param useSecondaryUV Indicates whether the secondary UV set should be used to map the light map.
 		 * @param baseMethod The diffuse method used to calculate the regular light-based lighting.
 		 */
-		public function LightMapDiffuseMethod(lightMap:Texture2DBase, blendMode:String = "multiply", useSecondaryUV:Boolean = false, baseMethod:BasicDiffuseMethod = null)
+		public function LightMapDiffuseMethod(lightMap:Texture2DBase, blendMode:String = "multiply", useSecondaryUV:Boolean = false, baseMethod:DiffuseBasicMethod = null)
 		{
 			super(null, baseMethod);
 			_useSecondaryUV = useSecondaryUV;

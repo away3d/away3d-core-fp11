@@ -1,6 +1,6 @@
 package away3d.events
 {
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.IAsset;
 	
 	import flash.events.Event;
 	

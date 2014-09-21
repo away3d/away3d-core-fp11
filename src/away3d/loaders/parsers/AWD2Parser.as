@@ -39,16 +39,16 @@ package away3d.loaders.parsers
 	import away3d.core.base.Geometry;
 	import away3d.entities.Mesh;
 	import away3d.entities.TextureProjector;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
-	import away3d.lights.shadowmaps.CascadeShadowMapper;
-	import away3d.lights.shadowmaps.CubeMapShadowMapper;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
-	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
+	import away3d.entities.DirectionalLight;
+	import away3d.core.base.LightBase;
+	import away3d.entities.PointLight;
+	import away3d.materials.shadowmappers.CascadeShadowMapper;
+	import away3d.materials.shadowmappers.CubeMapShadowMapper;
+	import away3d.materials.shadowmappers.DirectionalShadowMapper;
+	import away3d.materials.shadowmappers.NearDirectionalShadowMapper;
+	import away3d.materials.shadowmappers.ShadowMapperBase;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
@@ -66,7 +66,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.CelDiffuseMethod;
 	import away3d.materials.methods.CelSpecularMethod;
 	import away3d.materials.methods.ColorMatrixMethod;
-	import away3d.materials.methods.ColorTransformMethod;
+	import away3d.materials.methods.EffectColorTransformMethod;
 	import away3d.materials.methods.DepthDiffuseMethod;
 	import away3d.materials.methods.DitheredShadowMapMethod;
 	import away3d.materials.methods.EffectMethodBase;
@@ -77,7 +77,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.FresnelEnvMapMethod;
 	import away3d.materials.methods.FresnelSpecularMethod;
 	import away3d.materials.methods.GradientDiffuseMethod;
-	import away3d.materials.methods.HardShadowMapMethod;
+	import away3d.materials.methods.ShadowHardMethod;
 	import away3d.materials.methods.LightMapDiffuseMethod;
 	import away3d.materials.methods.LightMapMethod;
 	import away3d.materials.methods.NearShadowMapMethod;
@@ -1616,10 +1616,10 @@ package away3d.loaders.parsers
 					effectMethodReturn = new ColorMatrixMethod(props.get(101, new Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)));
 					break;
 				case 402: //ColorTransform
-					effectMethodReturn = new ColorTransformMethod();
+					effectMethodReturn = new EffectColorTransformMethod();
 					var offCol:uint = props.get(601, 0x00000000);
 					var newColorTransform:ColorTransform = new ColorTransform(props.get(102, 1), props.get(103, 1), props.get(104, 1), props.get(101, 1), ((offCol >> 16) & 0xFF), ((offCol >> 8) & 0xFF), (offCol & 0xFF), ((offCol >> 24) & 0xFF));
-					ColorTransformMethod(effectMethodReturn).colorTransform = newColorTransform;
+					EffectColorTransformMethod(effectMethodReturn).colorTransform = newColorTransform;
 					break;
 				case 403: //EnvMap
 					targetID = props.get(1, 0);
@@ -1756,9 +1756,9 @@ package away3d.loaders.parsers
 					SoftShadowMapMethod(shadowMethod).range = props.get(103, 1);
 					break;
 				case 1104: //HardShadowMapMethod
-					shadowMethod = new HardShadowMapMethod(light);
-					HardShadowMapMethod(shadowMethod).alpha = props.get(101, 1);
-					HardShadowMapMethod(shadowMethod).epsilon = props.get(102, 0.002);
+					shadowMethod = new ShadowHardMethod(light);
+					ShadowHardMethod(shadowMethod).alpha = props.get(101, 1);
+					ShadowHardMethod(shadowMethod).epsilon = props.get(102, 0.002);
 					break;
 				
 			}

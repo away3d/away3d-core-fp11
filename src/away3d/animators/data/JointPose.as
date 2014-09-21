@@ -1,6 +1,6 @@
 package away3d.animators.data
 {
-	import away3d.core.math.*;
+	import away3d.core.geom.*;
 	
 	import flash.geom.*;
 	

@@ -1,10 +1,11 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.PoissonLookup;
-	import away3d.lights.DirectionalLight;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.PoissonLookup;
+	import away3d.entities.DirectionalLight;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
@@ -12,7 +13,7 @@ package away3d.materials.methods
 	/**
 	 * SoftShadowMapMethod provides a soft shadowing technique by randomly distributing sample points.
 	 */
-	public class SoftShadowMapMethod extends SimpleShadowMapMethodBase
+	public class SoftShadowMapMethod extends ShadowMethodBase
 	{
 		private var _range:Number = 1;
 		private var _numSamples:int;

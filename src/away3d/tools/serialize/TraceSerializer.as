@@ -1,7 +1,7 @@
 package away3d.tools.serialize
 {
 	import away3d.arcane;
-	import away3d.core.math.Quaternion;
+	import away3d.core.geom.Quaternion;
 	
 	import flash.geom.Vector3D;
 	

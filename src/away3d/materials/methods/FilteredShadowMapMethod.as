@@ -1,9 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.DirectionalLight;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+	import away3d.entities.DirectionalLight;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
@@ -12,7 +13,7 @@ package away3d.materials.methods
 	 * DitheredShadowMapMethod provides a softened shadowing technique by bilinearly interpolating shadow comparison
 	 * results of neighbouring pixels.
 	 */
-	public class FilteredShadowMapMethod extends SimpleShadowMapMethodBase
+	public class FilteredShadowMapMethod extends ShadowMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.

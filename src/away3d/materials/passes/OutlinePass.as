@@ -1,11 +1,11 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;

@@ -1,23 +1,26 @@
-package away3d.prefabs {
+package away3d.prefabs
+{
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.library.AssetType;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.library.assets.AssetType;
-	import away3d.materials.IMaterial;
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
-	public class PrimitivePrefabBase extends PrefabBase {
+
+	public class PrimitivePrefabBase extends PrefabBase
+	{
 
 		protected var _geomDirty:Boolean = true;
 		protected var _uvDirty:Boolean = true;
 
 		private var _subGeometry:SubGeometryBase;
-		private var _material:IMaterial;
+		private var _material:MaterialBase;
 		private var _geometry:Geometry;
 		private var _geometryType:String;
 		private var _geometryTypeDirty:Boolean = true;
@@ -30,7 +33,8 @@ package away3d.prefabs {
 			return AssetType.PRIMITIVE_PREFAB;
 		}
 
-		override public function dispose():void {
+		override public function dispose():void
+		{
 			_geometry.dispose();
 		}
 
@@ -38,19 +42,21 @@ package away3d.prefabs {
 		 * Creates a new PrimitiveBase object.
 		 * @param material The material with which to render the object
 		 */
-		public function PrimitivePrefabBase(material:IMaterial = null, geometryType:String = GeometryType.TRIANGLES)
+		public function PrimitivePrefabBase(material:MaterialBase = null, geometryType:String = GeometryType.TRIANGLES)
 		{
 			_geometry = new Geometry();
 			_material = material;
 			_geometryType = geometryType;
 		}
 
-		public function get geometryType():String {
+		public function get geometryType():String
+		{
 			return _geometryType;
 		}
 
-		public function set geometryType(value:String):void {
-			if(_geometryType == value) return;
+		public function set geometryType(value:String):void
+		{
+			if (_geometryType == value) return;
 			_geometryType = value;
 			invalidateGeometryType();
 		}
@@ -64,12 +70,12 @@ package away3d.prefabs {
 		/**
 		 * The material with which to render the primitive.
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
 			return _material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (value == _material)
 				return;
@@ -77,10 +83,11 @@ package away3d.prefabs {
 			_material = value;
 
 			var len:Number = _objects.length;
-			for (var i:Number = 0; i < len; i++){
+			for (var i:Number = 0; i < len; i++) {
 				(_objects[i] as Mesh).material = _material;
 			}
 		}
+
 		/**
 		 * Builds the primitive's geometry when invalid. This method should not be called directly. The calling should
 		 * be triggered by the invalidateGeometry method (and in turn by updateGeometry).
@@ -141,10 +148,11 @@ package away3d.prefabs {
 				triangleGeometry.autoDeriveUVs = false;
 				_geometry.addSubGeometry(triangleGeometry);
 				_subGeometry = triangleGeometry;
-			} else if (_geometryType == GeometryType.LINE) {
-				_subGeometry = new LineSubGeometry()
-				_geometry.addSubGeometry(_subGeometry);
-			}
+			} else
+				if (_geometryType == GeometryType.LINE) {
+					_subGeometry = new LineSubGeometry()
+					_geometry.addSubGeometry(_subGeometry);
+				}
 
 			_geometryTypeDirty = false;
 		}

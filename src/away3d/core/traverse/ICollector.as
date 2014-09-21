@@ -1,12 +1,15 @@
-package away3d.core.traverse {
+package away3d.core.traverse
+{
 	import away3d.containers.Scene3D;
 	import away3d.core.partition.NodeBase;
+	import away3d.core.pool.EntityListItem;
 	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
 
 	import flash.geom.Vector3D;
 
-	public interface ICollector {
+	public interface ICollector
+	{
 		function clear():void;
 
 		function enterNode(node:NodeBase):Boolean;
@@ -19,7 +22,9 @@ package away3d.core.traverse {
 
 		function applyPointLight(entity:IEntity):void;
 
-		function get entityHead():*;
+		function applySkybox(entity:IEntity):void;
+
+		function get entityHead():EntityListItem;
 
 		function get entryPoint():Vector3D;
 

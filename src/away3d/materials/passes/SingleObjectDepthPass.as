@@ -5,10 +5,11 @@ package away3d.materials.passes
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.LightBase;
-	
-	import flash.display3D.Context3D;
+	import away3d.managers.Stage3DProxy;
+	import away3d.core.base.LightBase;
+    import away3d.textures.RenderTexture;
+
+    import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
@@ -23,8 +24,8 @@ package away3d.materials.passes
 	 */
 	public class SingleObjectDepthPass extends MaterialPassBase
 	{
-		private var _textures:Vector.<Dictionary>;
-		private var _projections:Dictionary;
+		private var _textures:Object;
+		private var _projections:Object;
 		private var _textureSize:uint;
 		private var _polyOffset:Vector.<Number>;
 		private var _enc:Vector.<Number>;
@@ -57,15 +58,13 @@ package away3d.materials.passes
 		 */
 		override public function dispose():void
 		{
-			if (_textures) {
-				for (var i:uint = 0; i < _textures.length; ++i) {
-					for each (var vec:Vector.<Texture> in _textures[i]) {
-						for (var j:uint = 0; j < vec.length; ++j)
-							vec[j].dispose();
-					}
-				}
-				_textures = null;
-			}
+            if (_textures) {
+                for (var key:* in _textures) {
+                    var texture:RenderTexture = _textures[key];
+                    texture.dispose();
+                }
+                _textures = null;
+            }
 		}
 
 		/**
@@ -73,18 +72,16 @@ package away3d.materials.passes
 		 */
 		private function updateProjectionTextures():void
 		{
-			if (_textures) {
-				for (var i:uint = 0; i < _textures.length; ++i) {
-					for each (var vec:Vector.<Texture> in _textures[i]) {
-						for (var j:uint = 0; j < vec.length; ++j)
-							vec[j].dispose();
-					}
-				}
-			}
-			
-			_textures = new Vector.<Dictionary>(8);
-			_projections = new Dictionary();
-			_projectionTexturesInvalid = false;
+            if (_textures) {
+                for (var key:* in _textures) {
+                    var texture:RenderTexture = _textures[key];
+                    texture.dispose();
+                }
+            }
+
+            _textures = {};
+            _projections = {};
+            _projectionTexturesInvalid = false;
 		}
 		
 		/**
@@ -130,9 +127,9 @@ package away3d.materials.passes
 		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 * @return A list of depth map textures for all supported lights.
 		 */
-		arcane function getDepthMap(renderable:IRenderable, stage3DProxy:Stage3DProxy):Texture
+		arcane function getDepthMap(renderable:IRenderable):Texture
 		{
-			return _textures[stage3DProxy._stage3DIndex][renderable];
+			return _textures[renderable.materialOwner.id];
 		}
 		
 		/**
@@ -142,7 +139,7 @@ package away3d.materials.passes
 		 */
 		arcane function getProjection(renderable:IRenderable):Matrix3D
 		{
-			return _projections[renderable];
+            return _projections[renderable.materialOwner.id];
 		}
 		
 		/**
@@ -156,23 +153,23 @@ package away3d.materials.passes
 			var len:uint;
 			var light:LightBase;
 			var lights:Vector.<LightBase> = _lightPicker.allPickedLights;
-			
-			_textures[contextIndex] ||= new Dictionary();
-			
-			if (!_projections[renderable])
-				_projections[renderable] = new Matrix3D();
-			
-			len = lights.length;
+            var rId:uint = renderable.materialOwner.id;
+
+            if (!_textures[rId])
+                _textures[rId] = new RenderTexture(_textureSize, _textureSize);
+
+            if (!_projections[rId])
+                _projections[rId] = new Matrix3D();
+
+            len = lights.length;
+
 			// local position = enough
 			light = lights[0];
 			
-			matrix = light.getObjectProjectionMatrix(renderable.sourceEntity, _projections[renderable]);
+			matrix = light.getObjectProjectionMatrix(renderable.sourceEntity, camera, _projections[renderable]);
 			
-			// todo: use texture proxy?
-			var target:Texture = _textures[contextIndex][renderable] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
-			
-			stage3DProxy.setRenderTarget(target, true);
-			context.clear(1.0, 1.0, 1.0);
+			stage3DProxy.setRenderTarget(_textures[rId], true);
+			context.clear(1, 1, 1);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
 

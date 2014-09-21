@@ -1,4 +1,5 @@
-package away3d.core.base {
+package away3d.core.base
+{
 	import away3d.arcane;
 	import away3d.events.SubGeometryEvent;
 
@@ -6,7 +7,11 @@ package away3d.core.base {
 
 	use namespace arcane
 
-	public class LineSubGeometry extends SubGeometryBase{
+	/**
+	 * @class away3d.core.base.TriangleSubGeometry
+	 */
+	public class LineSubGeometry extends SubGeometryBase
+	{
 		public static const VERTEX_DATA:String = "vertices";
 		public static const START_POSITION_DATA:String = "startPositions";
 		public static const END_POSITION_DATA:String = "endPositions";
@@ -58,12 +63,12 @@ package away3d.core.base {
 			_stride[THICKNESS_DATA] = stride;
 			_stride[COLOR_DATA] = stride;
 
-			var len:Number = _numVertices*stride;
+			var len:Number = _numVertices * stride;
 
 			if (_vertices == null)
-				_vertices = new Vector.<Number>(len);
-			else if (_vertices.length != len)
-				_vertices.length = len;
+				_vertices = new Vector.<Number>(len); else
+				if (_vertices.length != len)
+					_vertices.length = len;
 
 			_strideOffsetDirty = false;
 		}
@@ -192,15 +197,15 @@ package away3d.core.base {
 			}
 
 			_boundingPositionDirty = true;
-			_numSegments = _startPositions.length/3;
-			_numVertices = _numSegments*4;
+			_numSegments = _startPositions.length / 3;
+			_numVertices = _numSegments * 4;
 
-			var lenV:Number = _numVertices*getStride(VERTEX_DATA);
+			var lenV:Number = _numVertices * getStride(VERTEX_DATA);
 
 			if (_vertices == null)
-				_vertices = new Vector.<Number>(lenV);
-			else if (_vertices.length != lenV)
-				_vertices.length = lenV;
+				_vertices = new Vector.<Number>(lenV); else
+				if (_vertices.length != lenV)
+					_vertices.length = lenV;
 
 			i = 0;
 			j = 0;
@@ -209,20 +214,20 @@ package away3d.core.base {
 			positions = _vertices;
 			indices = new Vector.<uint>();
 
-			if(startValues && endValues) {
+			if (startValues && endValues) {
 				while (i < startValues.length) {
-					values = (index/stride & 1)? endValues : startValues;
+					values = (index / stride & 1) ? endValues : startValues;
 					positions[index] = values[i];
 					positions[index + 1] = values[i + 1];
 					positions[index + 2] = values[i + 2];
 
-					values = (index/stride & 1)? startValues : endValues;
+					values = (index / stride & 1) ? startValues : endValues;
 					positions[index + 3] = values[i];
 					positions[index + 4] = values[i + 1];
 					positions[index + 5] = values[i + 2];
 
 					if (++j == 4) {
-						var o:Number = index/stride - 3;
+						var o:Number = index / stride - 3;
 						indices.push(o, o + 1, o + 2, o + 3, o + 2, o + 1);
 						j = 0;
 						i += 3;
@@ -245,11 +250,11 @@ package away3d.core.base {
 		 */
 		public function updateThickness(values:Vector.<Number>):void
 		{
-			var i:Number;
-			var j:Number;
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var j:int;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var thickness:Vector.<Number>;
 
 			_thickness = values;
@@ -261,9 +266,9 @@ package away3d.core.base {
 				stride = getStride(THICKNESS_DATA);
 				thickness = _vertices;
 
-				index = offset
+				index = offset;
 				while (i < values.length) {
-					thickness[index] = (Math.floor(0.5*(index - offset)/stride + 0.5) & 1)? -values[i] : values[i];
+					thickness[index] = (Math.floor(0.5 * (index - offset) / stride + 0.5) & 1) ? -values[i] : values[i];
 
 					if (++j == 4) {
 						j = 0;
@@ -283,21 +288,20 @@ package away3d.core.base {
 		 */
 		public function updateColors(startValues:Vector.<Number>, endValues:Vector.<Number>):void
 		{
-			var i:Number;
-			var j:Number;
-			var values:Vector.<Number>
-			var index:Number;
-			var offset:Number;
-			var stride:Number;
+			var i:int;
+			var j:int;
+			var values:Vector.<Number>;
+			var index:int;
+			var offset:int;
+			var stride:int;
 			var colors:Vector.<Number>;
 
 			_startColors = startValues;
-
 			_endColors = endValues;
 
 			//default to white
 			if (_startColors == null) {
-				_startColors = new Vector.<Number>(_numSegments*4);
+				_startColors = new Vector.<Number>(_numSegments * 4);
 
 				i = 0;
 				while (i < _startColors.length)
@@ -305,7 +309,7 @@ package away3d.core.base {
 			}
 
 			if (_endColors == null) {
-				_endColors = new Vector.<Number>(_numSegments*4);
+				_endColors = new Vector.<Number>(_numSegments * 4);
 
 				i = 0;
 				while (i < _endColors.length)
@@ -321,7 +325,7 @@ package away3d.core.base {
 			index = offset;
 
 			while (i < _startColors.length) {
-				values = ((index - offset)/stride & 1)? _endColors : _startColors;
+				values = ((index - offset) / stride & 1) ? _endColors : _startColors;
 				colors[index] = values[i];
 				colors[index + 1] = values[i + 1];
 				colors[index + 2] = values[i + 2];

@@ -13,9 +13,10 @@ package away3d.animators
 	import away3d.core.base.ParticleGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.data.ParticleData;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
-	import away3d.materials.passes.MaterialPassBase;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;
 
@@ -129,46 +130,46 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function activate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
-			_animationRegisterCache = pass.animationRegisterCache;
+//			_animationRegisterCache = pass.animationRegisterCache;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function deactivate(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy):void
 		{
-			if (_animationRegisterCache)
-			{
-				var context:Context3D = stage3DProxy.context3D;
-				var offset:int = _animationRegisterCache.vertexAttributesOffset;
-				var used:int = _animationRegisterCache.numUsedStreams;
-				for (var i:int = offset; i < used; i++)
-					context.setVertexBufferAt(i, null);
-			}
+//			if (_animationRegisterCache)
+//			{
+//				var context:Context3D = stage3DProxy.context3D;
+//				var offset:int = _animationRegisterCache.vertexAttributesOffset;
+//				var used:int = _animationRegisterCache.numUsedStreams;
+//				for (var i:int = offset; i < used; i++)
+//					context.setVertexBufferAt(i, null);
+//			}
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase):String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
-			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache(profile);
+			_animationRegisterCache = shaderObject.animationRegisterCache;
 			
 			//reset animationRegisterCache
-			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
-			_animationRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
-			_animationRegisterCache.varyingsOffset = pass.numUsedVaryings;
-			_animationRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
+			_animationRegisterCache.vertexConstantOffset = shaderObject.numUsedVertexConstants;
+			_animationRegisterCache.vertexAttributesOffset = shaderObject.numUsedStreams;
+			_animationRegisterCache.varyingsOffset = shaderObject.numUsedVaryings;
+			_animationRegisterCache.fragmentConstantOffset = shaderObject.numUsedFragmentConstants;
 			_animationRegisterCache.hasUVNode = hasUVNode;
 			_animationRegisterCache.needVelocity = needVelocity;
 			_animationRegisterCache.hasBillboard = hasBillboard;
-			_animationRegisterCache.sourceRegisters = sourceRegisters;
-			_animationRegisterCache.targetRegisters = targetRegisters;
-			_animationRegisterCache.needFragmentAnimation = pass.needFragmentAnimation;
-			_animationRegisterCache.needUVAnimation = pass.needUVAnimation;
+			_animationRegisterCache.sourceRegisters = shaderObject.animatableAttributes;
+			_animationRegisterCache.targetRegisters = shaderObject.animationTargetRegisters;
+			_animationRegisterCache.needFragmentAnimation = shaderObject.usesFragmentAnimation;
+			_animationRegisterCache.needUVAnimation = !shaderObject.usesUVTransform;
 			_animationRegisterCache.hasColorAddNode = hasColorAddNode;
 			_animationRegisterCache.hasColorMulNode = hasColorMulNode;
 			_animationRegisterCache.reset();
@@ -180,20 +181,20 @@ package away3d.animators
 			var node:ParticleNodeBase;
 			for each (node in _particleNodes) {
 				if (node.priority < POST_PRIORITY)
-					code += node.getAGALVertexCode(pass, _animationRegisterCache);
+					code += node.getAGALVertexCode(shaderObject, _animationRegisterCache);
 			}
 			
 			code += _animationRegisterCache.getCombinationCode();
 			
 			for each (node in _particleNodes) {
 				if (node.priority >= POST_PRIORITY && node.priority < COLOR_PRIORITY)
-					code += node.getAGALVertexCode(pass, _animationRegisterCache);
+					code += node.getAGALVertexCode(shaderObject, _animationRegisterCache);
 			}
 			
 			code += _animationRegisterCache.initColorRegisters();
 			for each (node in _particleNodes) {
 				if (node.priority >= COLOR_PRIORITY)
-					code += node.getAGALVertexCode(pass, _animationRegisterCache);
+					code += node.getAGALVertexCode(shaderObject, _animationRegisterCache);
 			}
 			code += _animationRegisterCache.getColorPassCode();
 			return code;
@@ -202,25 +203,25 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		override public function getAGALUVCode(shaderObject:ShaderObjectBase):String
 		{
 			var code:String = "";
 			if (hasUVNode) {
-				_animationRegisterCache.setUVSourceAndTarget(UVSource, UVTarget);
+				_animationRegisterCache.setUVSourceAndTarget(shaderObject.uvSource, shaderObject.uvTarget);
 				code += "mov " + _animationRegisterCache.uvTarget + ".xy," + _animationRegisterCache.uvAttribute.toString() + "\n";
 				var node:ParticleNodeBase;
 				for each (node in _particleNodes)
-					code += node.getAGALUVCode(pass, _animationRegisterCache);
+					code += node.getAGALUVCode(shaderObject, _animationRegisterCache);
 				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget + ".xy\n";
 			} else
-				code += "mov " + UVTarget + "," + UVSource + "\n";
+				code += "mov " + shaderObject.uvTarget + "," + shaderObject.uvSource + "\n";
 			return code;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		override public function getAGALFragmentCode(shaderObject:ShaderObjectBase, shadedTarget:String):String
 		{
 			return _animationRegisterCache.getColorCombinationCode(shadedTarget);
 		}
@@ -228,7 +229,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function doneAGALCode(pass:MaterialPassBase):void
+		override public function doneAGALCode(shaderObject:ShaderObjectBase):void
 		{
 			_animationRegisterCache.setDataLength();
 			

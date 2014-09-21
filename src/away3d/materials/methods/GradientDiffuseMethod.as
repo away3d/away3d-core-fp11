@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 	
@@ -14,7 +15,7 @@ package away3d.materials.methods
 	 * approximation to subsurface scattering (for instance, the mid-range shading for skin can be tinted red to similate
 	 * scattered light within the skin attributing to the final colour)
 	 */
-	public class GradientDiffuseMethod extends BasicDiffuseMethod
+	public class GradientDiffuseMethod extends DiffuseBasicMethod
 	{
 		private var _gradientTextureRegister:ShaderRegisterElement;
 		private var _gradient:Texture2DBase;

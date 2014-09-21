@@ -1,13 +1,11 @@
 package away3d.prefabs
 {
-	import away3d.library.assets.IAsset;
-
 	/**
 	 * A UV RegularPolygon primitive mesh.
 	 */
 	public class PrimitivePolygonPrefab extends PrimitiveCylinderPrefab
 	{
-		
+
 		/**
 		 * The radius of the regular polygon.
 		 */
@@ -15,13 +13,13 @@ package away3d.prefabs
 		{
 			return _bottomRadius;
 		}
-		
+
 		public function set radius(value:Number):void
 		{
 			_bottomRadius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The number of sides of the regular polygon.
 		 */
@@ -29,12 +27,12 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set sides(value:uint):void
 		{
 			segmentsW = value;
 		}
-		
+
 		/**
 		 * The number of subdivisions from the edge to the center of the regular polygon.
 		 */
@@ -42,12 +40,12 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set subdivisions(value:uint):void
 		{
 			segmentsH = value;
 		}
-		
+
 		/**
 		 * Creates a new RegularPolygon disc object.
 		 * @param radius The radius of the regular polygon

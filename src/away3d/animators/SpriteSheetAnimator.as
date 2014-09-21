@@ -5,9 +5,9 @@ package away3d.animators
 	import away3d.animators.states.ISpriteSheetAnimationState;
 	import away3d.animators.states.SpriteSheetAnimationState;
 	import away3d.animators.transitions.IAnimationTransition;
-	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.*;
-	import away3d.core.managers.*;
+	import away3d.managers.*;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;

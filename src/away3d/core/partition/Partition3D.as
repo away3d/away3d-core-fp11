@@ -6,7 +6,7 @@ package away3d.core.partition
 	import away3d.entities.IEntity;
 
 	use namespace arcane;
-	
+
 	/**
 	 * Partition3D is the core of a space partition system. The space partition system typically subdivides the 3D scene
 	 * hierarchically into a number of non-overlapping subspaces, forming a tree data structure. This is used to more
@@ -17,7 +17,7 @@ package away3d.core.partition
 		protected var _rootNode:NodeBase;
 		private var _updatesMade:Boolean;
 		private var _updateQueue:EntityNode;
-		
+
 		/**
 		 * Creates a new Partition3D object.
 		 * @param rootNode The root node of the space partition system. This will indicate which type of data structure will be used.
@@ -27,10 +27,11 @@ package away3d.core.partition
 			_rootNode = rootNode || new NullNode();
 		}
 
-		public function get rootNode():NodeBase{
+		public function get rootNode():NodeBase
+		{
 			return _rootNode;
 		}
-		
+
 		/**
 		 * Sends a traverser through the partition tree.
 		 * @param traverser
@@ -39,13 +40,13 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser:ICollector):void
 		{
-			if(_updatesMade) {
+			if (_updatesMade) {
 				updateEntities();
 			}
 
 			_rootNode.acceptTraverser(traverser);
 		}
-		
+
 		/**
 		 * Mark a scene graph entity for updating. This will trigger a reassignment within the tree, based on the
 		 * object's bounding box, upon the next traversal.
@@ -70,7 +71,7 @@ package away3d.core.partition
 			_updateQueue = node;
 			_updatesMade = true;
 		}
-		
+
 		/**
 		 * Removes an entity from the partition tree.
 		 * @param entity The entity to be removed.
@@ -79,27 +80,26 @@ package away3d.core.partition
 		{
 			var node:EntityNode = entity.partitionNode;
 			var t:EntityNode;
-			
+
 			node.removeFromParent();
-			
+
 			// remove from update list if it's in
 			if (node == _updateQueue)
-				_updateQueue = node._updateQueueNext;
-			else {
+				_updateQueue = node._updateQueueNext; else {
 				t = _updateQueue;
 				while (t && t._updateQueueNext != node)
 					t = t._updateQueueNext;
 				if (t)
 					t._updateQueueNext = node._updateQueueNext;
 			}
-			
+
 			node._updateQueueNext = null;
-			
+
 			// any updates have been made undone
 			if (!_updateQueue)
 				_updatesMade = false;
 		}
-		
+
 		/**
 		 * Updates all entities that were marked for update.
 		 */
@@ -108,7 +108,7 @@ package away3d.core.partition
 			var node:EntityNode = _updateQueue;
 			var targetNode:NodeBase;
 			var t:EntityNode;
-			
+
 			// clear updateQueue early to allow for newly marked entity updates
 			_updateQueue = null;
 			_updatesMade = false;

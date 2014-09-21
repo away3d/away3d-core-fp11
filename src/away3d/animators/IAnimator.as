@@ -3,7 +3,7 @@ package away3d.animators
 	import away3d.core.pool.IRenderable;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.IAsset;
+	import away3d.core.library.IAsset;
 
 	/**
 	 * Provides an interface for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
@@ -16,7 +16,13 @@ package away3d.animators
 		 * Returns the animation data set in use by the animator.
 		 */
 		function get animationSet():IAnimationSet;
-		
+
+        /**
+         * Returns animated
+         * @param renderable
+         * @param sourceSubGeometry
+         * @return
+         */
 		function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):SubGeometryBase;
 
 		/**

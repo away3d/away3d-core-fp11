@@ -1,7 +1,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
@@ -9,7 +10,7 @@ package away3d.materials.methods
 	/**
 	 * DepthDiffuseMethod provides a debug method to visualise depth maps
 	 */
-	public class DepthDiffuseMethod extends BasicDiffuseMethod
+	public class DepthDiffuseMethod extends DiffuseBasicMethod
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.

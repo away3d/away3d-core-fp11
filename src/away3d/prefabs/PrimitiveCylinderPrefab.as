@@ -4,10 +4,9 @@ package away3d.prefabs
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
 
 	use namespace arcane;
-	
+
 	/**
 	 * A Cylinder primitive mesh.
 	 */
@@ -54,7 +53,8 @@ package away3d.prefabs
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target:SubGeometryBase, geometryType:String):void {
+		protected override function buildGeometry(target:SubGeometryBase, geometryType:String):void
+		{
 			var indices:Vector.<uint>;
 			var positions:Vector.<Number>;
 			var normals:Vector.<Number>;
@@ -375,83 +375,84 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == GeometryType.LINE) {
-				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+			} else
+				if (geometryType == GeometryType.LINE) {
+					var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
-				var numSegments:Number = (_segmentsH + 1) * (_segmentsW) + _segmentsW;
-				var startPositions:Vector.<Number>;
-				var endPositions:Vector.<Number>;
-				var thickness:Vector.<Number>;
+					var numSegments:Number = (_segmentsH + 1) * (_segmentsW) + _segmentsW;
+					var startPositions:Vector.<Number>;
+					var endPositions:Vector.<Number>;
+					var thickness:Vector.<Number>;
 
-				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
-					startPositions = lineGeometry.startPositions;
-					endPositions = lineGeometry.endPositions;
-					thickness = lineGeometry.thickness;
-				} else {
-					startPositions = new Vector.<Number>(numSegments * 3);
-					endPositions = new Vector.<Number>(numSegments * 3);
-					thickness = new Vector.<Number>(numSegments);
-				}
+					if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+						startPositions = lineGeometry.startPositions;
+						endPositions = lineGeometry.endPositions;
+						thickness = lineGeometry.thickness;
+					} else {
+						startPositions = new Vector.<Number>(numSegments * 3);
+						endPositions = new Vector.<Number>(numSegments * 3);
+						thickness = new Vector.<Number>(numSegments);
+					}
 
-				vidx = 0;
+					vidx = 0;
 
-				fidx = 0;
+					fidx = 0;
 
-				//horizonal lines
+					//horizonal lines
 
-				for (j = 0; j <= _segmentsH; ++j) {
-					radius = _topRadius - ((j / _segmentsH) * (_topRadius - _bottomRadius));
-					z = _height * (j / _segmentsH - 0.5);
+					for (j = 0; j <= _segmentsH; ++j) {
+						radius = _topRadius - ((j / _segmentsH) * (_topRadius - _bottomRadius));
+						z = _height * (j / _segmentsH - 0.5);
 
-					for (i = 0; i <= _segmentsW; ++i) {
-						// revolution vertex
-						revolutionAngle = i * revolutionAngleDelta;
-						x = radius * Math.cos(revolutionAngle);
-						y = radius * Math.sin(revolutionAngle);
+						for (i = 0; i <= _segmentsW; ++i) {
+							// revolution vertex
+							revolutionAngle = i * revolutionAngleDelta;
+							x = radius * Math.cos(revolutionAngle);
+							y = radius * Math.sin(revolutionAngle);
 
-						if (_yUp) {
-							comp1 = -z;
-							comp2 = y;
-						} else {
-							comp1 = y;
-							comp2 = z;
-						}
+							if (_yUp) {
+								comp1 = -z;
+								comp2 = y;
+							} else {
+								comp1 = y;
+								comp2 = z;
+							}
 
-						if (i > 0) {
-							endPositions[vidx] = x;
-							endPositions[vidx + 1] = comp1;
-							endPositions[vidx + 2] = comp2;
+							if (i > 0) {
+								endPositions[vidx] = x;
+								endPositions[vidx + 1] = comp1;
+								endPositions[vidx + 2] = comp2;
 
-							thickness[fidx++] = 1;
+								thickness[fidx++] = 1;
 
-							vidx += 3;
+								vidx += 3;
 
-							//vertical lines
-							startPositions[vidx] = endPositions[vidx - _segmentsW * 6];
-							startPositions[vidx + 1] = endPositions[vidx + 1 - _segmentsW * 6];
-							startPositions[vidx + 2] = endPositions[vidx + 2 - _segmentsW * 6];
+								//vertical lines
+								startPositions[vidx] = endPositions[vidx - _segmentsW * 6];
+								startPositions[vidx + 1] = endPositions[vidx + 1 - _segmentsW * 6];
+								startPositions[vidx + 2] = endPositions[vidx + 2 - _segmentsW * 6];
 
-							endPositions[vidx] = x;
-							endPositions[vidx + 1] = comp1;
-							endPositions[vidx + 2] = comp2;
+								endPositions[vidx] = x;
+								endPositions[vidx + 1] = comp1;
+								endPositions[vidx + 2] = comp2;
 
-							thickness[fidx++] = 1;
+								thickness[fidx++] = 1;
 
-							vidx += 3;
-						}
+								vidx += 3;
+							}
 
-						if (i < _segmentsW) {
-							startPositions[vidx] = x;
-							startPositions[vidx + 1] = comp1;
-							startPositions[vidx + 2] = comp2;
+							if (i < _segmentsW) {
+								startPositions[vidx] = x;
+								startPositions[vidx + 1] = comp1;
+								startPositions[vidx + 2] = comp2;
+							}
 						}
 					}
-				}
 
-				// build real data from raw data
-				lineGeometry.updatePositions(startPositions, endPositions);
-				lineGeometry.updateThickness(thickness);
-			}
+					// build real data from raw data
+					lineGeometry.updatePositions(startPositions, endPositions);
+					lineGeometry.updateThickness(thickness);
+				}
 		}
 
 		/**
@@ -529,11 +530,12 @@ package away3d.prefabs
 				// build real data from raw data
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == GeometryType.LINE) {
-				//nothing to do here
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//nothing to do here
+				}
 		}
-		
+
 		/**
 		 * The radius of the top end of the cylinder.
 		 */
@@ -541,13 +543,13 @@ package away3d.prefabs
 		{
 			return _topRadius;
 		}
-		
+
 		public function set topRadius(value:Number):void
 		{
 			_topRadius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The radius of the bottom end of the cylinder.
 		 */
@@ -555,13 +557,13 @@ package away3d.prefabs
 		{
 			return _bottomRadius;
 		}
-		
+
 		public function set bottomRadius(value:Number):void
 		{
 			_bottomRadius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * The radius of the top end of the cylinder.
 		 */
@@ -569,13 +571,13 @@ package away3d.prefabs
 		{
 			return _height;
 		}
-		
+
 		public function set height(value:Number):void
 		{
 			_height = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines the Number of horizontal segments that make up the cylinder. Defaults to 16.
 		 */
@@ -583,14 +585,14 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set segmentsW(value:uint):void
 		{
 			_segmentsW = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines the Number of vertical segments that make up the cylinder. Defaults to 1.
 		 */
@@ -598,14 +600,14 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set segmentsH(value:uint):void
 		{
 			_segmentsH = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines whether the top end of the cylinder is closed (true) or open.
 		 */
@@ -613,13 +615,13 @@ package away3d.prefabs
 		{
 			return _topClosed;
 		}
-		
+
 		public function set topClosed(value:Boolean):void
 		{
 			_topClosed = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines whether the bottom end of the cylinder is closed (true) or open.
 		 */
@@ -627,13 +629,13 @@ package away3d.prefabs
 		{
 			return _bottomClosed;
 		}
-		
+
 		public function set bottomClosed(value:Boolean):void
 		{
 			_bottomClosed = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines whether the cylinder poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
@@ -641,7 +643,7 @@ package away3d.prefabs
 		{
 			return _yUp;
 		}
-		
+
 		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;

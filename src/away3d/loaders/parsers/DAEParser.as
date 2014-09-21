@@ -28,9 +28,9 @@ package away3d.loaders.parsers
 	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.methods.BasicAmbientMethod;
-	import away3d.materials.methods.BasicDiffuseMethod;
-	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.methods.AmbientBasicMethod;
+	import away3d.materials.methods.DiffuseBasicMethod;
+	import away3d.materials.methods.SpecularBasicMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
@@ -792,18 +792,18 @@ package away3d.loaders.parsers
 			}
 			if (mat) {
 				if (materialMode < 2) {
-					SinglePassMaterialBase(mat).ambientMethod = new BasicAmbientMethod();
-					SinglePassMaterialBase(mat).diffuseMethod = new BasicDiffuseMethod();
-					SinglePassMaterialBase(mat).specularMethod = new BasicSpecularMethod();
+					SinglePassMaterialBase(mat).ambientMethod = new AmbientBasicMethod();
+					SinglePassMaterialBase(mat).diffuseMethod = new DiffuseBasicMethod();
+					SinglePassMaterialBase(mat).specularMethod = new SpecularBasicMethod();
 					SinglePassMaterialBase(mat).ambientColor = (ambient && ambient.color)? ambient.color.rgb : 0x303030;
 					SinglePassMaterialBase(mat).specularColor = (specular && specular.color)? specular.color.rgb : 0x202020;
 					SinglePassMaterialBase(mat).gloss = shininess;
 					SinglePassMaterialBase(mat).ambient = 1;
 					SinglePassMaterialBase(mat).specular = 1;
 				} else {
-					MultiPassMaterialBase(mat).ambientMethod = new BasicAmbientMethod();
-					MultiPassMaterialBase(mat).diffuseMethod = new BasicDiffuseMethod();
-					MultiPassMaterialBase(mat).specularMethod = new BasicSpecularMethod();
+					MultiPassMaterialBase(mat).ambientMethod = new AmbientBasicMethod();
+					MultiPassMaterialBase(mat).diffuseMethod = new DiffuseBasicMethod();
+					MultiPassMaterialBase(mat).specularMethod = new SpecularBasicMethod();
 					MultiPassMaterialBase(mat).ambientColor = (ambient && ambient.color)? ambient.color.rgb : 0x303030;
 					MultiPassMaterialBase(mat).specularColor = (specular && specular.color)? specular.color.rgb : 0x202020;
 					MultiPassMaterialBase(mat).gloss = shininess;

@@ -1,8 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
@@ -22,7 +23,7 @@ package away3d.materials.methods
 		 * @param levels The amount of shadow gradations.
 		 * @param baseDiffuseMethod An optional diffuse method on which the cartoon shading is based. If omitted, BasicDiffuseMethod is used.
 		 */
-		public function CelDiffuseMethod(levels:uint = 3, baseDiffuseMethod:BasicDiffuseMethod = null)
+		public function CelDiffuseMethod(levels:uint = 3, baseDiffuseMethod:DiffuseBasicMethod = null)
 		{
 			super(clampDiffuse, baseDiffuseMethod);
 			

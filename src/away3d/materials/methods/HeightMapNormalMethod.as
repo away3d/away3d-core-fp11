@@ -1,7 +1,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.compilation.ShaderRegisterCache;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.methods.HeightMapNormalMethod;
 	import away3d.textures.Texture2DBase;
@@ -11,7 +12,7 @@ package away3d.materials.methods
 	/**
 	 * HeightMapNormalMethod provides a normal map method that uses a height map to calculate the normals.
 	 */
-	public class HeightMapNormalMethod extends BasicNormalMethod
+	public class HeightMapNormalMethod extends NormalBasicMethod
 	{
 		private var _worldXYRatio:Number;
 		private var _worldXZRatio:Number;

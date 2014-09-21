@@ -1,15 +1,19 @@
-package away3d.core.pool {
+package away3d.core.pool
+{
 	import away3d.core.base.SubGeometryBase;
 
-	public class IndexDataPool {
+	public class IndexDataPool
+	{
 		private static const _pool:Object = {};
 
-		public function IndexDataPool() {
+		public function IndexDataPool()
+		{
 		}
 
-		public static function getItem(subGeometry:SubGeometryBase, level:uint, indexOffset:uint):IndexData {
+		public static function getItem(subGeometry:SubGeometryBase, level:uint, indexOffset:uint):IndexData
+		{
 			var subGeometryData:Vector.<IndexData> = _pool[subGeometry.id];
-			if(!subGeometryData) {
+			if (!subGeometryData) {
 				subGeometryData = _pool[subGeometry.id] = new Vector.<IndexData>();
 			}
 
@@ -22,13 +26,15 @@ package away3d.core.pool {
 			return indexData;
 		}
 
-		public static function disposeItem(id:uint, level:Number):void {
+		public static function disposeItem(id:uint, level:Number):void
+		{
 			var subGeometryData:Vector.<IndexData> = _pool[id];
 			subGeometryData[level].dispose();
 			subGeometryData[level] = null;
 		}
 
-		public static function disposeData(id:String):void {
+		public static function disposeData(id:String):void
+		{
 			var subGeometryData:Vector.<IndexData> = _pool[id];
 
 			var len:uint = subGeometryData.length;

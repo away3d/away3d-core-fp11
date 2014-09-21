@@ -6,7 +6,7 @@ package away3d.prefabs
 	import away3d.core.base.TriangleSubGeometry;
 
 	use namespace arcane;
-	
+
 	/**
 	 * A UV Sphere primitive mesh.
 	 */
@@ -16,7 +16,7 @@ package away3d.prefabs
 		private var _segmentsW:uint;
 		private var _segmentsH:uint;
 		private var _yUp:Boolean;
-		
+
 		/**
 		 * Creates a new Sphere object.
 		 * @param radius The radius of the sphere.
@@ -27,13 +27,13 @@ package away3d.prefabs
 		public function PrimitiveSpherePrefab(radius:Number = 50, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
 		{
 			super();
-			
+
 			_radius = radius;
 			_segmentsW = segmentsW;
 			_segmentsH = segmentsH;
 			_yUp = yUp;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -156,20 +156,21 @@ package away3d.prefabs
 								indices[fidx++] = c;
 								indices[fidx++] = d;
 
-							} else if (j == 1) {
+							} else
+								if (j == 1) {
 
-								indices[fidx++] = a;
-								indices[fidx++] = b;
-								indices[fidx++] = c;
+									indices[fidx++] = a;
+									indices[fidx++] = b;
+									indices[fidx++] = c;
 
-							} else {
-								indices[fidx++] = a;
-								indices[fidx++] = b;
-								indices[fidx++] = c;
-								indices[fidx++] = a;
-								indices[fidx++] = c;
-								indices[fidx++] = d;
-							}
+								} else {
+									indices[fidx++] = a;
+									indices[fidx++] = b;
+									indices[fidx++] = c;
+									indices[fidx++] = a;
+									indices[fidx++] = c;
+									indices[fidx++] = d;
+								}
 						}
 
 						vidx += 3;
@@ -181,52 +182,67 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == GeometryType.LINE) {
+			} else
+				if (geometryType == GeometryType.LINE) {
 
-				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+					var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
-				var numSegments:Number = (_segmentsH - 1) * _segmentsW * 2;
-				var startPositions:Vector.<Number>;
-				var endPositions:Vector.<Number>;
-				var thickness:Vector.<Number>;
+					var numSegments:Number = (_segmentsH - 1) * _segmentsW * 2;
+					var startPositions:Vector.<Number>;
+					var endPositions:Vector.<Number>;
+					var thickness:Vector.<Number>;
 
-				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
-					startPositions = lineGeometry.startPositions;
-					endPositions = lineGeometry.endPositions;
-					thickness = lineGeometry.thickness;
-				} else {
-					startPositions = new Vector.<Number>(numSegments * 3);
-					endPositions = new Vector.<Number>(numSegments * 3);
-					thickness = new Vector.<Number>(numSegments);
-				}
+					if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+						startPositions = lineGeometry.startPositions;
+						endPositions = lineGeometry.endPositions;
+						thickness = lineGeometry.thickness;
+					} else {
+						startPositions = new Vector.<Number>(numSegments * 3);
+						endPositions = new Vector.<Number>(numSegments * 3);
+						thickness = new Vector.<Number>(numSegments);
+					}
 
-				vidx = 0;
+					vidx = 0;
 
-				fidx = 0;
+					fidx = 0;
 
-				for (j = 0; j <= _segmentsH; ++j) {
+					for (j = 0; j <= _segmentsH; ++j) {
 
-					horangle = Math.PI * j / _segmentsH;
-					z = -_radius * Math.cos(horangle);
-					ringradius = _radius * Math.sin(horangle);
+						horangle = Math.PI * j / _segmentsH;
+						z = -_radius * Math.cos(horangle);
+						ringradius = _radius * Math.sin(horangle);
 
-					for (i = 0; i <= _segmentsW; ++i) {
-						verangle = 2 * Math.PI * i / _segmentsW;
-						x = ringradius * Math.cos(verangle);
-						y = ringradius * Math.sin(verangle);
+						for (i = 0; i <= _segmentsW; ++i) {
+							verangle = 2 * Math.PI * i / _segmentsW;
+							x = ringradius * Math.cos(verangle);
+							y = ringradius * Math.sin(verangle);
 
-						if (_yUp) {
-							comp1 = -z;
-							comp2 = y;
+							if (_yUp) {
+								comp1 = -z;
+								comp2 = y;
 
-						} else {
-							comp1 = y;
-							comp2 = z;
-						}
+							} else {
+								comp1 = y;
+								comp2 = z;
+							}
 
-						if (i > 0 && j > 0) {
-							//horizonal lines
-							if (j < _segmentsH) {
+							if (i > 0 && j > 0) {
+								//horizonal lines
+								if (j < _segmentsH) {
+									endPositions[vidx] = x;
+									endPositions[vidx + 1] = comp1;
+									endPositions[vidx + 2] = comp2;
+
+									thickness[fidx++] = 1;
+
+									vidx += 3;
+								}
+
+								//vertical lines
+								startPositions[vidx] = endPositions[vidx - _segmentsW * 6];
+								startPositions[vidx + 1] = endPositions[vidx + 1 - _segmentsW * 6];
+								startPositions[vidx + 2] = endPositions[vidx + 2 - _segmentsW * 6];
+
 								endPositions[vidx] = x;
 								endPositions[vidx + 1] = comp1;
 								endPositions[vidx + 2] = comp2;
@@ -236,32 +252,18 @@ package away3d.prefabs
 								vidx += 3;
 							}
 
-							//vertical lines
-							startPositions[vidx] = endPositions[vidx - _segmentsW * 6];
-							startPositions[vidx + 1] = endPositions[vidx + 1 - _segmentsW * 6];
-							startPositions[vidx + 2] = endPositions[vidx + 2 - _segmentsW * 6];
-
-							endPositions[vidx] = x;
-							endPositions[vidx + 1] = comp1;
-							endPositions[vidx + 2] = comp2;
-
-							thickness[fidx++] = 1;
-
-							vidx += 3;
-						}
-
-						if (i < _segmentsW && j > 0 && j < _segmentsH) {
-							startPositions[vidx] = x;
-							startPositions[vidx + 1] = comp1;
-							startPositions[vidx + 2] = comp2;
+							if (i < _segmentsW && j > 0 && j < _segmentsH) {
+								startPositions[vidx] = x;
+								startPositions[vidx + 1] = comp1;
+								startPositions[vidx + 2] = comp2;
+							}
 						}
 					}
-				}
 
-				// build real data from raw data
-				lineGeometry.updatePositions(startPositions, endPositions);
-				lineGeometry.updateThickness(thickness);
-			}
+					// build real data from raw data
+					lineGeometry.updatePositions(startPositions, endPositions);
+					lineGeometry.updateThickness(thickness);
+				}
 		}
 
 		/**
@@ -296,11 +298,12 @@ package away3d.prefabs
 
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == GeometryType.LINE) {
-				//nothing to do here
-			}
+			} else
+				if (geometryType == GeometryType.LINE) {
+					//nothing to do here
+				}
 		}
-		
+
 		/**
 		 * The radius of the sphere.
 		 */
@@ -308,13 +311,13 @@ package away3d.prefabs
 		{
 			return _radius;
 		}
-		
+
 		public function set radius(value:Number):void
 		{
 			_radius = value;
 			invalidateGeometry();
 		}
-		
+
 		/**
 		 * Defines the Number of horizontal segments that make up the sphere. Defaults to 16.
 		 */
@@ -322,14 +325,14 @@ package away3d.prefabs
 		{
 			return _segmentsW;
 		}
-		
+
 		public function set segmentsW(value:uint):void
 		{
 			_segmentsW = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines the Number of vertical segments that make up the sphere. Defaults to 12.
 		 */
@@ -337,14 +340,14 @@ package away3d.prefabs
 		{
 			return _segmentsH;
 		}
-		
+
 		public function set segmentsH(value:uint):void
 		{
 			_segmentsH = value;
 			invalidateGeometry();
 			invalidateUVs();
 		}
-		
+
 		/**
 		 * Defines whether the sphere poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
@@ -352,7 +355,7 @@ package away3d.prefabs
 		{
 			return _yUp;
 		}
-		
+
 		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;

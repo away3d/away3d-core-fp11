@@ -3,8 +3,10 @@ package away3d.loaders.parsers
 	import away3d.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.library.AssetType;
+	import away3d.core.library.IAsset;
 	import away3d.entities.*;
-	import away3d.library.assets.*;
+	import away3d.core.library.assets.*;
 	import away3d.loaders.misc.*;
 	import away3d.loaders.parsers.utils.*;
 	import away3d.materials.*;

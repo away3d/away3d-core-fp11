@@ -4,13 +4,12 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
-	import away3d.core.math.UVTransform;
+	import away3d.core.geom.UVTransform;
+	import away3d.core.library.AssetType;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.render.IRenderer;
 	import away3d.events.MaterialEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.materials.IMaterial;
-
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
 
@@ -25,7 +24,7 @@ package away3d.entities
 		private var _animator:IAnimator;
 		private var _billboardWidth:Number;
 		private var _billboardHeight:Number;
-		private var _material:IMaterial;
+		private var _material:MaterialBase;
 		private var _uvTransform:UVTransform;
 
 
@@ -64,12 +63,12 @@ package away3d.entities
 		/**
 		 *
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
 			return _material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (value == _material)
 				return;
@@ -87,7 +86,8 @@ package away3d.entities
 			}
 		}
 
-		private function onSizeChanged(event:MaterialEvent):void {
+		private function onSizeChanged(event:MaterialEvent):void
+		{
 			_billboardWidth = _material.width;
 			_billboardHeight = _material.height;
 
@@ -111,7 +111,7 @@ package away3d.entities
 			_uvTransform = value;
 		}
 
-		public function Billboard(material:IMaterial, pixelSnapping:String = "auto", smoothing:Boolean = false)
+		public function Billboard(material:MaterialBase, pixelSnapping:String = "auto", smoothing:Boolean = false)
 		{
 			super();
 

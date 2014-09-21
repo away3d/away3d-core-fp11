@@ -1,15 +1,14 @@
 ﻿package away3d.entities
 {
-	import away3d.core.math.UVTransform;
-	import away3d.core.render.IRenderer;
-	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.geom.UVTransform;
+	import away3d.core.library.AssetType;
 	import away3d.core.partition.*;
+	import away3d.core.render.IRenderer;
 	import away3d.events.*;
-	import away3d.library.assets.*;
 	import away3d.materials.*;
 
 	use namespace arcane;
@@ -25,7 +24,7 @@
 
 		private var _subMeshes:Vector.<ISubMesh>;
 		private var _geometry:Geometry;
-		private var _material:IMaterial;
+		private var _material:MaterialBase;
 		private var _animator:IAnimator;
 		private var _shareAnimationGeometry:Boolean = true;
 
@@ -35,7 +34,7 @@
 		 * @param geometry                    The geometry used by the mesh that provides it with its shape.
 		 * @param material    [optional]        The material with which to render the Mesh.
 		 */
-		public function Mesh(geometry:Geometry, material:IMaterial = null)
+		public function Mesh(geometry:Geometry, material:MaterialBase = null)
 		{
 			super();
 
@@ -71,7 +70,7 @@
 			for (var i:int = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];
 
-				if(subMesh.material) {
+				if (subMesh.material) {
 					subMesh.material.removeOwner(subMesh);
 					subMesh.material.addOwner(subMesh);
 				}
@@ -92,7 +91,7 @@
 		 */
 		public function get geometry():Geometry
 		{
-			if(sourcePrefab) {
+			if (sourcePrefab) {
 				sourcePrefab.validate();
 			}
 			return _geometry;
@@ -129,32 +128,32 @@
 		/**
 		 * The material with which to render the Mesh.
 		 */
-		public function get material():IMaterial
+		public function get material():MaterialBase
 		{
 			return _material;
 		}
 
-		public function set material(value:IMaterial):void
+		public function set material(value:MaterialBase):void
 		{
 			if (value == _material)
 				return;
 
-			var i:uint;
-			var len:uint = _subMeshes.length;
+			var i:int;
+			var len:int = _subMeshes.length;
 			var subMesh:ISubMesh;
 
-			for(i = 0; i<len; i++) {
+			for (i = 0; i < len; i++) {
 				subMesh = _subMeshes[i];
-				if(_material && subMesh.material == _material) {
+				if (_material && subMesh.material == _material) {
 					_material.removeOwner(subMesh);
 				}
 			}
 
 			_material = value;
 
-			for(i = 0; i<len; i++) {
+			for (i = 0; i < len; i++) {
 				subMesh = _subMeshes[i];
-				if(_material && subMesh.material == _material) {
+				if (_material && subMesh.material == _material) {
 					_material.addOwner(subMesh);
 				}
 			}
@@ -182,17 +181,19 @@
 			// Since this getter is invoked every iteration of the render loop, and
 			// the geometry construct could affect the sub-meshes, the geometry is
 			// validated here to give it a chance to rebuild.
-			if(sourcePrefab) {
+			if (sourcePrefab) {
 				sourcePrefab.validate();
 			}
 			return _subMeshes;
 		}
 
-		public function get uvTransform():UVTransform {
+		public function get uvTransform():UVTransform
+		{
 			return _uvTransform;
 		}
 
-		public function set uvTransform(value:UVTransform):void {
+		public function set uvTransform(value:UVTransform):void
+		{
 			_uvTransform = value;
 		}
 
@@ -364,7 +365,8 @@
 		}
 
 
-		public function collectRenderables(renderer:IRenderer):void {
+		public function collectRenderables(renderer:IRenderer):void
+		{
 			// Since this getter is invoked every iteration of the render loop, and
 			// the prefab construct could affect the sub-meshes, the prefab is
 			// validated here to give it a chance to rebuild.
@@ -387,10 +389,11 @@
 		/**
 		 * Returns the triangles count
 		 */
-		public function get numTriangles():uint {
+		public function get numTriangles():uint
+		{
 			var len:uint = _subMeshes.length;
 			var count:uint = 0;
-			for(var i:uint = 0; i<len; i++) {
+			for (var i:uint = 0; i < len; i++) {
 				var subMesh:ISubMesh = _subMeshes[i];
 				count += subMesh.subGeometry.numTriangles;
 			}

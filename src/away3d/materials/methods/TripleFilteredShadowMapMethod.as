@@ -1,15 +1,16 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.PointLight;
-	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.entities.DirectionalLight;
+	import away3d.entities.PointLight;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
 	
 	[Deprecated(message="Please consider any of the superior shadow map methods: SoftShadowMapMethod or DitheredShadowMapMethod")]
-	public class TripleFilteredShadowMapMethod extends SimpleShadowMapMethodBase
+	public class TripleFilteredShadowMapMethod extends ShadowMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
