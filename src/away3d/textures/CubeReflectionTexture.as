@@ -20,7 +20,7 @@ package away3d.textures
 	 * CubeReflectionTexture provides a cube map texture for real-time reflections, used for any method that uses environment maps,
 	 * such as EnvMapMethod.
 	 *
-	 * @see away3d.materials.methods.EnvMapMethod
+	 * @see away3d.materials.methods.EffectEnvMapMethod
 	 */
 	public class CubeReflectionTexture extends RenderCubeTexture
 	{

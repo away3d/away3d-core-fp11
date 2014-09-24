@@ -239,7 +239,7 @@ package away3d.materials.methods {
         /**
          * Sets the method state for cascade shadow mapping.
          */
-        arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+        arcane function activateForCascade(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
         {
             throw new Error("This shadow method is incompatible with cascade shadows");
         }

@@ -1,0 +1,146 @@
+package away3d.materials.methods
+{
+	import away3d.arcane;
+	import away3d.managers.Stage3DProxy;
+    import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderLightingObject;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
+	import away3d.materials.compilation.ShaderRegisterElement;
+	
+	use namespace arcane;
+	
+	/**
+	 * FresnelSpecularMethod provides a specular shading method that causes stronger highlights on grazing view angles.
+	 */
+	public class SpecularFresnelMethod extends SpecularCompositeMethod
+	{
+		private var _dataReg:ShaderRegisterElement;
+		private var _incidentLight:Boolean;
+		private var _fresnelPower:Number = 5;
+		private var _normalReflectance:Number = .028; // default value for skin
+		
+		/**
+		 * Creates a new FresnelSpecularMethod object.
+		 * @param basedOnSurface Defines whether the fresnel effect should be based on the view angle on the surface (if true), or on the angle between the light and the view.
+		 * @param baseSpecularMethod The specular method to which the fresnel equation. Defaults to BasicSpecularMethod.
+		 */
+		public function SpecularFresnelMethod(basedOnSurface:Boolean = true, baseSpecularMethod:SpecularBasicMethod = null)
+		{
+			// may want to offer diff speculars
+			super(modulateSpecular, baseSpecularMethod);
+			_incidentLight = !basedOnSurface;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function initConstants(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
+		{
+			var index:int = methodVO.secondaryFragmentConstantsIndex;
+            shaderObject.fragmentConstantData[index + 2] = 1;
+            shaderObject.fragmentConstantData[index + 3] = 0;
+		}
+		
+		/**
+		 * Defines whether the fresnel effect should be based on the view angle on the surface (if true), or on the angle between the light and the view.
+		 */
+		public function get basedOnSurface():Boolean
+		{
+			return !_incidentLight;
+		}
+		
+		public function set basedOnSurface(value:Boolean):void
+		{
+			if (_incidentLight != value)
+				return;
+			
+			_incidentLight = !value;
+			
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * The power used in the Fresnel equation. Higher values make the fresnel effect more pronounced. Defaults to 5.
+		 */
+		public function get fresnelPower():Number
+		{
+			return _fresnelPower;
+		}
+		
+		public function set fresnelPower(value:Number):void
+		{
+			_fresnelPower = value;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function cleanCompilationData():void
+		{
+			super.cleanCompilationData();
+			_dataReg = null;
+		}
+		
+		/**
+		 * The minimum amount of reflectance, ie the reflectance when the view direction is normal to the surface or light direction.
+		 */
+		public function get normalReflectance():Number
+		{
+			return _normalReflectance;
+		}
+		
+		public function set normalReflectance(value:Number):void
+		{
+			_normalReflectance = value;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+        arcane override function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
+		{
+            super.activate(shaderObject, methodVO, stage);
+			var fragmentData:Vector.<Number> = shaderObject.fragmentConstantData;
+			var index:int = methodVO.secondaryFragmentConstantsIndex;
+			fragmentData[index] = _normalReflectance;
+			fragmentData[index + 1] = _fresnelPower;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getFragmentPreLightingCode(shaderObject:ShaderLightingObject, methodVO:MethodVO, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+		{
+			_dataReg = registerCache.getFreeFragmentConstant();
+			methodVO.secondaryFragmentConstantsIndex = _dataReg.index*4;
+			return super.getFragmentPreLightingCode(shaderObject, methodVO, registerCache, sharedRegisters);
+		}
+		
+		/**
+		 * Applies the fresnel effect to the specular strength.
+		 *
+		 * @param vo The MethodVO object containing the method data for the currently compiled material pass.
+		 * @param target The register containing the specular strength in the "w" component, and the half-vector/reflection vector in "xyz".
+		 * @param regCache The register cache used for the shader compilation.
+		 * @param sharedRegisters The shared registers created by the compiler.
+		 * @return The AGAL fragment code for the method.
+		 */
+		private function modulateSpecular(vo:MethodVO, target:ShaderRegisterElement, regCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+		{
+			var code:String;
+			
+			code = "dp3 " + target + ".y, " + sharedRegisters.viewDirFragment + ".xyz, " + (_incidentLight? target + ".xyz\n" : sharedRegisters.normalFragment + ".xyz\n") +   // dot(V, H)
+				"sub " + target + ".y, " + _dataReg + ".z, " + target + ".y\n" +             // base = 1-dot(V, H)
+				"pow " + target + ".x, " + target + ".y, " + _dataReg + ".y\n" +             // exp = pow(base, 5)
+				"sub " + target + ".y, " + _dataReg + ".z, " + target + ".y\n" +             // 1 - exp
+				"mul " + target + ".y, " + _dataReg + ".x, " + target + ".y\n" +             // f0*(1 - exp)
+				"add " + target + ".y, " + target + ".x, " + target + ".y\n" +          // exp + f0*(1 - exp)
+				"mul " + target + ".w, " + target + ".w, " + target + ".y\n";
+			
+			return code;
+		}
+	
+	}
+}

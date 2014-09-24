@@ -127,7 +127,7 @@ package away3d.materials.passes
 		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 * @return A list of depth map textures for all supported lights.
 		 */
-		arcane function getDepthMap(renderable:IRenderable):Texture
+		arcane function getDepthMap(renderable:IRenderable):RenderTexture
 		{
 			return _textures[renderable.materialOwner.id];
 		}

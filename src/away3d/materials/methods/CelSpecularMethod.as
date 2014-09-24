@@ -12,7 +12,7 @@ package away3d.materials.methods
 	/**
 	 * CelSpecularMethod provides a shading method to add specular cel (cartoon) shading.
 	 */
-	public class CelSpecularMethod extends CompositeSpecularMethod
+	public class CelSpecularMethod extends SpecularCompositeMethod
 	{
 		private var _dataReg:ShaderRegisterElement;
 		private var _smoothness:Number = .1;

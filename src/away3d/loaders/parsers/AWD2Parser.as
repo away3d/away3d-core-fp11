@@ -60,37 +60,37 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.materials.methods.AlphaMaskMethod;
-	import away3d.materials.methods.AnisotropicSpecularMethod;
-	import away3d.materials.methods.CascadeShadowMapMethod;
-	import away3d.materials.methods.CelDiffuseMethod;
+	import away3d.materials.methods.EffectAlphaMaskMethod;
+	import away3d.materials.methods.SpecularAnisotropicMethod;
+	import away3d.materials.methods.ShadowCascadeMethod;
+	import away3d.materials.methods.DiffuseCelMethod;
 	import away3d.materials.methods.CelSpecularMethod;
-	import away3d.materials.methods.ColorMatrixMethod;
+	import away3d.materials.methods.EffectColorMatrixMethod;
 	import away3d.materials.methods.EffectColorTransformMethod;
 	import away3d.materials.methods.DepthDiffuseMethod;
-	import away3d.materials.methods.DitheredShadowMapMethod;
+	import away3d.materials.methods.ShadowDitheredMethod;
 	import away3d.materials.methods.EffectMethodBase;
-	import away3d.materials.methods.EnvMapAmbientMethod;
-	import away3d.materials.methods.EnvMapMethod;
-	import away3d.materials.methods.FilteredShadowMapMethod;
-	import away3d.materials.methods.FogMethod;
-	import away3d.materials.methods.FresnelEnvMapMethod;
-	import away3d.materials.methods.FresnelSpecularMethod;
-	import away3d.materials.methods.GradientDiffuseMethod;
+	import away3d.materials.methods.AmbientEnvMapMethod;
+	import away3d.materials.methods.EffectEnvMapMethod;
+	import away3d.materials.methods.ShadowFilteredMethod;
+	import away3d.materials.methods.EffectFogMethod;
+	import away3d.materials.methods.EffectFresnelEnvMapMethod;
+	import away3d.materials.methods.SpecularFresnelMethod;
+	import away3d.materials.methods.DiffuseGradientMethod;
 	import away3d.materials.methods.ShadowHardMethod;
-	import away3d.materials.methods.LightMapDiffuseMethod;
-	import away3d.materials.methods.LightMapMethod;
-	import away3d.materials.methods.NearShadowMapMethod;
+	import away3d.materials.methods.DiffuseLightMapMethod;
+	import away3d.materials.methods.EffectLightMapMethod;
+	import away3d.materials.methods.ShadowNearMethod;
 	import away3d.materials.methods.OutlineMethod;
-	import away3d.materials.methods.PhongSpecularMethod;
+	import away3d.materials.methods.SpecularPhongMethod;
 	import away3d.materials.methods.ProjectiveTextureMethod;
-	import away3d.materials.methods.RefractionEnvMapMethod;
-	import away3d.materials.methods.RimLightMethod;
+	import away3d.materials.methods.EffectRefractionEnvMapMethod;
+	import away3d.materials.methods.EffectRimLightMethod;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.methods.SimpleWaterNormalMethod;
-	import away3d.materials.methods.SoftShadowMapMethod;
-	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
-	import away3d.materials.methods.WrapDiffuseMethod;
+	import away3d.materials.methods.NormalSimpleWaterMethod;
+	import away3d.materials.methods.ShadowSoftMethod;
+	import away3d.materials.methods.DiffuseSubSurfaceMethod;
+	import away3d.materials.methods.DiffuseWrapMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.prefabs.PrimitiveCapsulePrefab;
 	import away3d.prefabs.PrimitiveConePrefab;
@@ -1370,9 +1370,9 @@ package away3d.loaders.parsers
 							if (!returnedArray[0])
 								_blocks[blockID].addError("Could not find the EnvMap (ID = " + targetID + " ) for this EnvMapAmbientMethodMaterial");
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).ambientMethod = new EnvMapAmbientMethod(returnedArray[1]);
+								SinglePassMaterialBase(mat).ambientMethod = new AmbientEnvMapMethod(returnedArray[1]);
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).ambientMethod = new EnvMapAmbientMethod(returnedArray[1]);
+								MultiPassMaterialBase(mat).ambientMethod = new AmbientEnvMapMethod(returnedArray[1]);
 							debugString += " | EnvMapAmbientMethod | EnvMap-Name =" + CubeTextureBase(returnedArray[1]).name;
 							break;
 						
@@ -1389,16 +1389,16 @@ package away3d.loaders.parsers
 							if (!returnedArray[0])
 								_blocks[blockID].addError("Could not find the GradientDiffuseTexture (ID = " + targetID + " ) for this GradientDiffuseMethod");
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).diffuseMethod = new GradientDiffuseMethod(returnedArray[1]);
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseGradientMethod(returnedArray[1]);
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).diffuseMethod = new GradientDiffuseMethod(returnedArray[1]);
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseGradientMethod(returnedArray[1]);
 							debugString += " | GradientDiffuseMethod | GradientDiffuseTexture-Name =" + Texture2DBase(returnedArray[1]).name;
 							break;
 						case 53: //WrapDiffuseMethod
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).diffuseMethod = new WrapDiffuseMethod(props.get(101, 5));
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseWrapMethod(props.get(101, 5));
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).diffuseMethod = new WrapDiffuseMethod(props.get(101, 5));
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseWrapMethod(props.get(101, 5));
 							debugString += " | WrapDiffuseMethod";
 							break;
 						case 54: //LightMapDiffuseMethod
@@ -1407,50 +1407,50 @@ package away3d.loaders.parsers
 							if (!returnedArray[0])
 								_blocks[blockID].addError("Could not find the LightMap (ID = " + targetID + " ) for this LightMapDiffuseMethod");
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).diffuseMethod = new LightMapDiffuseMethod(returnedArray[1], blendModeDic[props.get(401, 10)], false, SinglePassMaterialBase(mat).diffuseMethod);
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseLightMapMethod(returnedArray[1], blendModeDic[props.get(401, 10)], false, SinglePassMaterialBase(mat).diffuseMethod);
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).diffuseMethod = new LightMapDiffuseMethod(returnedArray[1], blendModeDic[props.get(401, 10)], false, MultiPassMaterialBase(mat).diffuseMethod);
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseLightMapMethod(returnedArray[1], blendModeDic[props.get(401, 10)], false, MultiPassMaterialBase(mat).diffuseMethod);
 							debugString += " | LightMapDiffuseMethod | LightMapTexture-Name =" + Texture2DBase(returnedArray[1]).name;
 							break;
 						case 55: //CelDiffuseMethod
 							if (spezialType == 0) {
-								SinglePassMaterialBase(mat).diffuseMethod = new CelDiffuseMethod(props.get(401, 3), SinglePassMaterialBase(mat).diffuseMethod);
-								CelDiffuseMethod(SinglePassMaterialBase(mat).diffuseMethod).smoothness = props.get(101, 0.1);
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseCelMethod(props.get(401, 3), SinglePassMaterialBase(mat).diffuseMethod);
+								DiffuseCelMethod(SinglePassMaterialBase(mat).diffuseMethod).smoothness = props.get(101, 0.1);
 							}
 							if (spezialType == 1) {
-								MultiPassMaterialBase(mat).diffuseMethod = new CelDiffuseMethod(props.get(401, 3), MultiPassMaterialBase(mat).diffuseMethod);
-								CelDiffuseMethod(MultiPassMaterialBase(mat).diffuseMethod).smoothness = props.get(101, 0.1);
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseCelMethod(props.get(401, 3), MultiPassMaterialBase(mat).diffuseMethod);
+								DiffuseCelMethod(MultiPassMaterialBase(mat).diffuseMethod).smoothness = props.get(101, 0.1);
 							}
 							debugString += " | CelDiffuseMethod";
 							break;
 						case 56: //SubSurfaceScatteringMethod
 							if (spezialType == 0) {
-								SinglePassMaterialBase(mat).diffuseMethod = new SubsurfaceScatteringDiffuseMethod(); //depthMapSize and depthMapOffset ?
-								SubsurfaceScatteringDiffuseMethod(SinglePassMaterialBase(mat).diffuseMethod).scattering = props.get(101, 0.2);
-								SubsurfaceScatteringDiffuseMethod(SinglePassMaterialBase(mat).diffuseMethod).translucency = props.get(102, 1);
-								SubsurfaceScatteringDiffuseMethod(SinglePassMaterialBase(mat).diffuseMethod).scatterColor = props.get(601, 0xffffff);
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseSubSurfaceMethod(); //depthMapSize and depthMapOffset ?
+								DiffuseSubSurfaceMethod(SinglePassMaterialBase(mat).diffuseMethod).scattering = props.get(101, 0.2);
+								DiffuseSubSurfaceMethod(SinglePassMaterialBase(mat).diffuseMethod).translucency = props.get(102, 1);
+								DiffuseSubSurfaceMethod(SinglePassMaterialBase(mat).diffuseMethod).scatterColor = props.get(601, 0xffffff);
 							}
 							if (spezialType == 1) {
-								MultiPassMaterialBase(mat).diffuseMethod = new SubsurfaceScatteringDiffuseMethod(); //depthMapSize and depthMapOffset ?
-								SubsurfaceScatteringDiffuseMethod(MultiPassMaterialBase(mat).diffuseMethod).scattering = props.get(101, 0.2);
-								SubsurfaceScatteringDiffuseMethod(MultiPassMaterialBase(mat).diffuseMethod).translucency = props.get(102, 1);
-								SubsurfaceScatteringDiffuseMethod(MultiPassMaterialBase(mat).diffuseMethod).scatterColor = props.get(601, 0xffffff);
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseSubSurfaceMethod(); //depthMapSize and depthMapOffset ?
+								DiffuseSubSurfaceMethod(MultiPassMaterialBase(mat).diffuseMethod).scattering = props.get(101, 0.2);
+								DiffuseSubSurfaceMethod(MultiPassMaterialBase(mat).diffuseMethod).translucency = props.get(102, 1);
+								DiffuseSubSurfaceMethod(MultiPassMaterialBase(mat).diffuseMethod).scatterColor = props.get(601, 0xffffff);
 							}
 							debugString += " | SubSurfaceScatteringMethod";
 							break;
 						
 						case 101: //AnisotropicSpecularMethod 
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).specularMethod = new AnisotropicSpecularMethod();
+								SinglePassMaterialBase(mat).specularMethod = new SpecularAnisotropicMethod();
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).specularMethod = new AnisotropicSpecularMethod();
+								MultiPassMaterialBase(mat).specularMethod = new SpecularAnisotropicMethod();
 							debugString += " | AnisotropicSpecularMethod";
 							break;
 						case 102: //PhongSpecularMethod
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).specularMethod = new PhongSpecularMethod();
+								SinglePassMaterialBase(mat).specularMethod = new SpecularPhongMethod();
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).specularMethod = new PhongSpecularMethod();
+								MultiPassMaterialBase(mat).specularMethod = new SpecularPhongMethod();
 							debugString += " | PhongSpecularMethod";
 							break;
 						case 103: //CellSpecularMethod
@@ -1466,14 +1466,14 @@ package away3d.loaders.parsers
 							break;
 						case 104: //FresnelSpecularMethod
 							if (spezialType == 0) {
-								SinglePassMaterialBase(mat).specularMethod = new FresnelSpecularMethod(props.get(701, true), SinglePassMaterialBase(mat).specularMethod);
-								FresnelSpecularMethod(SinglePassMaterialBase(mat).specularMethod).fresnelPower = props.get(101, 5);
-								FresnelSpecularMethod(SinglePassMaterialBase(mat).specularMethod).normalReflectance = props.get(102, 0.1);
+								SinglePassMaterialBase(mat).specularMethod = new SpecularFresnelMethod(props.get(701, true), SinglePassMaterialBase(mat).specularMethod);
+								SpecularFresnelMethod(SinglePassMaterialBase(mat).specularMethod).fresnelPower = props.get(101, 5);
+								SpecularFresnelMethod(SinglePassMaterialBase(mat).specularMethod).normalReflectance = props.get(102, 0.1);
 							}
 							if (spezialType == 1) {
-								MultiPassMaterialBase(mat).specularMethod = new FresnelSpecularMethod(props.get(701, true), MultiPassMaterialBase(mat).specularMethod);
-								FresnelSpecularMethod(MultiPassMaterialBase(mat).specularMethod).fresnelPower = props.get(101, 5);
-								FresnelSpecularMethod(MultiPassMaterialBase(mat).specularMethod).normalReflectance = props.get(102, 0.1);
+								MultiPassMaterialBase(mat).specularMethod = new SpecularFresnelMethod(props.get(701, true), MultiPassMaterialBase(mat).specularMethod);
+								SpecularFresnelMethod(MultiPassMaterialBase(mat).specularMethod).fresnelPower = props.get(101, 5);
+								SpecularFresnelMethod(MultiPassMaterialBase(mat).specularMethod).normalReflectance = props.get(102, 0.1);
 							}
 							debugString += " | FresnelSpecularMethod";
 							break;
@@ -1489,14 +1489,14 @@ package away3d.loaders.parsers
 									_blocks[blockID].addError("Could not find a normal Map on this Material to use with this SimpleWaterNormalMethod");
 									SinglePassMaterialBase(mat).normalMap = returnedArray[1];
 								}
-								SinglePassMaterialBase(mat).normalMethod = new SimpleWaterNormalMethod(SinglePassMaterialBase(mat).normalMap, returnedArray[1]);
+								SinglePassMaterialBase(mat).normalMethod = new NormalSimpleWaterMethod(SinglePassMaterialBase(mat).normalMap, returnedArray[1]);
 							}
 							if (spezialType == 1) {
 								if (!MultiPassMaterialBase(mat).normalMap){
 									_blocks[blockID].addError("Could not find a normal Map on this Material to use with this SimpleWaterNormalMethod");
 									MultiPassMaterialBase(mat).normalMap = returnedArray[1];
 								}
-								MultiPassMaterialBase(mat).normalMethod = new SimpleWaterNormalMethod(MultiPassMaterialBase(mat).normalMap, returnedArray[1]);
+								MultiPassMaterialBase(mat).normalMethod = new NormalSimpleWaterMethod(MultiPassMaterialBase(mat).normalMap, returnedArray[1]);
 							}
 							debugString += " | SimpleWaterNormalMethod | Second-NormalTexture-Name = " + Texture2DBase(returnedArray[1]).name;
 							break;
@@ -1613,7 +1613,7 @@ package away3d.loaders.parsers
 			switch (methodType) {
 				// Effect Methods
 				case 401: //ColorMatrix
-					effectMethodReturn = new ColorMatrixMethod(props.get(101, new Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)));
+					effectMethodReturn = new EffectColorMatrixMethod(props.get(101, new Array(0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)));
 					break;
 				case 402: //ColorTransform
 					effectMethodReturn = new EffectColorTransformMethod();
@@ -1626,13 +1626,13 @@ package away3d.loaders.parsers
 					returnedArray = getAssetByID(targetID, [AssetType.TEXTURE], "CubeTexture");
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the EnvMap (ID = " + targetID + " ) for this EnvMapMethod");
-					effectMethodReturn = new EnvMapMethod(returnedArray[1], props.get(101, 1));
+					effectMethodReturn = new EffectEnvMapMethod(returnedArray[1], props.get(101, 1));
 					targetID = props.get(2, 0);
 					if (targetID > 0) {
 						returnedArray = getAssetByID(targetID, [AssetType.TEXTURE]);
 						if (!returnedArray[0])
 							_blocks[blockID].addError("Could not find the Mask-texture (ID = " + targetID + " ) for this EnvMapMethod");
-						EnvMapMethod(effectMethodReturn).mask = returnedArray[1];
+						EffectEnvMapMethod(effectMethodReturn).mask = returnedArray[1];
 					}
 					break;
 				case 404: //LightMapMethod
@@ -1640,7 +1640,7 @@ package away3d.loaders.parsers
 					returnedArray = getAssetByID(targetID, [AssetType.TEXTURE]);
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the LightMap (ID = " + targetID + " ) for this LightMapMethod");
-					effectMethodReturn = new LightMapMethod(returnedArray[1], blendModeDic[props.get(401, 10)], props.get(701, false));				
+					effectMethodReturn = new EffectLightMapMethod(returnedArray[1], blendModeDic[props.get(401, 10)], props.get(701, false));
 					break;
 				case 405: //ProjectiveTextureMethod
 					targetID = props.get(1, 0);
@@ -1650,22 +1650,22 @@ package away3d.loaders.parsers
 					effectMethodReturn = new ProjectiveTextureMethod(returnedArray[1], blendModeDic[props.get(401, 10)]);
 					break;
 				case 406: //RimLightMethod
-					effectMethodReturn = new RimLightMethod(props.get(601, 0xffffff), props.get(101, 0.4), props.get(102, 2));
+					effectMethodReturn = new EffectRimLightMethod(props.get(601, 0xffffff), props.get(101, 0.4), props.get(102, 2));
 					break;
 				case 407: //AlphaMaskMethod
 					targetID = props.get(1, 0);
 					returnedArray = getAssetByID(targetID, [AssetType.TEXTURE]);
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the Alpha-texture (ID = " + targetID + " ) for this AlphaMaskMethod");
-					effectMethodReturn = new AlphaMaskMethod(returnedArray[1], props.get(701, false));
+					effectMethodReturn = new EffectAlphaMaskMethod(returnedArray[1], props.get(701, false));
 					break;
 				case 408: //RefractionEnvMapMethod
 					targetID = props.get(1, 0);
 					returnedArray = getAssetByID(targetID, [AssetType.TEXTURE], "CubeTexture");
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the EnvMap (ID = " + targetID + " ) for this RefractionEnvMapMethod");
-					effectMethodReturn = new RefractionEnvMapMethod(returnedArray[1], props.get(101, 0.1), props.get(102, 0.01), props.get(103, 0.01), props.get(104, 0.01));
-					RefractionEnvMapMethod(effectMethodReturn).alpha = props.get(105, 1);
+					effectMethodReturn = new EffectRefractionEnvMapMethod(returnedArray[1], props.get(101, 0.1), props.get(102, 0.01), props.get(103, 0.01), props.get(104, 0.01));
+					EffectRefractionEnvMapMethod(effectMethodReturn).alpha = props.get(105, 1);
 					break;
 				case 409: //OutlineMethod
 					effectMethodReturn = new OutlineMethod(props.get(601, 0x00000000), props.get(101, 1), props.get(701, true), props.get(702, false));
@@ -1675,10 +1675,10 @@ package away3d.loaders.parsers
 					returnedArray = getAssetByID(targetID, [AssetType.TEXTURE], "CubeTexture");
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the EnvMap (ID = " + targetID + " ) for this FresnelEnvMapMethod");
-					effectMethodReturn = new FresnelEnvMapMethod(returnedArray[1], props.get(101, 1));
+					effectMethodReturn = new EffectFresnelEnvMapMethod(returnedArray[1], props.get(101, 1));
 					break;
 				case 411: //FogMethod
-					effectMethodReturn = new FogMethod(props.get(101, 0), props.get(102, 1000), props.get(601, 0x808080));
+					effectMethodReturn = new EffectFogMethod(props.get(101, 0), props.get(102, 1000), props.get(601, 0x808080));
 					break;
 				
 			}
@@ -1727,7 +1727,7 @@ package away3d.loaders.parsers
 						_blocks[blockID].addError("Could not find the ShadowBaseMethod (ID = " + targetID + " ) for this CascadeShadowMapMethod - ShadowMethod not created");
 						return shadowMethod;
 					}
-					shadowMethod = new CascadeShadowMapMethod(returnedArray[1]);
+					shadowMethod = new ShadowCascadeMethod(returnedArray[1]);
 					break;
 				case 1002: //NearShadowMapMethod
 					targetID = props.get(1, 0);
@@ -1736,24 +1736,24 @@ package away3d.loaders.parsers
 						_blocks[blockID].addError("Could not find the ShadowBaseMethod (ID = " + targetID + " ) for this NearShadowMapMethod - ShadowMethod not created");
 						return shadowMethod;
 					}
-					shadowMethod = new NearShadowMapMethod(returnedArray[1]);
+					shadowMethod = new ShadowNearMethod(returnedArray[1]);
 					break;
 				case 1101: //FilteredShadowMapMethod					
-					shadowMethod = new FilteredShadowMapMethod(DirectionalLight(light));
-					FilteredShadowMapMethod(shadowMethod).alpha = props.get(101, 1);
-					FilteredShadowMapMethod(shadowMethod).epsilon = props.get(102, 0.002);
+					shadowMethod = new ShadowFilteredMethod(DirectionalLight(light));
+					ShadowFilteredMethod(shadowMethod).alpha = props.get(101, 1);
+					ShadowFilteredMethod(shadowMethod).epsilon = props.get(102, 0.002);
 					break;
 				case 1102: //DitheredShadowMapMethod
-					shadowMethod = new DitheredShadowMapMethod(DirectionalLight(light), props.get(201, 5));
-					DitheredShadowMapMethod(shadowMethod).alpha = props.get(101, 1);
-					DitheredShadowMapMethod(shadowMethod).epsilon = props.get(102, 0.002);
-					DitheredShadowMapMethod(shadowMethod).range = props.get(103, 1);
+					shadowMethod = new ShadowDitheredMethod(DirectionalLight(light), props.get(201, 5));
+					ShadowDitheredMethod(shadowMethod).alpha = props.get(101, 1);
+					ShadowDitheredMethod(shadowMethod).epsilon = props.get(102, 0.002);
+					ShadowDitheredMethod(shadowMethod).range = props.get(103, 1);
 					break;
 				case 1103: //SoftShadowMapMethod
-					shadowMethod = new SoftShadowMapMethod(DirectionalLight(light), props.get(201, 5));
-					SoftShadowMapMethod(shadowMethod).alpha = props.get(101, 1);
-					SoftShadowMapMethod(shadowMethod).epsilon = props.get(102, 0.002);
-					SoftShadowMapMethod(shadowMethod).range = props.get(103, 1);
+					shadowMethod = new ShadowSoftMethod(DirectionalLight(light), props.get(201, 5));
+					ShadowSoftMethod(shadowMethod).alpha = props.get(101, 1);
+					ShadowSoftMethod(shadowMethod).epsilon = props.get(102, 0.002);
+					ShadowSoftMethod(shadowMethod).range = props.get(103, 1);
 					break;
 				case 1104: //HardShadowMapMethod
 					shadowMethod = new ShadowHardMethod(light);

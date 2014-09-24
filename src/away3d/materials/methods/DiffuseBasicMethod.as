@@ -29,8 +29,8 @@ package away3d.materials.methods {
         protected var _diffuseInputRegister:ShaderRegisterElement;
 
         private var _texture:Texture2DBase;
-        private var _diffuseColor:Number = 0xffffff;
-        private var _ambientColor:Number = 0xffffff;
+        private var _diffuseColor:uint = 0xffffff;
+        private var _ambientColor:uint = 0xffffff;
         private var _diffuseR:Number = 1;
         private var _diffuseG:Number = 1;
         private var _diffuseB:Number = 1;
@@ -90,12 +90,12 @@ package away3d.materials.methods {
         /**
          * The color of the diffuse reflection when not using a texture.
          */
-        public function get diffuseColor():Number
+        public function get diffuseColor():uint
         {
             return _diffuseColor;
         }
 
-        public function set diffuseColor(value:Number)
+        public function set diffuseColor(value:uint):void
         {
             if (_diffuseColor == value)
                 return;
@@ -108,12 +108,12 @@ package away3d.materials.methods {
         /**
          * The color of the ambient reflection
          */
-        public function get ambientColor():Number
+        public function get ambientColor():uint
         {
             return _ambientColor;
         }
 
-        public function set ambientColor(value:Number)
+        public function set ambientColor(value:uint):void
         {
             if (_ambientColor == value)
                 return;
@@ -132,7 +132,7 @@ package away3d.materials.methods {
             return this._texture;
         }
 
-        public function set texture(value:Texture2DBase)
+        public function set texture(value:Texture2DBase):void
         {
             var b:Boolean = (value != null);
 
