@@ -3,6 +3,8 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.managers.Stage3DProxy;
     import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterData;
     import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.OutlinePass;
 	import away3d.materials.compilation.ShaderRegisterCache;
@@ -35,9 +37,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function initVO(vo:MethodVO):void
+		override arcane function initVO(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
 		{
-			vo.needsNormals = true;
+			methodVO.needsNormals = true;
 		}
 		
 		/**
@@ -92,14 +94,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		arcane override function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
 		{
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		arcane override function getFragmentCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, targetReg:ShaderRegisterElement, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			return "";
 		}

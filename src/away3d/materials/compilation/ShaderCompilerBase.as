@@ -1,13 +1,7 @@
 package away3d.materials.compilation {
     import away3d.arcane;
-    import away3d.materials.LightSources;
     import away3d.materials.MaterialBase;
-    import away3d.materials.methods.EffectMethodBase;
-    import away3d.materials.methods.MethodVOSet;
-    import away3d.materials.methods.ShaderMethodSetup;
-    import away3d.materials.methods.ShadingMethodBase;
     import away3d.materials.passes.IMaterialPass;
-    import away3d.materials.passes.MaterialPassBase;
     import away3d.materials.passes.MaterialPassMode;
 
     use namespace arcane;

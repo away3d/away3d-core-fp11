@@ -1,7 +1,8 @@
 package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.entities.Camera3D;
+    import away3d.core.pool.MaterialPassData;
+    import away3d.entities.Camera3D;
 	import away3d.managers.Stage3DProxy;
 	
 	use namespace arcane;
@@ -9,7 +10,7 @@ package away3d.materials
 	/**
 	 * OcclusionMaterial is a ColorMaterial for an object to prevents drawing anything that is placed behind it.
 	 */
-	public class OcclusionMaterial extends ColorMaterial
+	public class OcclusionMaterial extends TriangleMethodMaterial
 	{
 		private var _occlude:Boolean = true;
 		
@@ -21,8 +22,10 @@ package away3d.materials
 		 */
 		public function OcclusionMaterial(occlude:Boolean = true, color:uint = 0xcccccc, alpha:Number = 1)
 		{
-			super(color, alpha);
-			this.occlude = occlude;
+			super(null, false, false, false);
+            this.occlude = occlude;
+            this.color = color;
+            this.alpha = alpha;
 		}
 		
 		/**
@@ -41,20 +44,20 @@ package away3d.materials
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activatePass(index:uint, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		override arcane function activatePass(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void
 		{
 			if (occlude)
-				stage3DProxy._context3D.setColorMask(false, false, false, false);
-			super.activatePass(index, stage3DProxy, camera);
+				stage._context3D.setColorMask(false, false, false, false);
+			super.activatePass(pass, stage, camera);
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function deactivatePass(index:uint, stage3DProxy:Stage3DProxy):void
+		override arcane function deactivatePass(pass:MaterialPassData, stage:Stage3DProxy):void
 		{
-			super.deactivatePass(index, stage3DProxy);
-			stage3DProxy._context3D.setColorMask(true, true, true, true);
+			super.deactivatePass(pass,stage);
+			stage._context3D.setColorMask(true, true, true, true);
 		}
 	}
 }

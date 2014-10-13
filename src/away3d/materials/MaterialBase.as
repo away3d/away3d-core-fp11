@@ -6,7 +6,6 @@ package away3d.materials
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.pool.IMaterialData;
 	import away3d.core.pool.IMaterialPassData;
-	import away3d.core.pool.IRenderable;
     import away3d.core.pool.MaterialPassData;
     import away3d.core.pool.RenderableBase;
     import away3d.entities.Camera3D;
@@ -472,7 +471,7 @@ package away3d.materials
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */
-		arcane function activatePass(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void // ARCANE
+		arcane function activatePass(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void
 		{
 			pass.materialPass.activate(pass, stage, camera);
 		}
@@ -484,7 +483,7 @@ package away3d.materials
 		 *
 		 * @internal
 		 */
-		arcane function deactivatePass(pass:MaterialPassData, stage:Stage3DProxy):void // ARCANE
+		arcane function deactivatePass(pass:MaterialPassData, stage:Stage3DProxy):void
 		{
 			pass.materialPass.deactivate(pass, stage);
 		}

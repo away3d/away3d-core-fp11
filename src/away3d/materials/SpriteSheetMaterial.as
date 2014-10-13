@@ -10,7 +10,7 @@ package away3d.materials
 	 * and/or have animated normalmaps, specularmaps
 	 */
 	
-	public class SpriteSheetMaterial extends TextureMaterial
+	public class SpriteSheetMaterial extends TriangleMethodMaterial
 	{
 		//private var currentID:uint = 0;
 		
@@ -48,10 +48,10 @@ package away3d.materials
 			super(_TBDiffuse, smooth, repeat, mipmap);
 			
 			if (_TBNormal)
-				this.normalMap = _TBNormal;
+				normalMap = _TBNormal;
 			
 			if (_TBSpecular)
-				this.specularMap = _TBSpecular;
+				specularMap = _TBSpecular;
 		
 		}
 		

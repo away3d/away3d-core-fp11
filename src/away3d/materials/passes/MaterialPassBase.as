@@ -1,5 +1,6 @@
 package away3d.materials.passes {
     import away3d.arcane;
+    import away3d.core.library.NamedAssetBase;
     import away3d.core.pool.MaterialPassData;
     import away3d.core.pool.RenderableBase;
     import away3d.entities.Camera3D;
@@ -14,7 +15,6 @@ package away3d.materials.passes {
     import flash.display3D.Context3DBlendFactor;
     import flash.display3D.Context3DCompareMode;
     import flash.events.Event;
-    import flash.events.EventDispatcher;
     import flash.geom.Matrix3D;
 
     use namespace arcane;
@@ -23,7 +23,7 @@ package away3d.materials.passes {
      * MaterialPassBase provides an abstract base class for material shader passes. A material pass constitutes at least
      * a render call per required renderable.
      */
-    public class MaterialPassBase extends EventDispatcher implements IMaterialPass {
+    public class MaterialPassBase extends NamedAssetBase implements IMaterialPass {
         private var _materialPassData:Vector.<MaterialPassData> = new Vector.<MaterialPassData>();
         private var _maxLights:Number = 3;
         private var _preserveAlpha:Boolean = true;
@@ -215,7 +215,7 @@ package away3d.materials.passes {
         /**
          * Cleans up any resources used by the current object.
          */
-        public function dispose():void
+        override public function dispose():void
         {
             if (_lightPicker)
                 _lightPicker.removeEventListener(Event.CHANGE, onLightsChange);

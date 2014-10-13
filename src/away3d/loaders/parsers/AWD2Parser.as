@@ -67,7 +67,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.CelSpecularMethod;
 	import away3d.materials.methods.EffectColorMatrixMethod;
 	import away3d.materials.methods.EffectColorTransformMethod;
-	import away3d.materials.methods.DepthDiffuseMethod;
+	import away3d.materials.methods.DiffuseDepthMethod;
 	import away3d.materials.methods.ShadowDitheredMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.AmbientEnvMapMethod;
@@ -1378,9 +1378,9 @@ package away3d.loaders.parsers
 						
 						case 51: //DepthDiffuseMethod
 							if (spezialType == 0)
-								SinglePassMaterialBase(mat).diffuseMethod = new DepthDiffuseMethod();
+								SinglePassMaterialBase(mat).diffuseMethod = new DiffuseDepthMethod();
 							if (spezialType == 1)
-								MultiPassMaterialBase(mat).diffuseMethod = new DepthDiffuseMethod();
+								MultiPassMaterialBase(mat).diffuseMethod = new DiffuseDepthMethod();
 							debugString += " | DepthDiffuseMethod";
 							break;
 						case 52: //GradientDiffuseMethod

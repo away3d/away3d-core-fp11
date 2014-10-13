@@ -1,13 +1,12 @@
 package away3d.core.base
 {
-	import away3d.arcane;
-	import away3d.core.render.IRenderer;
-	import away3d.entities.Mesh;
-	import away3d.core.library.AssetType;
-	import away3d.materials.IMaterial;
-	import away3d.materials.MaterialBase;
+    import away3d.arcane;
+    import away3d.core.library.AssetType;
+    import away3d.core.render.IRenderer;
+    import away3d.entities.Mesh;
+    import away3d.materials.MaterialBase;
 
-	use namespace arcane;
+    use namespace arcane;
 
 	public class LineSubMesh extends SubMeshBase implements ISubMesh
 	{

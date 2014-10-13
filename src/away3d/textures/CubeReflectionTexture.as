@@ -104,7 +104,8 @@ package away3d.textures
 		{
 			var stage3DProxy:Stage3DProxy = view.stage3DProxy;
 			var scene:Scene3D = view.scene;
-			var targetTexture:TextureBase = super.getTextureForStage3D(stage3DProxy);
+
+			var targetTexture:TextureBase = _mockTexture;
 			
 			_isRendering = true;
 			_renderer.stage3DProxy = stage3DProxy;

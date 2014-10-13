@@ -3,13 +3,14 @@ package away3d.core.pool
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.ShaderObjectBase;
 	import away3d.materials.passes.IMaterialPass;
+    import away3d.materials.passes.MaterialPassBase;
 
-	public class MaterialPassData implements IMaterialPassData
+    public class MaterialPassData implements IMaterialPassData
 	{
 		private var _pool:MaterialPassDataPool;
 		public var material:MaterialBase;
 		public var shaderObject:ShaderObjectBase;
-		private var _materialPass:IMaterialPass;
+		private var _materialPass:MaterialPassBase;
 		public var programData:ProgramData;
 		public var shadedTarget:String;
 		public var vertexCode:String;
@@ -21,7 +22,7 @@ package away3d.core.pool
 		public var invalid:Boolean;
 		public var usesAnimation:Boolean;
 
-		public function MaterialPassData(pool:MaterialPassDataPool, material:MaterialBase, materialPass:IMaterialPass)
+		public function MaterialPassData(pool:MaterialPassDataPool, material:MaterialBase, materialPass:MaterialPassBase)
 		{
 			_pool = pool;
 			_materialPass = materialPass;
@@ -57,7 +58,7 @@ package away3d.core.pool
 
 		public function set materialPass(value:IMaterialPass):void
 		{
-			_materialPass = value;
+			_materialPass = value as MaterialPassBase;
 		}
 	}
 }

@@ -426,9 +426,11 @@ package away3d.core.render
 
 			updateSkyBoxProjection(camera);
 
-			material.activatePass(0, _stage3DProxy, camera);
-			material.renderPass(0, skyBox, _stage3DProxy, entityCollector, _skyboxProjection);
-			material.deactivatePass(0, _stage3DProxy);
+            var activePass:MaterialPassData = _stage3DProxy.getMaterial(material, _stage3DProxy.profile).getMaterialPass(material.screenPasses[0] as MaterialPassBase, _stage3DProxy.profile);
+
+			material.activatePass(activePass, _stage3DProxy, camera);
+			material.renderPass(activePass, skyBox, _stage3DProxy, camera, _skyboxProjection);
+			material.deactivatePass(activePass, _stage3DProxy);
 		}
 
 		private function updateSkyBoxProjection(camera:Camera3D):void

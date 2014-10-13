@@ -94,7 +94,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		override arcane function activateForCascade(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
 		{
 		}
 	}

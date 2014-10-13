@@ -4,8 +4,10 @@ package away3d.materials.methods
 	import away3d.entities.DirectionalLight;
 	import away3d.entities.PointLight;
     import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderObjectBase;
     import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
 	
@@ -24,11 +26,11 @@ package away3d.materials.methods
 				throw new Error("FilteredShadowMapMethod not supported for Point Lights");
 		}
 		
-		override arcane function initConstants(vo:MethodVO):void
+		override arcane function initConstants(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
 		{
-			super.initConstants(vo);
-			var fragmentData:Vector.<Number> = vo.fragmentData;
-			var index:int = vo.fragmentConstantsIndex;
+			super.initConstants(shaderObject, methodVO);
+			var fragmentData:Vector.<Number> = shaderObject.fragmentConstantData;
+			var index:int = methodVO.fragmentConstantsIndex;
 			
 			fragmentData[index + 8] = 1/3;
 			fragmentData[index + 9] = castingLight.shadowMapper.depthMapSize;
@@ -38,7 +40,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		override protected function getPlanarFragmentCode(methodVO:MethodVO, targetReg:ShaderRegisterElement, regCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			var depthMapRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -47,14 +49,14 @@ package away3d.materials.methods
 			var depthCol:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg:ShaderRegisterElement;
 			var code:String;
-			vo.fragmentConstantsIndex = decReg.index*4;
+			methodVO.fragmentConstantsIndex = decReg.index*4;
 			
 			regCache.addFragmentTempUsages(depthCol, 1);
 			
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uvReg, 1);
 			
-			var viewDirReg:ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			var viewDirReg:ShaderRegisterElement = sharedRegisters.viewDirFragment;
 			
 			code = "mov " + uvReg + ", " + _depthMapCoordReg + "\n" +
 				"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
@@ -186,7 +188,7 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(depthCol);
 			regCache.removeFragmentTempUsage(uvReg);
 			
-			vo.texturesIndex = depthMapRegister.index;
+			methodVO.texturesIndex = depthMapRegister.index;
 			
 			return code;
 		}

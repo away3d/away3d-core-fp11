@@ -7,10 +7,14 @@ package away3d.materials.methods
 	import away3d.managers.Stage3DProxy;
 	import away3d.entities.TextureProjector;
     import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderLightingObject;
+    import away3d.materials.compilation.ShaderObjectBase;
     import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	
-	import flash.geom.Matrix3D;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.utils.ShaderCompilerHelper;
+
+    import flash.geom.Matrix3D;
 	
 	use namespace arcane;
 	
@@ -48,10 +52,10 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function initConstants(vo:MethodVO):void
+		override arcane function initConstants(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
 		{
-			var index:int = vo.fragmentConstantsIndex;
-			var data:Vector.<Number> = vo.fragmentData;
+			var index:int = methodVO.fragmentConstantsIndex;
+			var data:Vector.<Number> = shaderObject.fragmentConstantData;
 			data[index] = .5;
 			data[index + 1] = -.5;
 			data[index + 2] = 1.0;
@@ -104,15 +108,15 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
+		arcane override function getVertexCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
-			var projReg:ShaderRegisterElement = regCache.getFreeVertexConstant();
-			regCache.getFreeVertexConstant();
-			regCache.getFreeVertexConstant();
-			regCache.getFreeVertexConstant();
-			regCache.getFreeVertexVectorTemp();
-			vo.vertexConstantsIndex = projReg.index*4;
-			_uvVarying = regCache.getFreeVarying();
+			var projReg:ShaderRegisterElement = registerCache.getFreeVertexConstant();
+            registerCache.getFreeVertexConstant();
+            registerCache.getFreeVertexConstant();
+            registerCache.getFreeVertexConstant();
+            registerCache.getFreeVertexVectorTemp();
+			methodVO.vertexConstantsIndex = projReg.index*4;
+			_uvVarying = registerCache.getFreeVarying();
 			
 			return "m44 " + _uvVarying + ", vt0, " + projReg + "\n";
 		}
@@ -120,19 +124,19 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		override arcane function getFragmentCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, targetReg:ShaderRegisterElement, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			var code:String = "";
-			var mapRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
-			var col:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var toTexReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			vo.fragmentConstantsIndex = toTexReg.index*4;
-			vo.texturesIndex = mapRegister.index;
+			var mapRegister:ShaderRegisterElement = registerCache.getFreeTextureReg();
+			var col:ShaderRegisterElement = registerCache.getFreeFragmentVectorTemp();
+			var toTexReg:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
+			methodVO.fragmentConstantsIndex = toTexReg.index*4;
+            methodVO.texturesIndex = mapRegister.index;
 			
 			code += "div " + col + ", " + _uvVarying + ", " + _uvVarying + ".w						\n" +
 				"mul " + col + ".xy, " + col + ".xy, " + toTexReg + ".xy	\n" +
 				"add " + col + ".xy, " + col + ".xy, " + toTexReg + ".xx	\n";
-			code += getTex2DSampleCode(vo, col, mapRegister, _projector.texture, col, "clamp");
+			code += ShaderCompilerHelper.getTex2DSampleCode(col, sharedRegisters, mapRegister, _projector.texture, shaderObject.useSmoothTextures, false, shaderObject.useMipmapping, col);
 			
 			if (_mode == MULTIPLY)
 				code += "mul " + targetReg + ".xyz, " + targetReg + ".xyz, " + col + ".xyz			\n";
@@ -151,19 +155,20 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function setRenderState(vo:MethodVO, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
-		{
-			_projMatrix.copyFrom(_projector.viewProjection);
-			_projMatrix.prepend(renderable.sourceEntity.getRenderSceneTransform(camera));
-			_projMatrix.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex, true);
-		}
-		
-		/**
+        override public function setRenderState(shaderObject:ShaderObjectBase, methodVO:MethodVO, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D):void
+        {
+            super.setRenderState(shaderObject, methodVO, renderable, stage, camera);
+            _projMatrix.copyFrom(_projector.viewProjection);
+            _projMatrix.prepend(renderable.sourceEntity.getRenderSceneTransform(camera));
+            _projMatrix.copyRawDataTo(shaderObject.vertexConstantData, methodVO.vertexConstantsIndex, true);
+        }
+
+        /**
 		 * @inheritDoc
 		 */
-		override arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		override arcane function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
 		{
-			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
+			stage.activateTexture(methodVO.texturesIndex, _projector.texture);
 		}
 	}
 }

@@ -31,7 +31,7 @@ package away3d.core.pool
 		 */
 		public function getItem(materialPass:MaterialPassBase):MaterialPassData
 		{
-			return (_pool[materialPass.id] || (_pool[materialPass.id] = _material._iAddMaterialPassData(materialPass.addMaterialPassData(new MaterialPassData(this, _material, materialPass)))));
+			return (_pool[materialPass.id] || (_pool[materialPass.id] = _material.addMaterialPassData(materialPass.addMaterialPassData(new MaterialPassData(this, _material, materialPass)))));
 		}
 
 		/**
@@ -41,14 +41,16 @@ package away3d.core.pool
 		 */
 		public function disposeItem(materialPass:MaterialPassBase):void
 		{
-			materialPass._iRemoveMaterialPassData(_pool[materialPass.id]);
+			materialPass.removeMaterialPassData(_pool[materialPass.id]);
 			delete _pool[materialPass.id];
 		}
 
 		public function disposePool():void
 		{
-			for (var id:* in this._pool)
-				(_pool[id] as MaterialPassData).materialPass.removeMaterialPassData(_pool[id]);
+			for (var id:* in _pool) {
+                var materialPassData:MaterialPassData = _pool[id] as MaterialPassData;
+                (materialPassData.materialPass as MaterialPassBase).removeMaterialPassData(_pool[id]);
+            }
 
 			delete _pool[id];
 		}

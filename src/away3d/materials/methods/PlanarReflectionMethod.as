@@ -3,8 +3,10 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.managers.Stage3DProxy;
     import away3d.materials.compilation.MethodVO;
+    import away3d.materials.compilation.ShaderObjectBase;
     import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.PlanarReflectionTexture;
 	
 	use namespace arcane;
@@ -35,10 +37,10 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function initVO(vo:MethodVO):void
+		override arcane function initVO(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
 		{
-			vo.needsProjection = true;
-			vo.needsNormals = _normalDisplacement > 0;
+			methodVO.needsProjection = true;
+            methodVO.needsNormals = _normalDisplacement > 0;
 		}
 		
 		/**
@@ -87,49 +89,49 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		arcane override function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
 		{
-			var index:int = vo.fragmentConstantsIndex;
-			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
-			vo.fragmentData[index] = _texture.textureRatioX*.5;
-			vo.fragmentData[uint(index + 1)] = _texture.textureRatioY*.5;
-			vo.fragmentData[uint(index + 3)] = _alpha;
+			var index:int = methodVO.fragmentConstantsIndex;
+			stage.activateTexture(methodVO.texturesIndex, _texture);
+			shaderObject.fragmentConstantData[index] = _texture.textureRatioX*.5;
+			shaderObject.fragmentConstantData[uint(index + 1)] = _texture.textureRatioY*.5;
+			shaderObject.fragmentConstantData[uint(index + 3)] = _alpha;
 			if (_normalDisplacement > 0) {
-				vo.fragmentData[uint(index + 2)] = _normalDisplacement;
-				vo.fragmentData[uint(index + 4)] = .5 + _texture.textureRatioX*.5 - 1/_texture.width;
-				vo.fragmentData[uint(index + 5)] = .5 + _texture.textureRatioY*.5 - 1/_texture.height;
-				vo.fragmentData[uint(index + 6)] = .5 - _texture.textureRatioX*.5 + 1/_texture.width;
-				vo.fragmentData[uint(index + 7)] = .5 - _texture.textureRatioY*.5 + 1/_texture.height;
+				shaderObject.fragmentConstantData[uint(index + 2)] = _normalDisplacement;
+				shaderObject.fragmentConstantData[uint(index + 4)] = .5 + _texture.textureRatioX*.5 - 1/_texture.width;
+				shaderObject.fragmentConstantData[uint(index + 5)] = .5 + _texture.textureRatioY*.5 - 1/_texture.height;
+				shaderObject.fragmentConstantData[uint(index + 6)] = .5 - _texture.textureRatioX*.5 + 1/_texture.width;
+				shaderObject.fragmentConstantData[uint(index + 7)] = .5 - _texture.textureRatioY*.5 + 1/_texture.height;
 			}
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		arcane override function getFragmentCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, targetReg:ShaderRegisterElement, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
-			var textureReg:ShaderRegisterElement = regCache.getFreeTextureReg();
-			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var dataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var textureReg:ShaderRegisterElement = registerCache.getFreeTextureReg();
+			var temp:ShaderRegisterElement = registerCache.getFreeFragmentVectorTemp();
+			var dataReg:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
 			
-			var filter:String = vo.useSmoothTextures? "linear" : "nearest";
+			var filter:String = shaderObject.useSmoothTextures? "linear" : "nearest";
 			var code:String;
-			vo.texturesIndex = textureReg.index;
-			vo.fragmentConstantsIndex = dataReg.index*4;
+			methodVO.texturesIndex = textureReg.index;
+			methodVO.fragmentConstantsIndex = dataReg.index*4;
 			// fc0.x = .5
 			
-			var projectionReg:ShaderRegisterElement = _sharedRegisters.projectionFragment;
+			var projectionReg:ShaderRegisterElement = sharedRegisters.projectionFragment;
 			
-			regCache.addFragmentTempUsages(temp, 1);
+			registerCache.addFragmentTempUsages(temp, 1);
 			
 			code = "div " + temp + ", " + projectionReg + ", " + projectionReg + ".w\n" +
 				"mul " + temp + ", " + temp + ", " + dataReg + "\n" +
 				"add " + temp + ", " + temp + ", fc0.xx\n";
 			
 			if (_normalDisplacement > 0) {
-				var dataReg2:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+				var dataReg2:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
 				code += "add " + temp + ".w, " + projectionReg + ".w, " + "fc0.w\n" +
-					"sub " + temp + ".z, fc0.w, " + _sharedRegisters.normalFragment + ".y\n" +
+					"sub " + temp + ".z, fc0.w, " + sharedRegisters.normalFragment + ".y\n" +
 					"div " + temp + ".z, " + temp + ".z, " + temp + ".w\n" +
 					"mul " + temp + ".z, " + dataReg + ".z, " + temp + ".z\n" +
 					"add " + temp + ".x, " + temp + ".x, " + temp + ".z\n" +
@@ -137,15 +139,15 @@ package away3d.materials.methods
 					"max " + temp + ".x, " + temp + ".x, " + dataReg2 + ".z\n";
 			}
 			
-			var temp2:ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
+			var temp2:ShaderRegisterElement = registerCache.getFreeFragmentSingleTemp();
 			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d," + filter + ">\n" +
 				"sub " + temp2 + ", " + temp + ".w,  fc0.x\n" +
 				"kil " + temp2 + "\n" +
 				"sub " + temp + ", " + temp + ", " + targetReg + "\n" +
 				"mul " + temp + ", " + temp + ", " + dataReg + ".w\n" +
 				"add " + targetReg + ", " + targetReg + ", " + temp + "\n";
-			
-			regCache.removeFragmentTempUsage(temp);
+
+            registerCache.removeFragmentTempUsage(temp);
 			
 			return code;
 		}
