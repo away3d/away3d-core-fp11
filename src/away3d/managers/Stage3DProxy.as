@@ -20,6 +20,8 @@ package away3d.managers
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.ShaderObjectBase;
     import away3d.textures.CubeTextureBase;
+    import away3d.textures.RectangleRenderTexture;
+    import away3d.textures.RenderCubeTexture;
     import away3d.textures.RenderTexture;
     import away3d.textures.Texture2DBase;
     import away3d.textures.TextureProxyBase;
@@ -247,7 +249,11 @@ package away3d.managers
 		{
 			var textureData:TextureData = _texturePool.getItem(textureProxy);
 			if (!textureData.texture) {
-				textureData.texture = _context3D.createTexture(textureProxy.width, textureProxy.height, Context3DTextureFormat.BGRA, true);
+                if(textureProxy is RectangleRenderTexture) {
+                    textureData.texture = _context3D.createRectangleTexture(textureProxy.width, textureProxy.height, Context3DTextureFormat.BGRA, true);
+                }else{
+                    textureData.texture = _context3D.createTexture(textureProxy.width, textureProxy.height, Context3DTextureFormat.BGRA, true);
+                }
 			}
 			return textureData.texture;
 		}
@@ -778,8 +784,12 @@ package away3d.managers
             var textureData:TextureData = _texturePool.getItem(textureProxy);
 
             if (!textureData.texture) {
-                textureData.texture = _context3D.createCubeTexture(textureProxy.size, Context3DTextureFormat.BGRA, false);
-                textureData.invalid = true;
+                if(textureProxy is RenderCubeTexture) {
+                    textureData.texture = _context3D.createCubeTexture(textureProxy.size, Context3DTextureFormat.BGRA, true);
+                }else{
+                    textureData.texture = _context3D.createCubeTexture(textureProxy.size, Context3DTextureFormat.BGRA, false);
+                    textureData.invalid = true;
+                }
             }
 
             if (textureData.invalid) {

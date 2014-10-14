@@ -1,7 +1,6 @@
 package away3d.materials.passes {
 	import away3d.arcane;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.managers.AGALProgram3DCache;
 	import away3d.managers.Stage3DProxy;
 	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.RenderableBase;
@@ -403,7 +402,7 @@ package away3d.materials.passes {
 				trace("--------------------");
 				trace(fragmentCode);
 			}
-			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode, 2);
+			stage3DProxy.getProgram.setProgram3D(this, vertexCode, fragmentCode, 2);
 		}
 
 		private function sampleTexture(texture:Texture2DBase, textureUVChannel:String, targetTemp:int, textureRegister:int):String {

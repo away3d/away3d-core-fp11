@@ -90,15 +90,7 @@ package away3d.textures
 			_plane.c = -_vector.z;
 			_plane.d = -_vector.w;
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function getTextureForStage3D(stage3DProxy:Stage3DProxy):TextureBase
-		{
-			return _isRendering? _mockTexture.getTextureForStage3D(stage3DProxy) : super.getTextureForStage3D(stage3DProxy);
-		}
-		
+
 		/**
 		 * The renderer to use.
 		 */
@@ -146,7 +138,7 @@ package away3d.textures
 			_entityCollector.clear();
 			view.scene.traversePartitions(_entityCollector);
 			_renderer.stage3DProxy = view.stage3DProxy;
-			_renderer.renderScene(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
+			_renderer.renderScene(_entityCollector, _mockTexture, _scissorRect);
 			_isRendering = false;
 		}
 		
@@ -166,13 +158,6 @@ package away3d.textures
 		arcane function get textureRatioY():Number
 		{
 			return _renderer.textureRatioY;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function uploadContent(texture:TextureBase):void
-		{ /* disallow */
 		}
 		
 		private function updateCamera(camera:Camera3D):void

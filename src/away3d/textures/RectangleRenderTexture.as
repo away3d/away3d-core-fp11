@@ -11,11 +11,6 @@ package away3d.textures {
             _format = format;
         }
 
-        override protected function uploadContent(texture:TextureBase):void
-        {
-            //do nothing
-        }
-
         override public function set width(value:int):void
         {
             if (value == _width)
@@ -32,11 +27,6 @@ package away3d.textures {
 
             invalidateContent();
             setSize(_width, value);
-        }
-
-        override protected function createTexture(context:Context3D):TextureBase
-        {
-            return context.createRectangleTexture(width, height, format, true);
         }
     }
 }

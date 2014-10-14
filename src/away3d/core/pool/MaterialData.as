@@ -69,7 +69,7 @@ package away3d.core.pool
 
 				//get the shader object for each screen pass and store
 				for (var i:int = 0; i < numPasses; i++)
-					_passes[i] = getMaterialPass(passes[i], profile);
+					_passes[i] = getMaterialPass(passes[i] as MaterialPassBase, profile);
 			}
 
 			return _passes;
