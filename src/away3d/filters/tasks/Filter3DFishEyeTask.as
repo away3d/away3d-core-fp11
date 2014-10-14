@@ -102,7 +102,7 @@ package away3d.filters.tasks
 			// fake data, to complete texture for sampling
 			var bmd:BitmapData = new BitmapData(_size, _size, false, 0);
 			for (var i:int = 0; i < 6; ++i)
-				MipmapGenerator.generateMipMaps(bmd, _mainInputTexture, null, false, i);
+				MipmapGenerator.uploadMipMaps(bmd, _mainInputTexture, null, false, i);
 			bmd.dispose();
 			
 			_textureDimensionsInvalid = false;

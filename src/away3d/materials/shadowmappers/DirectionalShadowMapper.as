@@ -1,20 +1,19 @@
 package away3d.materials.shadowmappers
 {
-	import away3d.lights.shadowmaps.*;
-	import away3d.arcane;
-	import away3d.entities.Camera3D;
-	import away3d.projections.FreeMatrixProjection;
-	import away3d.containers.Scene3D;
-	import away3d.core.geom.Matrix3DUtils;
-	import away3d.core.geom.Plane3D;
-	import away3d.core.render.DepthRenderer;
-	import away3d.entities.DirectionalLight;
-	
-	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	
-	use namespace arcane;
+    import away3d.arcane;
+    import away3d.containers.Scene3D;
+    import away3d.core.geom.Matrix3DUtils;
+    import away3d.core.geom.Plane3D;
+    import away3d.core.render.DepthRenderer;
+    import away3d.entities.Camera3D;
+    import away3d.entities.DirectionalLight;
+    import away3d.projections.FreeMatrixProjection;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.geom.Matrix3D;
+    import flash.geom.Vector3D;
+
+    use namespace arcane;
 	
 	public class DirectionalShadowMapper extends ShadowMapperBase
 	{
@@ -76,7 +75,7 @@ package away3d.materials.shadowmappers
 			return _maxZ - _minZ;
 		}
 		
-		override protected function drawDepthMap(target:TextureBase, scene:Scene3D, renderer:DepthRenderer):void
+		override protected function drawDepthMap(target:TextureProxyBase, scene:Scene3D, renderer:DepthRenderer):void
 		{
 			_casterCollector.camera = _overallDepthCamera;
 			_casterCollector.cullPlanes = _cullPlanes;

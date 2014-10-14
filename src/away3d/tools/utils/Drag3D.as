@@ -1,17 +1,17 @@
 package away3d.tools.utils
 {
-	
-	import away3d.projections.PerspectiveProjection;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.containers.View3D;
-	import away3d.core.geom.Matrix3DUtils;
-	import away3d.entities.Mesh;
-	import away3d.materials.ColorMaterial;
-	import away3d.prefabs.PrimitivePlanePrefab;
-	
-	import flash.geom.Vector3D;
-	
-	/**
+
+    import away3d.containers.ObjectContainer3D;
+    import away3d.containers.View3D;
+    import away3d.core.geom.Matrix3DUtils;
+    import away3d.entities.Mesh;
+    import away3d.materials.TriangleBasicMaterial;
+    import away3d.prefabs.PrimitivePlanePrefab;
+    import away3d.projections.PerspectiveProjection;
+
+    import flash.geom.Vector3D;
+
+    /**
 	 * Class Drag3D allows free dragging of an ObjectContainer3D onto a given plane.
 	 *
 	 * locks on world planes
@@ -33,9 +33,9 @@ package away3d.tools.utils
 		private var _planeXZ:Mesh;
 		private var _planeXY:Mesh;
 		private var _planeZY:Mesh;
-		private var _red:ColorMaterial;
-		private var _green:ColorMaterial;
-		private var _blue:ColorMaterial;
+		private var _red:TriangleBasicMaterial;
+		private var _green:TriangleBasicMaterial;
+		private var _blue:TriangleBasicMaterial;
 		private var _planesContainer:ObjectContainer3D;
 		
 		private var _np:Vector3D = new Vector3D(0.0, 0.0, 0.0);
@@ -151,11 +151,16 @@ package away3d.tools.utils
 			if (_debug && _planesContainer == null) {
 				
 				var size:Number = 1000;
-				_red = new ColorMaterial(0xFF0000);
+				_red = new TriangleBasicMaterial();
+                _red.color = 0xff0000;
 				_red.bothSides = true;
-				_green = new ColorMaterial(0x00FF00);
+
+                _green  = new TriangleBasicMaterial();
+				_green.color = 0x00FF00;
 				_green.bothSides = true;
-				_blue = new ColorMaterial(0x0000FF);
+
+                _blue = new TriangleBasicMaterial();
+                _blue.color = 0x0000FF;
 				_blue.bothSides = true;
 				_red.alpha = _green.alpha = _blue.alpha = .5;
 

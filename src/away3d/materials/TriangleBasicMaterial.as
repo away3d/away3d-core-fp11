@@ -24,7 +24,7 @@ package away3d.materials {
          * @param repeat Indicates whether the texture should be tiled when sampled. Defaults to false.
          * @param mipmap Indicates whether or not any used textures should use mipmapping. Defaults to false.
          */
-        public function TriangleBasicMaterial(texture:Texture2DBase, smooth:Boolean = true, repeat:Boolean = false, mipmap:Boolean = true)
+        public function TriangleBasicMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = false, mipmap:Boolean = true)
         {
             super();
 

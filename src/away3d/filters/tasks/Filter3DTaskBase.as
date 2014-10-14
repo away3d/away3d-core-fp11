@@ -3,8 +3,9 @@
 package away3d.filters.tasks
 {
 	import away3d.entities.Camera3D;
+    import away3d.textures.TextureProxyBase;
 
-	import com.adobe.utils.*;
+    import com.adobe.utils.*;
 	
 	import away3d.managers.*;
 	import away3d.debug.*;

@@ -100,7 +100,7 @@ package away3d.core.render
 			
 			context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			context.setProgram(_program3d);
-			context.setTextureAt(0, _texture.getTextureForStage3D(_stage3DProxy));
+            _stage3DProxy.activateTexture(0, _texture);
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			context.drawTriangles(_indexBuffer, 0, 2);

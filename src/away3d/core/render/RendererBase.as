@@ -1,49 +1,50 @@
 package away3d.core.render
 {
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.TriangleSubMesh;
-	import away3d.core.base.LineSubMesh;
-	import away3d.managers.RTTBufferManager;
-	import away3d.managers.Stage3DProxy;
-	import away3d.core.geom.Matrix3DUtils;
-	import away3d.core.pool.BillboardRenderable;
-	import away3d.core.pool.EntityListItem;
-	import away3d.core.pool.LineSubMeshRenderable;
-	import away3d.core.pool.RenderableBase;
-	import away3d.core.pool.RenderablePool;
-	import away3d.core.pool.SkyBoxRenderable;
-	import away3d.core.pool.TriangleSubMeshRenderable;
-	import away3d.core.sort.IEntitySorter;
-	import away3d.core.sort.RenderableMergeSort;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.core.traverse.ICollector;
-	import away3d.entities.Billboard;
-	import away3d.entities.Camera3D;
-	import away3d.entities.IEntity;
-	import away3d.entities.SkyBox;
-	import away3d.errors.AbstractMethodError;
-	import away3d.events.RendererEvent;
-	import away3d.events.Stage3DEvent;
-	import away3d.materials.IMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.projections.PerspectiveProjection;
-	import away3d.textures.Texture2DBase;
+    import away3d.arcane;
+    import away3d.containers.ObjectContainer3D;
+    import away3d.core.base.LineSubMesh;
+    import away3d.core.base.TriangleSubMesh;
+    import away3d.core.geom.Matrix3DUtils;
+    import away3d.core.pool.BillboardRenderable;
+    import away3d.core.pool.EntityListItem;
+    import away3d.core.pool.LineSubMeshRenderable;
+    import away3d.core.pool.RenderableBase;
+    import away3d.core.pool.RenderablePool;
+    import away3d.core.pool.SkyBoxRenderable;
+    import away3d.core.pool.TriangleSubMeshRenderable;
+    import away3d.core.sort.IEntitySorter;
+    import away3d.core.sort.RenderableMergeSort;
+    import away3d.core.traverse.EntityCollector;
+    import away3d.core.traverse.ICollector;
+    import away3d.entities.Billboard;
+    import away3d.entities.Camera3D;
+    import away3d.entities.IEntity;
+    import away3d.entities.SkyBox;
+    import away3d.errors.AbstractMethodError;
+    import away3d.events.RendererEvent;
+    import away3d.events.Stage3DEvent;
+    import away3d.managers.RTTBufferManager;
+    import away3d.managers.Stage3DProxy;
+    import away3d.materials.MaterialBase;
+    import away3d.materials.utils.DefaultMaterialManager;
+    import away3d.projections.PerspectiveProjection;
+    import away3d.textures.RenderTexture;
+    import away3d.textures.Texture2DBase;
+    import away3d.textures.TextureProxyBase;
 
-	import flash.display.BitmapData;
-	import flash.display.Stage;
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.textures.TextureBase;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.geom.Matrix3D;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.geom.Vector3D;
+    import flash.display.BitmapData;
+    import flash.display.Stage;
+    import flash.display3D.Context3D;
+    import flash.display3D.Context3DCompareMode;
+    import flash.display3D.textures.TextureBase;
+    import flash.events.Event;
+    import flash.events.EventDispatcher;
+    import flash.geom.Matrix3D;
+    import flash.geom.Point;
+    import flash.geom.Rectangle;
+    import flash.geom.Vector3D;
 
-	use namespace arcane;
+    use namespace arcane;
 
 	/**
 	 * RendererBase forms an abstract base class for classes that are used in the rendering pipeline to render geometry
@@ -81,7 +82,7 @@ package away3d.core.render
 
 		protected var _shareContext:Boolean = false;
 
-		protected var _renderTarget:TextureBase;
+		protected var _renderTarget:TextureProxyBase;
 		protected var _renderTargetSurface:int;
 
 		// only used by renderers that need to render geometry to textures
@@ -409,7 +410,7 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		arcane function renderScene(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:Number = 0):void
+		arcane function renderScene(entityCollector:ICollector, target:TextureProxyBase = null, scissorRect:Rectangle = null, surfaceSelector:Number = 0):void
 		{
 			if (!_stage3DProxy || !_context3D)
 				return;
@@ -455,7 +456,7 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
+		protected function executeRender(entityCollector:ICollector, target:TextureProxyBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = surfaceSelector;
@@ -504,7 +505,7 @@ package away3d.core.render
 		 * Performs the actual drawing of geometry to the target.
 		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
 		 */
-		protected function draw(entityCollector:ICollector, target:TextureBase):void
+		protected function draw(entityCollector:ICollector, target:TextureProxyBase):void
 		{
 			throw new AbstractMethodError();
 		}
@@ -681,7 +682,7 @@ package away3d.core.render
 
 		protected function applyRenderable(renderable:RenderableBase):void
 		{
-			var material:IMaterial = renderable.materialOwner.material;
+			var material:MaterialBase = renderable.materialOwner.material;
 			var entity:IEntity = renderable.sourceEntity;
 			var position:Vector3D = entity.scenePosition;
 
@@ -691,7 +692,7 @@ package away3d.core.render
 			//set ids for faster referencing
 			renderable.material = material as MaterialBase;
 			renderable.materialId = material.materialId;
-			renderable.renderOrderId = material.renderOrderId;
+			renderable.renderOrderId = _stage3DProxy.getMaterial(material, _stage3DProxy.profile).renderOrderId;
 			renderable.cascaded = false;
 
 			// project onto camera's z-axis

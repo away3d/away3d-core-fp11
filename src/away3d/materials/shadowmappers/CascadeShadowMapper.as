@@ -7,8 +7,9 @@ package away3d.materials.shadowmappers
 	import away3d.containers.Scene3D;
 	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.render.DepthRenderer;
-	
-	import flash.display3D.textures.TextureBase;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -120,7 +121,7 @@ package away3d.materials.shadowmappers
 			dispatchEvent(new Event(Event.CHANGE));
 		}
 		
-		override protected function drawDepthMap(target:TextureBase, scene:Scene3D, renderer:DepthRenderer):void
+		override protected function drawDepthMap(target:TextureProxyBase, scene:Scene3D, renderer:DepthRenderer):void
 		{
 			if (_scissorRectsInvalid)
 				updateScissorRects();

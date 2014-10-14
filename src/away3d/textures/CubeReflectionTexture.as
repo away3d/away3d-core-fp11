@@ -9,8 +9,9 @@ package away3d.textures
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
-	
-	import flash.display.BitmapData;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.display.BitmapData;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Vector3D;
 	
@@ -47,14 +48,6 @@ package away3d.textures
 			_position = new Vector3D();
 			initMockTexture();
 			initCameras();
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function getTextureForStage3D(stage3DProxy:Stage3DProxy):TextureBase
-		{
-			return _isRendering? _mockTexture.getTextureForStage3D(stage3DProxy) : super.getTextureForStage3D(stage3DProxy);
 		}
 
 		/**
@@ -105,7 +98,7 @@ package away3d.textures
 			var stage3DProxy:Stage3DProxy = view.stage3DProxy;
 			var scene:Scene3D = view.scene;
 
-			var targetTexture:TextureBase = _mockTexture;
+			var targetTexture:TextureProxyBase = _mockTexture;
 			
 			_isRendering = true;
 			_renderer.stage3DProxy = stage3DProxy;
@@ -144,7 +137,7 @@ package away3d.textures
 			_mockBitmapData.dispose();
 		}
 		
-		private function renderSurface(surfaceIndex:uint, scene:Scene3D, targetTexture:TextureBase):void
+		private function renderSurface(surfaceIndex:uint, scene:Scene3D, targetTexture:TextureProxyBase):void
 		{
 			var camera:Camera3D = _cameras[surfaceIndex];
 			

@@ -13,7 +13,7 @@ package away3d.filters
 		public function FishEyeFilter3D(size:uint = 256, fov:Number = 180)
 		{
 			super();
-			_fishEyeTask = new Filter3DFishEyeTask(size, fov)
+			_fishEyeTask = new Filter3DFishEyeTask(size, fov);
 			addTask(_fishEyeTask);
 		}
 		

@@ -74,7 +74,7 @@ package away3d.materials.shadowmappers
 			}
 		}
 		
-		override protected function drawDepthMap(target:TextureBase, scene:Scene3D, renderer:DepthRenderer):void
+		override protected function drawDepthMap(target:TextureProxyBase, scene:Scene3D, renderer:DepthRenderer):void
 		{
 			for (var i:uint = 0; i < 6; ++i) {
 				if (_needsRender[i]) {

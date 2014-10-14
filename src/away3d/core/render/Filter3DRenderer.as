@@ -132,8 +132,7 @@ package away3d.core.render
 			
 			for (i = 0; i < len; ++i) {
 				task = _tasks[i];
-				stage3DProxy.setRenderTarget(task.target);
-				
+				context.setRenderToTexture(task.target, _stage3DProxy.enableDepthAndStencil, _stage3DProxy.antiAlias);
 				context.setTextureAt(0, task.getMainInputTexture(stage3DProxy));
 				context.setProgram(task.getProgram3D(stage3DProxy));
 				if (!task.target) {

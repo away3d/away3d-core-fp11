@@ -85,7 +85,7 @@ package away3d.materials
 
 		protected var _blendMode:String = BlendMode.NORMAL;
 
-		private var _numPasses:Number = 0;
+		private var _numPasses:uint = 0;
 		private var _passes:Vector.<IMaterialPass>;
 
 		private var _mipmap:Boolean = false;
@@ -572,7 +572,7 @@ package away3d.materials
 		 *
 		 * @private
 		 */
-		arcane function numScreenPasses():Number
+		arcane function numScreenPasses():uint
 		{
 			return _numPasses;
 		}

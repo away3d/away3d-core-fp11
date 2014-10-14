@@ -1,17 +1,15 @@
 package away3d.filters.tasks
 {
-	import away3d.arcane;
-	import away3d.managers.Stage3DProxy;
-	import away3d.entities.Camera3D;
+    import away3d.arcane;
+    import away3d.entities.Camera3D;
+    import away3d.managers.Stage3DProxy;
 
-	import flash.display.BitmapData;
+    import flash.display.BitmapData;
+    import flash.display3D.Context3DTextureFormat;
+    import flash.display3D.textures.Texture;
+    import flash.display3D.textures.TextureBase;
 
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.textures.Texture;
-
-	import flash.display3D.textures.TextureBase;
-
-	use namespace arcane;
+    use namespace arcane;
 	
 	public class Filter3DDoubleBufferCopyTask extends Filter3DTaskBase
 	{

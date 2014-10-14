@@ -1,14 +1,13 @@
 package away3d.tools.commands
 {
-	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.geom.Matrix3DUtils;
-	import away3d.entities.*;
-	import away3d.materials.*;
-	import away3d.tools.utils.*;
-	
-	/**
+    import away3d.containers.*;
+    import away3d.core.base.*;
+    import away3d.core.geom.Matrix3DUtils;
+    import away3d.entities.*;
+    import away3d.materials.*;
+    import away3d.tools.utils.*;
+
+    /**
 	 *  Class Merge merges two or more static meshes into one.<code>Merge</code>
 	 */
 	public class Merge
@@ -294,7 +293,7 @@ package away3d.tools.commands
 			}
 		}
 		
-		private function getSubGeomData(material:IMaterial):GeometryVO
+		private function getSubGeomData(material:MaterialBase):GeometryVO
 		{
 			var data:GeometryVO;
 			
@@ -346,7 +345,6 @@ package away3d.tools.commands
 	}
 }
 
-import away3d.materials.IMaterial;
 import away3d.materials.MaterialBase;
 
 class GeometryVO
@@ -355,7 +353,7 @@ class GeometryVO
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
-	public var material:IMaterial;
+	public var material:MaterialBase;
 	
 	public function GeometryVO()
 	{
