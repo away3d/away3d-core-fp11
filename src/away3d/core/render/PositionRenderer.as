@@ -5,8 +5,9 @@ package away3d.core.render
 	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.traverse.ICollector;
 	import away3d.debug.Debug;
-	
-	import com.adobe.utils.AGALMiniAssembler;
+    import away3d.textures.TextureProxyBase;
+
+    import com.adobe.utils.AGALMiniAssembler;
 	
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
@@ -40,7 +41,7 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector:ICollector, target:TextureBase):void
+		override protected function draw(entityCollector:ICollector, target:TextureProxyBase):void
 		{
 			var renderable:RenderableBase;
 			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;

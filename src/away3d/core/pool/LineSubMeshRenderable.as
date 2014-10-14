@@ -62,7 +62,7 @@ package away3d.core.pool {
 		 * @returns {away.pool.LineSubMeshRenderable}
 		 * @private
 		 */
-		override public function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase
+		override protected function getOverflowRenderable(pool:RenderablePool, materialOwner:IMaterialOwner, level:Number, indexOffset:Number):RenderableBase
 		{
 			return new LineSubMeshRenderable(pool, materialOwner as LineSubMesh, level, indexOffset);
 		}

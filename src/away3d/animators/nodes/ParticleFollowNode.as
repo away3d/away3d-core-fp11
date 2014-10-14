@@ -6,7 +6,8 @@ package away3d.animators.nodes
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.states.ParticleFollowState;
 	import away3d.arcane;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	
 	use namespace arcane;
@@ -52,9 +53,8 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
 			
 			//TODO: use Quaternion to implement this function
 			var code:String = "";

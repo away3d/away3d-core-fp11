@@ -6,7 +6,8 @@ package away3d.animators.nodes
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.states.ParticleTimeState;
 	import away3d.arcane;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	
 	use namespace arcane;
@@ -50,9 +51,8 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
 			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute(); //timeStreamRegister.x is start，timeStreamRegister.y is during time
 			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_INDEX, timeStreamRegister.index);
 			var timeConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();

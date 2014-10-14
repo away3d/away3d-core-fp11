@@ -94,9 +94,8 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation) {
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();

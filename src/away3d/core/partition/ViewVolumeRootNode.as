@@ -61,8 +61,8 @@ package away3d.core.partition
 		
 		override public function acceptTraverser(traverser:ICollector):void
 		{
-			if (!(_activeVolume && _activeVolume.contains(traverser.entityHead))) {
-				var volume:ViewVolume = getVolumeContaining(traverser.entityHead);
+			if (!(_activeVolume && _activeVolume.contains(traverser.entryPoint))) {
+				var volume:ViewVolume = getVolumeContaining(traverser.entryPoint);
 				
 				if (!volume)
 					trace("WARNING: No view volume found for the current position.");

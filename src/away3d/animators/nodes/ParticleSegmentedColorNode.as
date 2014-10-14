@@ -6,7 +6,8 @@ package away3d.animators.nodes
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.states.ParticleSegmentedColorState;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderObjectBase;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	
 	import flash.geom.ColorTransform;
@@ -68,10 +69,8 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALVertexCode(shaderObject:ShaderObjectBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass = pass;
-			
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation) {
 				var accMultiplierColor:ShaderRegisterElement;

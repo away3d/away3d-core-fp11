@@ -37,7 +37,8 @@
         /**
          * Initializes the unchanging constant data for this material.
          */
-        override arcane function initConstantData(shaderObject:ShaderObjectBase):void
+
+        override public function initConstantData(shaderObject:ShaderObjectBase):void
         {
             super.initConstantData(shaderObject);
 
@@ -53,7 +54,7 @@
             data[index + 7] = 0.0;
         }
 
-        override arcane function includeDependencies(shaderObject:ShaderObjectBase):void
+        override public function includeDependencies(shaderObject:ShaderObjectBase):void
         {
             shaderObject.projectionDependencies++;
 
@@ -64,7 +65,7 @@
         /**
          * @inheritDoc
          */
-        override arcane function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        override public function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
         {
             var code:String = "";
             var targetReg:ShaderRegisterElement = sharedRegisters.shadedTarget;

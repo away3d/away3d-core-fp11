@@ -474,7 +474,7 @@ package away3d.materials.passes {
                 shaderObject.secondaryUVDependencies++;
         }
 
-        arcane function GetPreLightingVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        override public function getPreLightingVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
         {
             var code:String = "";
 
@@ -490,7 +490,7 @@ package away3d.materials.passes {
             return code;
         }
 
-        arcane function GetPreLightingFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        override public function getPreLightingFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
         {
             var code:String = "";
 
@@ -645,7 +645,7 @@ package away3d.materials.passes {
         /**
          * @inheritDoc
          */
-        arcane function GetVertexCode(shaderObject:ShaderObjectBase, regCache:ShaderRegisterCache, sharedReg:ShaderRegisterData):String
+        override public function getVertexCode(shaderObject:ShaderObjectBase, regCache:ShaderRegisterCache, sharedReg:ShaderRegisterData):String
         {
             var code:String = "";
             var methodVO:MethodVO;
