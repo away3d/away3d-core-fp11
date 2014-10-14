@@ -1,27 +1,25 @@
 package away3d.loaders.parsers
 {
-	import away3d.arcane;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
-	import away3d.entities.Mesh;
-	import away3d.core.library.AssetType;
-	import away3d.core.library.IAsset;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.ColorMultiPassMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.methods.SpecularBasicMethod;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.Texture2DBase;
+    import away3d.arcane;
+    import away3d.core.base.Geometry;
+    import away3d.core.base.TriangleSubGeometry;
+    import away3d.core.base.data.UV;
+    import away3d.core.base.data.Vertex;
+    import away3d.core.library.AssetType;
+    import away3d.core.library.IAsset;
+    import away3d.entities.Mesh;
+    import away3d.loaders.misc.ResourceDependency;
+    import away3d.loaders.parsers.utils.ParserUtil;
+    import away3d.materials.MaterialBase;
+    import away3d.materials.TriangleMaterialMode;
+    import away3d.materials.TriangleMethodMaterial;
+    import away3d.materials.methods.SpecularBasicMethod;
+    import away3d.materials.utils.DefaultMaterialManager;
+    import away3d.textures.Texture2DBase;
 
-	import flash.net.URLRequest;
-	
-	use namespace arcane;
+    import flash.net.URLRequest;
+
+    use namespace arcane;
 	
 	/**
 	 * OBJParser provides a parser for the OBJ data type.
@@ -276,7 +274,7 @@ package away3d.loaders.parsers
 				
 				var m:uint;
 				var sm:uint;
-				var bmMaterial:MaterialBase;
+				var bmMaterial:TriangleMethodMaterial;
 				
 				for (var g:uint = 0; g < numGroups; ++g) {
 					geometry = new Geometry();
@@ -291,10 +289,12 @@ package away3d.loaders.parsers
 					
 					// Finalize and force type-based name
 					finalizeAsset(geometry, "");
-					if (materialMode < 2)
-						bmMaterial = new TextureMaterial(DefaultMaterialManager.getDefaultTexture());
-					else
-						bmMaterial = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+                    bmMaterial = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
+
+					if (materialMode >= 2){
+                        bmMaterial.materialMode = TriangleMaterialMode.MULTI_PASS;
+                    }
+
 					//bmMaterial = new TextureMaterial(DefaultMaterialManager.getDefaultTexture());
 					mesh = new Mesh(geometry, bmMaterial);
 					
@@ -679,26 +679,20 @@ package away3d.loaders.parsers
 					if (alpha == 0)
 						trace("Warning: an alpha value of 0 was found in mtl color tag (Tr or d) ref:" + _lastMtlID + ", mesh(es) using it will be invisible!");
 					
-					var cm:MaterialBase;
-					if (materialMode < 2) {
-						cm = new ColorMaterial(diffuseColor);
-						ColorMaterial(cm).alpha = alpha;
-						ColorMaterial(cm).ambientColor = ambientColor;
-						ColorMaterial(cm).repeat = true;
-						if (useSpecular) {
-							ColorMaterial(cm).specularColor = specularColor;
-							ColorMaterial(cm).specular = specular;
-						}
-					} else {
-						cm = new ColorMultiPassMaterial(diffuseColor);
-						ColorMultiPassMaterial(cm).ambientColor = ambientColor;
-						ColorMultiPassMaterial(cm).repeat = true;
-						if (useSpecular) {
-							ColorMultiPassMaterial(cm).specularColor = specularColor;
-							ColorMultiPassMaterial(cm).specular = specular;
-						}
+					var cm:TriangleMethodMaterial = new TriangleMethodMaterial();
+                    cm.color = diffuseColor;
+                    cm.alpha = alpha;
+                    cm.ambientColor = ambientColor;
+                    cm.repeat = true;
+                    if (useSpecular) {
+                        cm.specularColor = specularColor;
+                        cm.specular = specular;
+                    }
+
+					if (materialMode >= 2) {
+                        cm.materialMode = TriangleMaterialMode.MULTI_PASS;
 					}
-					
+
 					lm.cm = cm;
 					_materialLoaded.push(lm);
 					
@@ -767,7 +761,7 @@ package away3d.loaders.parsers
 		{
 			var decomposeID:Array;
 			var mesh:Mesh;
-			var mat:MaterialBase;
+			var mat:TriangleMethodMaterial;
 			var j:uint;
 			var specularData:SpecularData;
 			
@@ -783,57 +777,37 @@ package away3d.loaders.parsers
 						mesh.material = lm.cm;
 						
 					} else if (lm.texture) {
-						if (materialMode < 2) { // if materialMode is 0 or 1, we create a SinglePass				
-							mat = TextureMaterial(mesh.material);
-							TextureMaterial(mat).texture = lm.texture;
-							TextureMaterial(mat).ambientColor = lm.ambientColor;
-							TextureMaterial(mat).alpha = lm.alpha;
-							TextureMaterial(mat).repeat = true;
-							
-							if (lm.specularMethod) {
-								// By setting the specularMethod property to null before assigning
-								// the actual method instance, we avoid having the properties of
-								// the new method being overridden with the settings from the old
-								// one, which is default behavior of the setter.
-								TextureMaterial(mat).specularMethod = null;
-								TextureMaterial(mat).specularMethod = lm.specularMethod;
-							} else if (_materialSpecularData) {
-								for (j = 0; j < _materialSpecularData.length; ++j) {
-									specularData = _materialSpecularData[j];
-									if (specularData.materialID == lm.materialID) {
-										TextureMaterial(mat).specularMethod = null; // Prevent property overwrite (see above)
-										TextureMaterial(mat).specularMethod = specularData.basicSpecularMethod;
-										TextureMaterial(mat).ambientColor = specularData.ambientColor;
-										TextureMaterial(mat).alpha = specularData.alpha;
-										break;
-									}
-								}
-							}
-						} else { //if materialMode==2 this is a MultiPassTexture					
-							mat = TextureMultiPassMaterial(mesh.material);
-							TextureMultiPassMaterial(mat).texture = lm.texture;
-							TextureMultiPassMaterial(mat).ambientColor = lm.ambientColor;
-							TextureMultiPassMaterial(mat).repeat = true;
-							
-							if (lm.specularMethod) {
-								// By setting the specularMethod property to null before assigning
-								// the actual method instance, we avoid having the properties of
-								// the new method being overridden with the settings from the old
-								// one, which is default behavior of the setter.
-								TextureMultiPassMaterial(mat).specularMethod = null;
-								TextureMultiPassMaterial(mat).specularMethod = lm.specularMethod;
-							} else if (_materialSpecularData) {
-								for (j = 0; j < _materialSpecularData.length; ++j) {
-									specularData = _materialSpecularData[j];
-									if (specularData.materialID == lm.materialID) {
-										TextureMultiPassMaterial(mat).specularMethod = null; // Prevent property overwrite (see above)
-										TextureMultiPassMaterial(mat).specularMethod = specularData.basicSpecularMethod;
-										TextureMultiPassMaterial(mat).ambientColor = specularData.ambientColor;
-										break;
-									}
-								}
-							}
-						}
+
+                        mat = mesh.material as TriangleMethodMaterial;
+                        mat.texture = lm.texture;
+                        mat.ambientColor = lm.ambientColor;
+                        mat.alpha = lm.alpha;
+                        mat.repeat = true;
+
+                        if (lm.specularMethod) {
+                            // By setting the specularMethod property to null before assigning
+                            // the actual method instance, we avoid having the properties of
+                            // the new method being overridden with the settings from the old
+                            // one, which is default behavior of the setter.
+                            mat.specularMethod = null;
+                            mat.specularMethod = lm.specularMethod;
+                        } else if (_materialSpecularData) {
+                            for (j = 0; j < _materialSpecularData.length; ++j) {
+                                specularData = _materialSpecularData[j];
+                                if (specularData.materialID == lm.materialID) {
+                                    mat.specularMethod = null; // Prevent property overwrite (see above)
+                                    mat.specularMethod = specularData.basicSpecularMethod;
+                                    mat.ambientColor = specularData.ambientColor;
+                                    mat.alpha = specularData.alpha;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (materialMode >= 2) { // if materialMode is 0 or 1, we create a SinglePass
+                            mat.materialMode = TriangleMaterialMode.MULTI_PASS;
+                        }
+
 					}
 					
 					mesh.material.name = decomposeID[1]? decomposeID[1] : decomposeID[0];
@@ -906,8 +880,6 @@ class SpecularData
 
 class LoadedMaterial
 {
-	import away3d.materials.ColorMaterial;
-	
 	public var materialID:String;
 	public var texture:Texture2DBase;
 	public var cm:MaterialBase;

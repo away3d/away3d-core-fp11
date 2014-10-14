@@ -1,28 +1,26 @@
 package away3d.loaders.parsers
 {
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
-	
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
-	import away3d.entities.Mesh;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.ColorMultiPassMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.Texture2DBase;
-	
-	use namespace arcane;
+    import away3d.arcane;
+    import away3d.containers.ObjectContainer3D;
+    import away3d.core.base.Geometry;
+    import away3d.core.base.TriangleSubGeometry;
+    import away3d.core.base.data.UV;
+    import away3d.core.base.data.Vertex;
+    import away3d.entities.Mesh;
+    import away3d.loaders.misc.ResourceDependency;
+    import away3d.loaders.parsers.utils.ParserUtil;
+    import away3d.materials.MaterialBase;
+    import away3d.materials.TriangleMaterialMode;
+    import away3d.materials.TriangleMethodMaterial;
+    import away3d.materials.utils.DefaultMaterialManager;
+    import away3d.textures.Texture2DBase;
+
+    import flash.geom.Vector3D;
+    import flash.net.URLRequest;
+    import flash.utils.ByteArray;
+    import flash.utils.Dictionary;
+
+    use namespace arcane;
 	
 	/**
 	 * AC3DParser provides a parser for the AC3D data type.
@@ -113,10 +111,7 @@ package away3d.loaders.parsers
 				mesh = retrieveMeshFromID(resourceDependency.id);
 			}
 			if (mesh && asset) {
-				if (materialMode < 2)
-					TextureMaterial(mesh.material).texture = asset;
-				else
-					TextureMultiPassMaterial(mesh.material).texture = asset;
+                TriangleMethodMaterial(mesh.material).texture = asset;
 			}
 		}
 		
@@ -286,10 +281,12 @@ package away3d.loaders.parsers
 						break;
 					
 					case "texture":
-						if (materialMode < 2)
-							_activeMesh.material = new TextureMaterial(DefaultMaterialManager.getDefaultTexture());
-						else
-							_activeMesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+						if (materialMode < 2) {
+							_activeMesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
+                        } else {
+                            _activeMesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
+                            (_activeMesh.material as TriangleMethodMaterial).materialMode = TriangleMaterialMode.MULTI_PASS;
+                        }
 						_activeMesh.material.name = "m_" + _activeMesh.name;
 						addDependency(String(_meshList.length - 1), new URLRequest(tUrl));
 						break;
@@ -573,23 +570,26 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			var colorMaterial:MaterialBase;
+			var colorMaterial:TriangleMethodMaterial;
 			
 			if (materialMode < 2) {
-				colorMaterial = new ColorMaterial(0xFFFFFF);
-				ColorMaterial(colorMaterial).name = name;
-				ColorMaterial(colorMaterial).color = color;
-				ColorMaterial(colorMaterial).ambient = ambient;
-				ColorMaterial(colorMaterial).specular = specular;
-				ColorMaterial(colorMaterial).gloss = gloss;
-				ColorMaterial(colorMaterial).alpha = alpha;
+				colorMaterial = new TriangleMethodMaterial();
+                colorMaterial.color = 0xffffff;
+				colorMaterial.name = name;
+				colorMaterial.color = color;
+				colorMaterial.ambient = ambient;
+				colorMaterial.specular = specular;
+				colorMaterial.gloss = gloss;
+				colorMaterial.alpha = alpha;
 			} else {
-				colorMaterial = new ColorMultiPassMaterial(0xFFFFFF);
-				ColorMultiPassMaterial(colorMaterial).name = name;
-				ColorMultiPassMaterial(colorMaterial).color = color;
-				ColorMultiPassMaterial(colorMaterial).ambient = ambient;
-				ColorMultiPassMaterial(colorMaterial).specular = specular;
-				ColorMultiPassMaterial(colorMaterial).gloss = gloss;
+				colorMaterial = new TriangleMethodMaterial();
+                colorMaterial.color = 0xFFFFFF;
+                colorMaterial.materialMode = TriangleMaterialMode.MULTI_PASS
+				colorMaterial.name = name;
+				colorMaterial.color = color;
+				colorMaterial.ambient = ambient;
+				colorMaterial.specular = specular;
+				colorMaterial.gloss = gloss;
 					//ColorMultiPassMaterial(colorMaterial).alpha=alpha;
 			}
 			return colorMaterial;

@@ -33,6 +33,21 @@ package away3d.materials.methods {
         {
         }
 
+
+        override arcane function initVO(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
+        {
+            methodVO.needsUV = shaderObject.texture != null;
+        }
+
+
+        override arcane function initConstants(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
+        {
+            if (!methodVO.needsUV) {
+                _color = shaderObject.color;
+                updateColor();
+            }
+        }
+
         /**
          * The strength of the ambient reflection of the surface.
          */
@@ -43,7 +58,9 @@ package away3d.materials.methods {
 
         public function set ambient(value:Number):void
         {
+            if(_ambient == value) return;
             _ambient = value;
+            updateColor();
         }
 
         /**
@@ -56,7 +73,9 @@ package away3d.materials.methods {
 
         public function set color(value:uint):void
         {
+            if(_color == value) return;
             _color = value;
+            updateColor();
         }
 
         /**
@@ -135,5 +154,14 @@ package away3d.materials.methods {
             _colorB = (_color & 0xff) / 0xff * _ambient;
         }
 
+        public function get alpha():Number
+        {
+            return _alpha;
+        }
+
+        public function set alpha(value:Number):void
+        {
+            _alpha = value;
+        }
     }
 }

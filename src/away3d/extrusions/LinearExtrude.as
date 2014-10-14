@@ -1,21 +1,20 @@
 ﻿package away3d.extrusions
 {
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubMesh;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
-	import away3d.entities.Mesh;
-	import away3d.materials.IMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.utils.MultipleMaterials;
-	import away3d.tools.helpers.MeshHelper;
+    import away3d.bounds.BoundingVolumeBase;
+    import away3d.core.base.Geometry;
+    import away3d.core.base.ISubMesh;
+    import away3d.core.base.TriangleSubGeometry;
+    import away3d.core.base.data.UV;
+    import away3d.core.base.data.Vertex;
+    import away3d.entities.Mesh;
+    import away3d.materials.MaterialBase;
+    import away3d.materials.utils.MultipleMaterials;
+    import away3d.tools.helpers.MeshHelper;
 
-	import flash.geom.Point;
-	import flash.geom.Vector3D;
+    import flash.geom.Point;
+    import flash.geom.Vector3D;
 
-	public class LinearExtrude extends Mesh
+    public class LinearExtrude extends Mesh
 	{
 		public static const X_AXIS:String = "x";
 		public static const Y_AXIS:String = "y";
@@ -347,7 +346,7 @@
 			return super.subMeshes;
 		}
 		
-		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:IMaterial, invertU:Boolean = false):void
+		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:MaterialBase, invertU:Boolean = false):void
 		{
 			var subGeom:TriangleSubGeometry;
 			var uvs:Vector.<Number>;
@@ -606,7 +605,7 @@
 			}
 			
 			var index:uint = 0;
-			var mat:IMaterial;
+			var mat:MaterialBase;
 			
 			if (_thickness > 0) {
 				var v1a:Vertex;
@@ -737,7 +736,7 @@
 			}
 		}
 		
-		private function addThicknessSubdivision(points1:Array, points2:Array, u1:Number, u2:Number, mat:IMaterial):void
+		private function addThicknessSubdivision(points1:Array, points2:Array, u1:Number, u2:Number, mat:MaterialBase):void
 		{
 			var i:uint;
 			var j:uint;
@@ -1002,7 +1001,7 @@
 			}
 		}
 		
-		private function getSubGeometryListFromMaterial(mat:IMaterial):SubGeometryList
+		private function getSubGeometryListFromMaterial(mat:MaterialBase):SubGeometryList
 		{
 			var sglist:SubGeometryList;
 			
@@ -1041,7 +1040,6 @@
 }
 
 import away3d.core.base.TriangleSubGeometry;
-import away3d.materials.IMaterial;
 import away3d.materials.MaterialBase;
 
 import flash.geom.Point;
@@ -1053,7 +1051,7 @@ class SubGeometryList
 	public var positions:Vector.<Number>;
 	public var indices:Vector.<uint>;
 	public var subGeometry:TriangleSubGeometry;
-	public var material:IMaterial;
+	public var material:MaterialBase;
 }
 
 class RenderSide

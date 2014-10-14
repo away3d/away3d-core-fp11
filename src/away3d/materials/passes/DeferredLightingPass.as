@@ -1,11 +1,9 @@
 package away3d.materials.passes {
     import away3d.arcane;
     import away3d.core.base.TriangleSubGeometry;
-    import away3d.managers.AGALProgram3DCache;
     import away3d.managers.Stage3DProxy;
     import away3d.core.geom.Matrix3DUtils;
     import away3d.core.pool.RenderableBase;
-    import away3d.debug.Debug;
     import away3d.entities.Camera3D;
     import away3d.materials.MaterialBase;
     import away3d.materials.compilation.ShaderState;

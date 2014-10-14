@@ -1,23 +1,22 @@
 package away3d.extrusions
 {
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubMesh;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
-	import away3d.core.geom.Vector3DUtils;
-	import away3d.entities.Mesh;
-	import away3d.materials.IMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.paths.IPath;
-	import away3d.paths.IPathSegment;
-	import away3d.tools.helpers.MeshHelper;
+    import away3d.bounds.BoundingVolumeBase;
+    import away3d.core.base.Geometry;
+    import away3d.core.base.ISubMesh;
+    import away3d.core.base.TriangleSubGeometry;
+    import away3d.core.base.data.UV;
+    import away3d.core.base.data.Vertex;
+    import away3d.core.geom.Vector3DUtils;
+    import away3d.entities.Mesh;
+    import away3d.materials.MaterialBase;
+    import away3d.paths.IPath;
+    import away3d.paths.IPathSegment;
+    import away3d.tools.helpers.MeshHelper;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+    import flash.geom.Matrix3D;
+    import flash.geom.Vector3D;
 
-	[Deprecated]
+    [Deprecated]
 	public class PathExtrude extends Mesh
 	{
 		private var _varr:Vector.<Vertex>;
@@ -33,7 +32,7 @@ package away3d.extrusions
 		private var _scales:Vector.<Vector3D>;
 		private var _rotations:Vector.<Vector3D>;
 		private var _materials:Vector.<MaterialBase>;
-		private var _activeMaterial:IMaterial;
+		private var _activeMaterial:MaterialBase;
 		private var _subdivision:uint;
 		private var _coverAll:Boolean;
 		private var _coverSegment:Boolean;
@@ -582,7 +581,7 @@ package away3d.extrusions
 			
 			var countloop:int = points1.length;
 			
-			var mat:IMaterial;
+			var mat:MaterialBase;
 			
 			if (_mapFit) {
 				var dist:Number = 0;
@@ -734,7 +733,7 @@ package away3d.extrusions
 			}
 		}
 		
-		private function getSubGeometryListFromMaterial(mat:IMaterial):SubGeometryList
+		private function getSubGeometryListFromMaterial(mat:MaterialBase):SubGeometryList
 		{
 			var sglist:SubGeometryList;
 			
@@ -779,7 +778,7 @@ package away3d.extrusions
 			_normal0.z = _normal1.z = _normal2.z = cz*d;
 		}
 		
-		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:IMaterial):void
+		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:MaterialBase):void
 		{
 			var subGeom:TriangleSubGeometry;
 			var uvs:Vector.<Number>;
@@ -1301,7 +1300,7 @@ package away3d.extrusions
 }
 
 import away3d.core.base.TriangleSubGeometry;
-import away3d.materials.IMaterial;
+import away3d.materials.MaterialBase;
 
 class SubGeometryList
 {
@@ -1310,5 +1309,5 @@ class SubGeometryList
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
 	public var subGeometry:TriangleSubGeometry;
-	public var material:IMaterial;
+	public var material:MaterialBase;
 }

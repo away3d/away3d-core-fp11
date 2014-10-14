@@ -54,7 +54,6 @@ package away3d.entities
 				_frustumPlanes[i] = new Plane3D();
 			
 			z = -1000;
-            lookAt()
 		}
 		
 		override protected function createDefaultBoundingVolume():BoundingVolumeBase

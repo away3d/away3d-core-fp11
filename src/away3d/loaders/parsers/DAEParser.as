@@ -1,41 +1,35 @@
 package away3d.loaders.parsers
 {
-	import away3d.core.base.TriangleSubGeometry;
+    import away3d.animators.SkeletonAnimationSet;
+    import away3d.animators.data.JointPose;
+    import away3d.animators.data.Skeleton;
+    import away3d.animators.data.SkeletonJoint;
+    import away3d.animators.data.SkeletonPose;
+    import away3d.animators.nodes.AnimationNodeBase;
+    import away3d.animators.nodes.SkeletonClipNode;
+    import away3d.arcane;
+    import away3d.containers.ObjectContainer3D;
+    import away3d.core.base.Geometry;
+    import away3d.core.base.TriangleSubGeometry;
+    import away3d.debug.Debug;
+    import away3d.entities.Mesh;
+    import away3d.loaders.misc.ResourceDependency;
+    import away3d.materials.MaterialBase;
+    import away3d.materials.TriangleMaterialMode;
+    import away3d.materials.TriangleMethodMaterial;
+    import away3d.materials.methods.AmbientBasicMethod;
+    import away3d.materials.methods.DiffuseBasicMethod;
+    import away3d.materials.methods.SpecularBasicMethod;
+    import away3d.materials.utils.DefaultMaterialManager;
+    import away3d.textures.BitmapTexture;
+    import away3d.textures.Texture2DBase;
 
-	import flash.display.BitmapData;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	
-	import away3d.arcane;
-	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.data.JointPose;
-	import away3d.animators.data.Skeleton;
-	import away3d.animators.data.SkeletonJoint;
-	import away3d.animators.data.SkeletonPose;
-	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.debug.Debug;
-	import away3d.entities.Mesh;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.ColorMultiPassMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.MultiPassMaterialBase;
-	import away3d.materials.SinglePassMaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.methods.AmbientBasicMethod;
-	import away3d.materials.methods.DiffuseBasicMethod;
-	import away3d.materials.methods.SpecularBasicMethod;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
-	
-	use namespace arcane;
+    import flash.display.BitmapData;
+    import flash.geom.Matrix3D;
+    import flash.geom.Vector3D;
+    import flash.net.URLRequest;
+
+    use namespace arcane;
 	
 	/**
 	 * DAEParser provides a parser for the DAE data type.
@@ -73,11 +67,9 @@ package away3d.loaders.parsers
 		private var _animationInfo:DAEAnimationInfo;
 		//private var _animators : Vector.<IAnimator>;
 		private var _rootNodes:Vector.<AnimationNodeBase>;
-		private var _defaultBitmapMaterial:MaterialBase = DefaultMaterialManager.getDefaultMaterial();
-		private var _defaultColorMaterial:ColorMaterial = new ColorMaterial(0xff0000);
-		private var _defaultColorMaterialMulti:ColorMultiPassMaterial = new ColorMultiPassMaterial(0xff0000);
-		private static var _numInstances:uint = 0;
-		
+		private var _defaultBitmapMaterial:TriangleMethodMaterial;
+		private var _defaultColorMaterial:TriangleMethodMaterial;
+
 		/**
 		 * @param    configFlags    Bitfield to configure the parser. 
 		 * @see DAEParser.CONFIG_USE_GPU etc.
@@ -86,6 +78,10 @@ package away3d.loaders.parsers
 		{
 			_configFlags = configFlags > 0? configFlags : CONFIG_DEFAULT;
 			_parseFlags = PARSE_DEFAULT;
+
+            _defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial() as TriangleMethodMaterial
+            _defaultColorMaterial = new TriangleMethodMaterial();
+            _defaultColorMaterial.color = 0xff0000;
 			
 			super(ParserDataFormat.PLAIN_TEXT);
 		}
@@ -247,19 +243,23 @@ package away3d.loaders.parsers
 			return MORE_TO_PARSE;
 		}
 		
-		private function buildDefaultMaterial(map:BitmapData = null):MaterialBase
+		private function buildDefaultMaterial(map:BitmapData = null):TriangleMethodMaterial
 		{
 			//TODO:fix this duplication mess
 			if (map) {
-				if (materialMode < 2)
-					_defaultBitmapMaterial = new TextureMaterial(new BitmapTexture(map));
-				else
-					_defaultBitmapMaterial = new TextureMultiPassMaterial(new BitmapTexture(map));
+                _defaultBitmapMaterial = new TriangleMethodMaterial(new BitmapTexture(map));
+
+				if (materialMode >= 2) {
+                    _defaultBitmapMaterial.materialMode = TriangleMaterialMode.MULTI_PASS;
+                }
+
 			} else if (materialMode < 2)
-				_defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial();
-			else
-				_defaultBitmapMaterial = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
-			
+				_defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial() as TriangleMethodMaterial;
+			else {
+				_defaultBitmapMaterial = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
+                _defaultBitmapMaterial.materialMode = TriangleMaterialMode.MULTI_PASS;
+            }
+
 			return _defaultBitmapMaterial;
 		}
 		
@@ -759,13 +759,15 @@ package away3d.loaders.parsers
 			if (!effect || !material)
 				return null;
 			
-			var mat:MaterialBase
+			var mat:TriangleMethodMaterial;
 			if (materialMode < 2)
 				mat = _defaultColorMaterial;
-			else
-				mat = new ColorMultiPassMaterial(_defaultColorMaterial.color);
-			
-			var textureMaterial:TextureMaterial;
+			else {
+				mat = new TriangleMethodMaterial();
+                mat.color = _defaultColorMaterial.color;
+                mat.materialMode = TriangleMaterialMode.MULTI_PASS;
+            }
+
 			var ambient:DAEColorOrTexture = effect.shader.props["ambient"];
 			var diffuse:DAEColorOrTexture = effect.shader.props["diffuse"];
 			var specular:DAEColorOrTexture = effect.shader.props["specular"];
@@ -778,41 +780,34 @@ package away3d.loaders.parsers
 				if (image.resource !== null && isBitmapDataValid(image.resource.bitmapData)) {
 					mat = buildDefaultMaterial(image.resource.bitmapData);
 					if (materialMode < 2)
-						TextureMaterial(mat).alpha = transparency;
+						mat.alpha = transparency;
 				} else
 					mat = buildDefaultMaterial();
 				
 			}
 			
 			else if (diffuse && diffuse.color) {
-				if (materialMode < 2)
-					mat = new ColorMaterial(diffuse.color.rgb, transparency);
-				else
-					mat = new ColorMultiPassMaterial(diffuse.color.rgb);
+				if (materialMode < 2) {
+					mat = new TriangleMethodMaterial();
+                    mat.alpha = transparency;
+                    mat.color = diffuse.color.rgb;
+                } else {
+					mat = new TriangleMethodMaterial();
+                    mat.color = diffuse.color.rgb;
+                    mat.materialMode = TriangleMaterialMode.MULTI_PASS;
+                }
 			}
 			if (mat) {
-				if (materialMode < 2) {
-					SinglePassMaterialBase(mat).ambientMethod = new AmbientBasicMethod();
-					SinglePassMaterialBase(mat).diffuseMethod = new DiffuseBasicMethod();
-					SinglePassMaterialBase(mat).specularMethod = new SpecularBasicMethod();
-					SinglePassMaterialBase(mat).ambientColor = (ambient && ambient.color)? ambient.color.rgb : 0x303030;
-					SinglePassMaterialBase(mat).specularColor = (specular && specular.color)? specular.color.rgb : 0x202020;
-					SinglePassMaterialBase(mat).gloss = shininess;
-					SinglePassMaterialBase(mat).ambient = 1;
-					SinglePassMaterialBase(mat).specular = 1;
-				} else {
-					MultiPassMaterialBase(mat).ambientMethod = new AmbientBasicMethod();
-					MultiPassMaterialBase(mat).diffuseMethod = new DiffuseBasicMethod();
-					MultiPassMaterialBase(mat).specularMethod = new SpecularBasicMethod();
-					MultiPassMaterialBase(mat).ambientColor = (ambient && ambient.color)? ambient.color.rgb : 0x303030;
-					MultiPassMaterialBase(mat).specularColor = (specular && specular.color)? specular.color.rgb : 0x202020;
-					MultiPassMaterialBase(mat).gloss = shininess;
-					MultiPassMaterialBase(mat).ambient = 1;
-					MultiPassMaterialBase(mat).specular = 1;
-					
-				}
+                mat.ambientMethod = new AmbientBasicMethod();
+                mat.diffuseMethod = new DiffuseBasicMethod();
+                mat.specularMethod = new SpecularBasicMethod();
+                mat.ambientColor = (ambient && ambient.color)? ambient.color.rgb : 0x303030;
+                mat.specularColor = (specular && specular.color)? specular.color.rgb : 0x202020;
+                mat.gloss = shininess;
+                mat.ambient = 1;
+                mat.specular = 1;
 			}
-			
+
 			mat.name = material.id;
 			finalizeAsset(mat);
 			

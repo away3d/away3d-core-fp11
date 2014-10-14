@@ -3,14 +3,15 @@ package away3d.materials.utils {
     import away3d.core.library.AssetType;
     import away3d.materials.LineBasicMaterial;
     import away3d.materials.MaterialBase;
-    import away3d.materials.TextureMaterial;
+    import away3d.materials.TriangleBasicMaterial;
+    import away3d.materials.TriangleMethodMaterial;
     import away3d.textures.BitmapTexture;
 
     import flash.display.BitmapData;
 
     public class DefaultMaterialManager {
         private static var _defaultTextureBitmapData:BitmapData;
-        private static var _defaultTextureMaterial:TextureMaterial;
+        private static var _defaultTextureMaterial:TriangleMethodMaterial;
         private static var _defaultLineMaterial:LineBasicMaterial;
         private static var _defaultTexture:BitmapTexture;
 
@@ -66,9 +67,7 @@ package away3d.materials.utils {
             if (!_defaultTexture)
                 createDefaultTexture();
 
-            _defaultTextureMaterial = new TextureMaterial(_defaultTexture);
-            _defaultTextureMaterial.mipmap = false;
-            _defaultTextureMaterial.smooth = false;
+            _defaultTextureMaterial = new TriangleMethodMaterial(_defaultTexture, false, false, false);
             _defaultTextureMaterial.name = "defaultTextureMaterial";
         }
 

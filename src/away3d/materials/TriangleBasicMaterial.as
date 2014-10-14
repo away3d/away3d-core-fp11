@@ -24,7 +24,7 @@ package away3d.materials {
          * @param repeat Indicates whether the texture should be tiled when sampled. Defaults to false.
          * @param mipmap Indicates whether or not any used textures should use mipmapping. Defaults to false.
          */
-        public function TriangleBasicMaterial(texture:Texture2DBase, smooth:Boolean, repeat:Boolean, mipmap:Boolean)
+        public function TriangleBasicMaterial(texture:Texture2DBase, smooth:Boolean = true, repeat:Boolean = false, mipmap:Boolean = true)
         {
             super();
 
@@ -59,7 +59,7 @@ package away3d.materials {
          */
         public function get alpha():Number
         {
-            return this._alpha;
+            return _alpha;
         }
 
         public function set alpha(value:Number)
@@ -99,19 +99,19 @@ package away3d.materials {
         /**
          * @inheritDoc
          */
-        arcane function UpdateMaterial():void
+        override arcane function updateMaterial():void
         {
             var passesInvalid:Boolean;
 
-            if (this._screenPassesInvalid) {
-                this.updateScreenPasses();
+            if (_screenPassesInvalid) {
+                updateScreenPasses();
                 passesInvalid = true;
             }
 
             if (passesInvalid) {
                 clearScreenPasses();
 
-                addScreenPass(this._screenPass);
+                addScreenPass(_screenPass);
             }
         }
 

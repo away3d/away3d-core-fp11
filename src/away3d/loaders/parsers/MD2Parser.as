@@ -114,9 +114,9 @@ package away3d.loaders.parsers
 			if (asset) {
 				var material:MaterialBase;
 				if (materialMode < 2)
-					material = new TextureMaterial(asset);
+					material = new TriangleBasicMaterial(asset);
 				else
-					material = new TextureMultiPassMaterial(asset);
+					material = new TriangleMethodMaterial(asset);
 				
 				material.name = _mesh.material.name;
 				_mesh.material = material;
@@ -136,7 +136,7 @@ package away3d.loaders.parsers
 			if (materialMode < 2)
 				_mesh.material = DefaultMaterialManager.getDefaultMaterial();
 			else
-				_mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+				_mesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
 			
 			finalizeAsset(_mesh.geometry);
 			finalizeAsset(_mesh);
@@ -169,7 +169,7 @@ package away3d.loaders.parsers
 					if (materialMode < 2)
 						_mesh.material = DefaultMaterialManager.getDefaultMaterial();
 					else
-						_mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+						_mesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
 					
 					//_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
 					//_animator = new VertexAnimator(VertexAnimationState(_mesh.animationState));

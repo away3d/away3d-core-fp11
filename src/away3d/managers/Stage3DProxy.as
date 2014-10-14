@@ -709,11 +709,11 @@ package away3d.managers
             var i:int;
 
 			//clear unused vertex streams
-			for (i = shaderObject.numUsedStreams; i < this._numUsedStreams; i++)
+			for (i = shaderObject.numUsedStreams; i < _numUsedStreams; i++)
 				_context3D.setVertexBufferAt(i, null);
 
 			//clear unused texture streams
-			for (i = shaderObject.numUsedTextures; i < this._numUsedTextures; i++)
+			for (i = shaderObject.numUsedTextures; i < _numUsedTextures; i++)
 				_context3D.setTextureAt(i, null);
 
 			if (materialPassData.usesAnimation)
@@ -723,7 +723,7 @@ package away3d.managers
 			shaderObject.activate(this, camera);
 
 			//check program data is uploaded
-			var programData:ProgramData = this.getProgram(materialPassData);
+			var programData:ProgramData = getProgram(materialPassData);
 
 			if (!programData.program) {
 				programData.program = _context3D.createProgram();

@@ -1,24 +1,22 @@
 package away3d.loaders.parsers
 {
-	import away3d.*;
-	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.core.library.AssetType;
-	import away3d.core.library.IAsset;
-	import away3d.entities.*;
-	import away3d.core.library.assets.*;
-	import away3d.loaders.misc.*;
-	import away3d.loaders.parsers.utils.*;
-	import away3d.materials.*;
-	import away3d.materials.utils.*;
-	import away3d.textures.*;
-	import away3d.tools.utils.*;
-	
-	import flash.geom.*;
-	import flash.net.*;
-	import flash.utils.*;
-	
-	use namespace arcane;
+    import away3d.*;
+    import away3d.containers.*;
+    import away3d.core.base.*;
+    import away3d.core.library.AssetType;
+    import away3d.core.library.IAsset;
+    import away3d.entities.*;
+    import away3d.loaders.misc.*;
+    import away3d.loaders.parsers.utils.*;
+    import away3d.materials.*;
+    import away3d.materials.utils.*;
+    import away3d.textures.*;
+
+    import flash.geom.*;
+    import flash.net.*;
+    import flash.utils.*;
+
+    use namespace arcane;
 	
 	/**
 	 * Max3DSParser provides a parser for the 3ds data type.
@@ -710,21 +708,27 @@ package away3d.loaders.parsers
 		
 		private function finalizeCurrentMaterial():void
 		{
-			var mat:MaterialBase;
+			var mat:TriangleMethodMaterial;
 			if (materialMode < 2) {
-				if (_cur_mat.colorMap)
-					mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
-				else
-					mat = new ColorMaterial(_cur_mat.diffuseColor);
-				SinglePassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
-				SinglePassMaterialBase(mat).specularColor = _cur_mat.specularColor;
+				if (_cur_mat.colorMap){
+                    mat = new TriangleMethodMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+                } else {
+                    mat = new TriangleMethodMaterial(null);
+                    mat.color = _cur_mat.diffuseColor;
+                }
+
+				mat.ambientColor = _cur_mat.ambientColor;
+				mat.specularColor = _cur_mat.specularColor;
 			} else {
-				if (_cur_mat.colorMap)
-					mat = new TextureMultiPassMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
-				else
-					mat = new ColorMultiPassMaterial(_cur_mat.diffuseColor);
-				MultiPassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
-				MultiPassMaterialBase(mat).specularColor = _cur_mat.specularColor;
+				if (_cur_mat.colorMap) {
+                    mat = new TriangleMethodMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+                } else {
+                    mat = new TriangleMethodMaterial(null);
+                    mat.color = _cur_mat.diffuseColor;
+                }
+                mat.materialMode = TriangleMaterialMode.MULTI_PASS;
+				mat.ambientColor = _cur_mat.ambientColor;
+				mat.specularColor = _cur_mat.specularColor;
 			}
 			
 			mat.bothSides = _cur_mat.twoSided;

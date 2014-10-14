@@ -1,15 +1,15 @@
 ﻿package away3d.debug
 {
-	import away3d.core.base.Geometry;
-	import away3d.debug.data.TridentLines;
-	import away3d.entities.Mesh;
-	import away3d.extrusions.LatheExtrude;
-	import away3d.materials.ColorMaterial;
-	import away3d.tools.commands.Merge;
-	
-	import flash.geom.Vector3D;
-	
-	/**
+    import away3d.core.base.Geometry;
+    import away3d.debug.data.TridentLines;
+    import away3d.entities.Mesh;
+    import away3d.extrusions.LatheExtrude;
+    import away3d.materials.TriangleMethodMaterial;
+    import away3d.tools.commands.Merge;
+
+    import flash.geom.Vector3D;
+
+    /**
 	 * Creates a new <code>Trident</code> object.
 	 *
 	 * @param     length                The length of the trident axes. Default is 1000.
@@ -32,10 +32,17 @@
 			var vectors:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
 			var colors:Vector.<uint> = Vector.<uint>([0xFF0000, 0x00FF00, 0x0000FF]);
 			
-			var matX:ColorMaterial = new ColorMaterial(0xFF0000);
-			var matY:ColorMaterial = new ColorMaterial(0x00FF00);
-			var matZ:ColorMaterial = new ColorMaterial(0x0000FF);
-			var matOrigin:ColorMaterial = new ColorMaterial(0xCCCCCC);
+			var matX:TriangleMethodMaterial = new TriangleMethodMaterial();
+            matX.color = 0xff0000;
+
+			var matY:TriangleMethodMaterial = new TriangleMethodMaterial();
+            matY.color = 0x00FF00;
+
+			var matZ:TriangleMethodMaterial = new TriangleMethodMaterial();
+            matZ.color = 0x0000FF;
+
+			var matOrigin:TriangleMethodMaterial = new TriangleMethodMaterial();
+            matOrigin.color = 0xCCCCCC;
 			
 			var merge:Merge = new Merge(true, true);
 			
