@@ -61,7 +61,7 @@ package away3d.materials.methods
 		{
 			super.activate(shaderObject, methodVO, stage);
 
-            stage.activateCubeTexture(methodVO.texturesIndex, _cubeTexture);
+            stage.activateTexture(methodVO.texturesIndex, _cubeTexture);
 		}
 		
 		/**

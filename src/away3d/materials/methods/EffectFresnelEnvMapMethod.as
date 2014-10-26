@@ -144,7 +144,7 @@ package away3d.materials.methods
 			data[index] = _alpha;
 			data[index + 1] = _normalReflectance;
 			data[index + 2] = _fresnelPower;
-            stage.activateCubeTexture(methodVO.texturesIndex, _cubeTexture);
+            stage.activateTexture(methodVO.texturesIndex, _cubeTexture);
 			if (_mask)
                 stage.activateTexture(methodVO.texturesIndex + 1, _mask);
 		}

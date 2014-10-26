@@ -104,7 +104,7 @@ package away3d.materials {
             var context:Context3D = stage.context3D;
             context.setSamplerStateAt(0, Context3DWrapMode.CLAMP, Context3DTextureFilter.LINEAR, _cubeMap.hasMipMaps ? Context3DMipFilter.MIPLINEAR : Context3DMipFilter.MIPNONE);
             context.setDepthTest(false, Context3DCompareMode.LESS);
-            stage.activateCubeTexture(0, _cubeMap);
+            stage.activateTexture(0, _cubeMap);
         }
 
         /**

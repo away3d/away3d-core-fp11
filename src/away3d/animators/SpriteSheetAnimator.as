@@ -118,7 +118,7 @@ package away3d.animators
 		override public function setRenderState(shaderObject:ShaderObjectBase, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, vertexConstantOffset:int, vertexStreamOffset:int):void
 		{
 			var material:MaterialBase = (renderable as TriangleSubMeshRenderable).material;
-			if (!material || !material is TriangleBasicMaterial)
+			if (!material || !material is TriangleMethodMaterial)
 				return;
 			
 			//because textures are already uploaded, we can't offset the uv's yet

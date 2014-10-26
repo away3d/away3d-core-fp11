@@ -2,8 +2,10 @@ package away3d.filters.tasks
 {
 	import away3d.entities.Camera3D;
 	import away3d.managers.Stage3DProxy;
-	
-	import flash.display3D.Context3DProgramType;
+    import away3d.textures.Texture2DBase;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.display3D.Context3DProgramType;
 	import flash.display3D.textures.Texture;
 	
 	public class Filter3DHBlurTask extends Filter3DTaskBase
@@ -82,14 +84,14 @@ package away3d.filters.tasks
 			return code;
 		}
 		
-		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:Texture):void
+		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:TextureProxyBase):void
 		{
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
 		}
 		
-		override protected function updateTextures(stage:Stage3DProxy):void
+		override protected function updateTextures():void
 		{
-			super.updateTextures(stage);
+			super.updateTextures();
 			
 			updateBlurData();
 		}
@@ -106,9 +108,7 @@ package away3d.filters.tasks
 		private function calculateStepSize():void
 		{
 			_realStepSize = _stepSize > 0? _stepSize :
-				_amount > MAX_AUTO_SAMPLES? _amount/MAX_AUTO_SAMPLES :
-				1;
-		
+				_amount > MAX_AUTO_SAMPLES? _amount/MAX_AUTO_SAMPLES : 1;
 		}
 	}
 }

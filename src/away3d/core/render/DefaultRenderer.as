@@ -16,15 +16,18 @@ package away3d.core.render
 	import away3d.entities.DirectionalLight;
 	import away3d.core.base.LightBase;
 	import away3d.entities.PointLight;
-	import away3d.materials.passes.IMaterialPass;
+    import away3d.materials.passes.DepthMapPass;
+    import away3d.materials.passes.DistanceMapPass;
+    import away3d.materials.passes.IMaterialPass;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.shadowmappers.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
 	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.RenderTexture;
 	import away3d.textures.Texture2DBase;
+    import away3d.textures.TextureProxyBase;
 
-	import flash.display.Stage;
+    import flash.display.Stage;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
@@ -125,10 +128,10 @@ package away3d.core.render
 		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline")
 		{
 			super();
-			_depthRenderer = new DepthRenderer();
+			_depthRenderer = new DepthRenderer(new DepthMapPass());
 			_worldNormalRenderer = new WorldNormalRenderer();
 			_gbufferRenderer = new GBufferRenderer();
-			_distanceRenderer = new DepthRenderer(false, true);
+			_distanceRenderer = new DepthRenderer(new DistanceMapPass());
 			_forceSoftware = forceSoftware;
 			_profile = profile;
 		}
@@ -214,8 +217,8 @@ package away3d.core.render
 			}
 
 			if (_useDeferredLighting && hasMRTSupport) {
-				_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
-				_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
+                _stage3DProxy.setRenderTarget(sceneDepthTexture, true, 0);
+                _stage3DProxy.setRenderTarget(sceneNormalTexture, true, 1);
 				_context3D.clear();
 
 				_gbufferRenderer.render(_stage3DProxy, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
@@ -227,11 +230,11 @@ package away3d.core.render
 				if (_useDeferredLighting || _requireDepthRender) {
 					_depthRenderer.textureRatioX = _textureRatioX;
 					_depthRenderer.textureRatioY = _textureRatioY;
-					_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+					_depthRenderer.renderScene(entityCollector, sceneDepthTexture, _rttBufferManager.renderToTextureRect);
 				}
 
 				if (_useDeferredLighting) {
-					_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias);
+					_stage3DProxy.setRenderTarget(sceneNormalTexture, true, 0);
 					_context3D.clear();
 					_context3D.setScissorRectangle(_rttBufferManager.renderToTextureRect);
 					_worldNormalRenderer.render(stage3DProxy, opaqueRenderableHead, entityCollector.camera, _rttViewProjectionMatrix);
@@ -249,12 +252,12 @@ package away3d.core.render
 			//TODO: downsampled lightbuffer support
 			if (_useDeferredLighting) {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
-				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, 0, 0, 0);
+                _stage3DProxy.setRenderTarget(lightAccumulation, true, 0);
 				updateFrustumCorners(camera);
 
 				if (_useDeferredColoredSpecular) {
 					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
-					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, 0, 0, 1);
+                    _stage3DProxy.setRenderTarget(lightAccumulationSpecular, true, 1);
 				}
 
 				stage3DProxy.clearBuffers();
@@ -277,7 +280,7 @@ package away3d.core.render
 			if (filter3DRenderer && _stage3DProxy.context3D) {
 				renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				if (filter3DRenderer.requireDepthRender) {
-					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, sceneDepthTexture.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, sceneDepthTexture, _shareContext);
 				} else {
 					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, null, _shareContext);
 				}
@@ -296,20 +299,20 @@ package away3d.core.render
 				var numTextures:int = 0;
 
 				if (_useDeferredLighting || _requireDepthRender) {
-					_context3D.setTextureAt(0, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+                    _stage3DProxy.activateTexture(0, sceneDepthTexture);
 					numTextures++;
 				}
 
 				if (_useDeferredLighting) {
 					numTextures++;
-					_context3D.setTextureAt(1, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
+                    _stage3DProxy.activateTexture(1, sceneNormalTexture);
 
 					numTextures++;
-					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+                    _stage3DProxy.activateTexture(2, lightAccumulation);
 
 					if (_useDeferredColoredSpecular && lightAccumulationSpecular) {
 						numTextures++;
-						_context3D.setTextureAt(3, lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
+                        _stage3DProxy.activateTexture(3, lightAccumulationSpecular);
 					}
 				}
 
@@ -340,19 +343,20 @@ package away3d.core.render
 			return _frustumCorners;
 		}
 
-		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
+		override protected function executeRender(entityCollector:ICollector, target:TextureProxyBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
 		{
-			updateShadows(entityCollector);
+			updateLights(entityCollector);
 
 			// otherwise RTT will interfere with other RTTs
 			if (target) {
+                collectRenderables(entityCollector);
 				drawRenderables(opaqueRenderableHead, entityCollector);
 				drawRenderables(blendedRenderableHead, entityCollector);
 			}
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
-		private function updateShadows(collector:ICollector):void
+		private function updateLights(collector:ICollector):void
 		{
 			_depthRenderer.textureRatioX = 1;
 			_depthRenderer.textureRatioY = 1;
@@ -383,7 +387,7 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(collector:ICollector, target:TextureBase):void
+		override protected function draw(collector:ICollector, target:TextureProxyBase):void
 		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			if (!target) {
@@ -392,26 +396,14 @@ package away3d.core.render
 			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (entityCollector.skyBox) {
-				if (_activeMaterial)
-					_activeMaterial.deactivate(_stage3DProxy);
-				_activeMaterial = null;
-
 				_context3D.setDepthTest(false, Context3DCompareMode.ALWAYS);
 				drawSkyBox(entityCollector);
 			}
 
 			_context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 
-			var which:int = target ? SCREEN_PASSES : ALL_PASSES;
-			drawRenderables(opaqueRenderableHead, entityCollector, which, _useDeferredLighting);
-			drawRenderables(blendedRenderableHead, entityCollector, which);
-
-			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
-
-			if (_activeMaterial)
-				_activeMaterial.deactivate(_stage3DProxy);
-
-			_activeMaterial = null;
+			drawRenderables(opaqueRenderableHead, entityCollector);
+			drawRenderables(blendedRenderableHead, entityCollector);
 		}
 
 		/**
@@ -504,7 +496,7 @@ package away3d.core.render
 			var renderable2:RenderableBase;
 
 			while (renderable) {
-				activeMaterial = context.getMaterial(renderable.material, _stage3DProxy.profile);
+				activeMaterial = _stage3DProxy.getMaterial(renderable.material, _stage3DProxy.profile);
 
 				//iterate through each screen pass
 				passes = renderable.material.screenPasses;
@@ -569,7 +561,7 @@ package away3d.core.render
 			// context does get available) means usesSoftwareRendering won't be reliable.
 			if (!_shareContext) {
 				if (_width && _height) {
-					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias);
+					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
 					_backBufferInvalid = false;
 				}
 			}

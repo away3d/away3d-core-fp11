@@ -110,7 +110,7 @@
             return code;
         }
 
-        arcane function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D)
+        arcane function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
         {
             //this.setRenderState(pass, renderable, stage, camera, viewProjection);
         }

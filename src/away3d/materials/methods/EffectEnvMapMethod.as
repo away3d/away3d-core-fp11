@@ -102,7 +102,7 @@ package away3d.materials.methods
 		arcane override function activate(shaderObject:ShaderObjectBase, methodVO:MethodVO, stage:Stage3DProxy):void
 		{
             shaderObject.fragmentConstantData[methodVO.fragmentConstantsIndex] = _alpha;
-            stage.activateCubeTexture(methodVO.texturesIndex, _cubeTexture);
+            stage.activateTexture(methodVO.texturesIndex, _cubeTexture);
 			if (_mask)
 				stage.activateTexture(methodVO.texturesIndex+1, _mask);
 		}

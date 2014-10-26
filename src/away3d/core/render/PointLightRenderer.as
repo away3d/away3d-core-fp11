@@ -297,9 +297,9 @@ package away3d.core.render {
             //VERTEX DATA
             var context3D:Context3D = stage3DProxy.context3D;
 
-            context3D.setTextureAt(shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture.getTextureForStage3D(stage3DProxy));
+            stage3DProxy.activateTexture(shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture);
             if (shader.hasTexture(DEPTH_TEXTURE)) {
-                context3D.setTextureAt(shader.getTexture(DEPTH_TEXTURE), depthTexture.getTextureForStage3D(stage3DProxy));
+                stage3DProxy.activateTexture(shader.getTexture(DEPTH_TEXTURE), depthTexture);
             }
 
             if (shader.hasFragmentConstant(LIGHT_FC)) {

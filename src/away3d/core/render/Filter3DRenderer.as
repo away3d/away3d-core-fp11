@@ -7,8 +7,10 @@ package away3d.core.render
 	import away3d.events.*;
 	import away3d.filters.*;
 	import away3d.filters.tasks.*;
-	
-	import flash.display3D.*;
+    import away3d.textures.Texture2DBase;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.display3D.*;
 	import flash.display3D.textures.*;
 	import flash.events.*;
 	
@@ -17,7 +19,7 @@ package away3d.core.render
 		private var _filters:Vector.<Filter3DBase>;
 		private var _tasks:Vector.<Filter3DTaskBase>;
 		private var _filterTasksInvalid:Boolean;
-		private var _mainInputTexture:TextureBase;
+		private var _mainInputTexture:TextureProxyBase;
 		
 		private var _requireDepthRender:Boolean;
 		
@@ -47,7 +49,7 @@ package away3d.core.render
 			return _requireDepthRender;
 		}
 		
-		public function getMainInputTexture(stage3DProxy:Stage3DProxy):TextureBase
+		public function getMainInputTexture(stage3DProxy:Stage3DProxy):TextureProxyBase
 		{
 			if (_filterTasksInvalid)
 				updateFilterTasks(stage3DProxy);
@@ -96,14 +98,18 @@ package away3d.core.render
 			for (var i:uint = 0; i <= len; ++i) {
 				// make sure all internal tasks are linked together
 				filter = _filters[i];
-				filter.setRenderTargets(i == len? null : Filter3DBase(_filters[i + 1]).getMainInputTexture(stage3DProxy) as Texture, stage3DProxy);
+                if(i == len) {
+                    filter.setRenderTargets(null);
+                }else{
+                    filter.setRenderTargets(_filters[i + 1].getMainInputTexture());
+                }
 				_tasks = _tasks.concat(filter.tasks);
 			}
 			
-			_mainInputTexture = _filters[0].getMainInputTexture(stage3DProxy);
+			_mainInputTexture = _filters[0].getMainInputTexture();
 		}
 		
-		public function render(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:Texture, shareContext:Boolean):void
+		public function render(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:TextureProxyBase, shareContext:Boolean):void
 		{
 			var len:int;
 			var i:int;
@@ -132,9 +138,12 @@ package away3d.core.render
 			
 			for (i = 0; i < len; ++i) {
 				task = _tasks[i];
-				context.setRenderToTexture(task.target, _stage3DProxy.enableDepthAndStencil, _stage3DProxy.antiAlias);
-				context.setTextureAt(0, task.getMainInputTexture(stage3DProxy));
+                _stage3DProxy.setRenderTarget(task.target, _stage3DProxy.enableDepthAndStencil);
+
+                _stage3DProxy.activateTexture(0, task.getMainInputTexture());
+
 				context.setProgram(task.getProgram3D(stage3DProxy));
+
 				if (!task.target) {
 					stage3DProxy.scissorRect = null;
 					vertexBuffer = _rttManager.renderToScreenVertexBuffer;

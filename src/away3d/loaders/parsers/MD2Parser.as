@@ -112,12 +112,11 @@ package away3d.loaders.parsers
 			
 			var asset:Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			if (asset) {
-				var material:MaterialBase;
-				if (materialMode < 2)
-					material = new TriangleBasicMaterial(asset);
-				else
-					material = new TriangleMethodMaterial(asset);
-				
+				var material:TriangleMethodMaterial = new TriangleMethodMaterial(asset);
+
+				if (materialMode >= 2)
+                    material.materialMode = TriangleMaterialMode.MULTI_PASS;
+
 				material.name = _mesh.material.name;
 				_mesh.material = material;
 				finalizeAsset(material);
@@ -135,9 +134,12 @@ package away3d.loaders.parsers
 			// apply system default
 			if (materialMode < 2)
 				_mesh.material = DefaultMaterialManager.getDefaultMaterial();
-			else
-				_mesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
-			
+			else {
+                _mesh.material = new TriangleMethodMaterial(DefaultMaterialManager.getDefaultTexture());
+                (_mesh.material as TriangleMethodMaterial).materialMode = TriangleMaterialMode.MULTI_PASS;
+            }
+
+
 			finalizeAsset(_mesh.geometry);
 			finalizeAsset(_mesh);
 			materialFinal = true;

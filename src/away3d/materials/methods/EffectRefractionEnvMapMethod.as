@@ -176,7 +176,7 @@ package away3d.materials.methods
 				data[index + 2] = _dispersionB + _refractionIndex;
 			}
 			data[index + 3] = _alpha;
-			stage.activateCubeTexture(methodVO.texturesIndex, _envMap);
+			stage.activateTexture(methodVO.texturesIndex, _envMap);
 		}
 
 		/**

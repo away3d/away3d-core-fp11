@@ -75,7 +75,7 @@ package away3d.materials {
         /**
          * The depth compare mode used to render the renderables using this material.
          *
-         * @see away.stagegl.Context3DCompareMode
+         * @see flash.display3D.Context3DCompareMode
          */
 
         public function get depthCompareMode():String

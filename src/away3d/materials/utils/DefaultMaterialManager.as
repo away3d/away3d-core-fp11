@@ -3,7 +3,6 @@ package away3d.materials.utils {
     import away3d.core.library.AssetType;
     import away3d.materials.LineBasicMaterial;
     import away3d.materials.MaterialBase;
-    import away3d.materials.TriangleBasicMaterial;
     import away3d.materials.TriangleMethodMaterial;
     import away3d.textures.BitmapTexture;
 

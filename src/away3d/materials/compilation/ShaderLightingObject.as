@@ -335,10 +335,10 @@ package away3d.materials.compilation {
                 probe = lightProbes[ lightProbesOffset + i];
 
                 if (addDiff)
-                    stage.activateCubeTexture(lightProbeDiffuseIndices[i], probe.diffuseMap);
+                    stage.activateTexture(lightProbeDiffuseIndices[i], probe.diffuseMap);
 
                 if (addSpec)
-                    stage.activateCubeTexture(lightProbeSpecularIndices[i], probe.specularMap);
+                    stage.activateTexture(lightProbeSpecularIndices[i], probe.specularMap);
             }
 
             for (i = 0; i < len; ++i)

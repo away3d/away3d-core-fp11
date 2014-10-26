@@ -5,7 +5,8 @@ package away3d.materials.methods
     import away3d.materials.compilation.MethodVO;
     import away3d.materials.compilation.ShaderObjectBase;
     import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
+    import away3d.materials.compilation.ShaderRegisterData;
+    import away3d.materials.compilation.ShaderRegisterElement;
 	
 	import flash.geom.ColorTransform;
 	
@@ -43,12 +44,12 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		override arcane function getFragmentCode(shaderObject:ShaderObjectBase, methodVO:MethodVO, targetReg:ShaderRegisterElement, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			var code:String = "";
-			var colorMultReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var colorOffsReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			vo.fragmentConstantsIndex = colorMultReg.index*4;
+			var colorMultReg:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
+			var colorOffsReg:ShaderRegisterElement = registerCache.getFreeFragmentConstant();
+			methodVO.fragmentConstantsIndex = colorMultReg.index*4;
 			code += "mul " + targetReg + ", " + targetReg.toString() + ", " + colorMultReg + "\n" +
 				"add " + targetReg + ", " + targetReg.toString() + ", " + colorOffsReg + "\n";
 			return code;

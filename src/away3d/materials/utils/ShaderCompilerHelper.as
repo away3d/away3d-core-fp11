@@ -44,7 +44,6 @@ package away3d.materials.utils {
          */
         public static function getTexCubeSampleCode(targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, smooth:Boolean, mipmaps:Boolean, uvReg:ShaderRegisterElement):String
         {
-            var filter:String;
             var format:String = ShaderCompilerHelper.getFormatStringForTexture(texture);
             var enableMipMaps:Boolean = mipmaps && texture.hasMipMaps;
             var filter:String = (smooth) ? (enableMipMaps ? "linear,miplinear" : "linear") : (enableMipMaps ? "nearest,mipnearest" : "nearest");

@@ -137,7 +137,7 @@ package away3d.core.render
 		}
 
 		/**
-		 * A viewPort rectangle equivalent of the StageGL size and position.
+		 * A viewPort rectangle equivalent of the Stage3D size and position.
 		 */
 		public function get viewPort():Rectangle
 		{
@@ -504,6 +504,7 @@ package away3d.core.render
 		/**
 		 * Performs the actual drawing of geometry to the target.
 		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
+         * @param target Render target texture
 		 */
 		protected function draw(entityCollector:ICollector, target:TextureProxyBase):void
 		{
@@ -607,7 +608,7 @@ package away3d.core.render
 		public function onViewportUpdated(event:Stage3DEvent):void
 		{
 			_viewPort = _stage3DProxy.viewPort;
-			//TODO stop firing viewport updated for every stagegl viewport change
+			//TODO stop firing viewport updated for every stage3d viewport change
 
 			if (_shareContext) {
 				_scissorRect.x = _globalPos.x - _stage3DProxy.x;

@@ -4,8 +4,11 @@ package away3d.filters.tasks
 	import away3d.core.geom.*;
 	import away3d.entities.Camera3D;
 	import away3d.materials.utils.*;
-	
-	import flash.display.*;
+    import away3d.textures.RenderCubeTexture;
+    import away3d.textures.Texture2DBase;
+    import away3d.textures.TextureProxyBase;
+
+    import flash.display.*;
 	import flash.display3D.*;
 	import flash.display3D.textures.*;
 	
@@ -80,7 +83,7 @@ package away3d.filters.tasks
 			return code;
 		}
 		
-		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:Texture):void
+		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:TextureProxyBase):void
 		{
 			_data[0] = _fov*MathConsts.DEGREES_TO_RADIANS*_scaledTextureWidth/stage3DProxy.height;
 			_data[1] = _fov*MathConsts.DEGREES_TO_RADIANS*_scaledTextureHeight/stage3DProxy.height;
@@ -88,7 +91,7 @@ package away3d.filters.tasks
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
 		}
 		
-		override protected function updateTextures(stage:Stage3DProxy):void
+		override protected function updateTextures():void
 		{
 			if (!_sizeDirty)
 				return;
@@ -96,15 +99,8 @@ package away3d.filters.tasks
 			if (_mainInputTexture)
 				_mainInputTexture.dispose();
 			
-			_mainInputTextureContext = stage.context3D;
-			_mainInputTexture = _mainInputTextureContext.createCubeTexture(_size, Context3DTextureFormat.BGRA, true);
-			
-			// fake data, to complete texture for sampling
-			var bmd:BitmapData = new BitmapData(_size, _size, false, 0);
-			for (var i:int = 0; i < 6; ++i)
-				MipmapGenerator.uploadMipMaps(bmd, _mainInputTexture, null, false, i);
-			bmd.dispose();
-			
+			_mainInputTexture = new RenderCubeTexture(_size);
+
 			_textureDimensionsInvalid = false;
 		}
 	}

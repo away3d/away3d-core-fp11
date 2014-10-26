@@ -36,7 +36,7 @@
         /**
          * Initializes the unchanging constant data for this material.
          */
-        override arcane function initConstantData(shaderObject:ShaderObjectBase):void
+        override public function initConstantData(shaderObject:ShaderObjectBase):void
         {
             super.initConstantData(shaderObject);
 
@@ -48,7 +48,7 @@
             data[index + 7] = 0.0;
         }
 
-        override arcane function includeDependencies(shaderObject:ShaderObjectBase):void
+        override public function includeDependencies(shaderObject:ShaderObjectBase):void
         {
             shaderObject.projectionDependencies++;
             shaderObject.viewDirDependencies++;
@@ -62,7 +62,7 @@
         /**
          * @inheritDoc
          */
-        override arcane function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
+        override public function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
         {
             var code:String;
             var targetReg:ShaderRegisterElement = sharedRegisters.shadedTarget;
@@ -117,7 +117,7 @@
             // sqrt(f*f+f*f) is largest possible distance for any frustum, so we need to divide by it. Rarely a tight fit, but with 32 bits precision, it's enough.
             var index:Number = this._fragmentConstantsIndex;
             var data:Vector.<Number> = shaderObject.fragmentConstantData;
-            data[index] = 1 * f;
+            data[index] = f;
             data[index + 1] = 255.0 * f;
             data[index + 2] = 65025.0 * f;
             data[index + 3] = 16581375.0 * f;

@@ -68,6 +68,7 @@ package away3d.textures {
 
                 MipmapGenerator.generateMipMaps(getTextureData(), _mipmapData, true);
             }
+            return _mipmapData;
         }
 
         arcane function getTextureData():BitmapData
