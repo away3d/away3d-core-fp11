@@ -164,6 +164,8 @@ package away3d.materials
 			_mipmap = value;
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].mipmap = value;
+			_depthPass.mipmap = value;
+			_distancePass.mipmap = value;
 		}
 		
 		/**
@@ -179,6 +181,8 @@ package away3d.materials
 			_smooth = value;
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].smooth = value;
+			_depthPass.smooth = value;
+			_distancePass.smooth = value;
 		}
 
 		/**
@@ -210,6 +214,8 @@ package away3d.materials
 			_repeat = value;
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].repeat = value;
+			_depthPass.repeat = value;
+			_distancePass.repeat = value;
 		}
 		
 		/**
