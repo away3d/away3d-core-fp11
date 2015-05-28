@@ -25,7 +25,7 @@ package away3d.materials.methods {
         private var _multiply:Boolean = true;
 
         protected var _useTexture:Boolean;
-        protected var _totalLightColorReg:ShaderRegisterElement;
+        arcane var _totalLightColorReg:ShaderRegisterElement;
         protected var _diffuseInputRegister:ShaderRegisterElement;
 
         private var _texture:Texture2DBase;

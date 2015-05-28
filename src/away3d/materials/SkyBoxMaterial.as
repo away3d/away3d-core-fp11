@@ -43,7 +43,8 @@ package away3d.materials {
             super();
 
             _cubeMap = cubeMap;
-            addScreenPass(this._skyboxPass = new SkyBoxPass());
+			_skyboxPass = new SkyBoxPass();
+            addScreenPass(_skyboxPass);
 
             _vertexData = Vector.<Number>([0, 0, 0, 0, 1, 1, 1, 1]);
         }

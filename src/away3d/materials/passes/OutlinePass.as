@@ -4,12 +4,16 @@ package away3d.materials.passes
 	import away3d.core.base.TriangleSubMesh;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.MaterialPassData;
 	import away3d.managers.Stage3DProxy;
 	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.entities.Mesh;
+	import away3d.materials.compilation.ShaderObjectBase;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
@@ -33,6 +37,7 @@ package away3d.materials.passes
 		private var _showInnerLines:Boolean;
 		private var _outlineMeshes:Dictionary;
 		private var _dedicatedMeshes:Boolean;
+		private var _defaultCulling:String;
 
 		/**
 		 * Creates a new OutlinePass object.
@@ -44,22 +49,22 @@ package away3d.materials.passes
 		public function OutlinePass(outlineColor:uint = 0x000000, outlineSize:Number = 20, showInnerLines:Boolean = true, dedicatedMeshes:Boolean = false)
 		{
 			super();
-			mipmap = false;
+//			mipmap = false;
 			_colorData = new Vector.<Number>(4, true);
 			_colorData[3] = 1;
 			_offsetData = new Vector.<Number>(4, true);
 			this.outlineColor = outlineColor;
 			this.outlineSize = outlineSize;
 			_defaultCulling = Context3DTriangleFace.FRONT;
-			_numUsedStreams = 2;
-			_numUsedVertexConstants = 6;
+//			_numUsedStreams = 2;
+//			_numUsedVertexConstants = 6;
 			_showInnerLines = showInnerLines;
 			_dedicatedMeshes = dedicatedMeshes;
 			if (dedicatedMeshes)
 				_outlineMeshes = new Dictionary();
 			
-			_animatableAttributes = Vector.<String>(["va0", "va1"]);
-			_animationTargetRegisters = Vector.<String>(["vt0", "vt1"]);
+//			_animatableAttributes = Vector.<String>(["va0", "va1"]);
+//			_animationTargetRegisters = Vector.<String>(["vt0", "vt1"]);
 		
 		}
 		
@@ -142,38 +147,38 @@ package away3d.materials.passes
 		{
 			_offsetData[0] = value;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode():String
+		override public function getVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			var code:String;
 			// offset
 			code = "mul vt7, vt1, vc5.x\n" +
-				"add vt7, vt7, vt0\n" +
-				"mov vt7.w, vt0.w\n" +
+			"add vt7, vt7, vt0\n" +
+			"mov vt7.w, vt0.w\n" +
 				// project and scale to viewport
-				"m44 op, vt7, vc0		\n";
-			
+			"m44 op, vt7, vc0		\n";
+
 			return code;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode(animationCode:String):String
+		override public function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
 			return "mov oc, fc0\n";
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		override public function activate(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void
 		{
-			var context:Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
+			var context:Context3D = stage._context3D;
+			super.activate(pass, stage, camera);
 			
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
@@ -186,22 +191,22 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(stage3DProxy:Stage3DProxy):void
+		override public function deactivate(pass:MaterialPassData, stage:Stage3DProxy):void
 		{
-			super.deactivate(stage3DProxy);
+			super.deactivate(pass, stage);
 			if (!_showInnerLines)
-				stage3DProxy._context3D.setDepthTest(true, Context3DCompareMode.LESS);
+				stage._context3D.setDepthTest(true, Context3DCompareMode.LESS);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		override public function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var mesh:Mesh;
 			var dedicatedRenderable:RenderableBase;
 			
-			var context:Context3D = stage3DProxy._context3D;
+			var context:Context3D = stage._context3D;
 			var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 			matrix3D.append(viewProjection);
@@ -212,15 +217,15 @@ package away3d.materials.passes
 				dedicatedRenderable = new TriangleSubMeshRenderable(null,mesh.subMeshes[0] as TriangleSubMesh);
 				
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
-				stage3DProxy.activateBuffer(0, dedicatedRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
-				stage3DProxy.activateBuffer(1, dedicatedRenderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
-				context.drawTriangles(stage3DProxy.getIndexBuffer(dedicatedRenderable.getIndexData()), 0, dedicatedRenderable.numTriangles);
+				stage.activateBuffer(0, dedicatedRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				stage.activateBuffer(1, dedicatedRenderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				context.drawTriangles(stage.getIndexBuffer(dedicatedRenderable.getIndexData()), 0, dedicatedRenderable.numTriangles);
 			} else {
-				stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				stage.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 				
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
-				stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
-				context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+				stage.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				context.drawTriangles(stage.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 			}
 		}
 

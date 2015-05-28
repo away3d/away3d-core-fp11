@@ -1,10 +1,15 @@
 package away3d.materials.passes {
+	import away3d.animators.AnimatorBase;
 	import away3d.arcane;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.managers.Stage3DProxy;
 	import away3d.core.geom.Matrix3DUtils;
+	import away3d.core.pool.MaterialPassData;
 	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
+	import away3d.managers.Stage3DProxy;
+	import away3d.materials.compilation.ShaderObjectBase;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderState;
 	import away3d.textures.Texture2DBase;
 
@@ -21,6 +26,7 @@ package away3d.materials.passes {
 	public class WorldNormalPass extends MaterialPassBase {
 		//varyings
 		public static const UV_VARYING:String = "vUV";
+		public static const SECONDARY_UV_VARYING:String = "vSecondaryUV";
 //		public static const PROJECTED_POSITION_VARYING:String = "vProjPos";
 		public static const NORMAL_VARYING:String = "vNormal";
 		public static const TANGENT_VARYING:String = "vTangent";
@@ -50,7 +56,7 @@ package away3d.materials.passes {
 		public function WorldNormalPass() {
 		}
 
-		override arcane function getVertexCode():String {
+		override public function getVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String {
 			var code:String = "";
 			var projectedPosTemp:int = _shader.getFreeVertexTemp();
 			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VC, 4) + "\n";
@@ -87,16 +93,16 @@ package away3d.materials.passes {
 			}
 			_shader.removeVertexTempUsage(normalTemp);
 
-			_numUsedVaryings = _shader.numVaryings;
-			_numUsedVertexConstants = _shader.numVertexConstants;
-			_numUsedStreams = _shader.numAttributes;
+			shaderObject.numUsedVaryings = _shader.numVaryings;
+			shaderObject.numUsedVertexConstants = _shader.numVertexConstants;
+			shaderObject.numUsedStreams = _shader.numAttributes;
 			return code;
 		}
 
-		override arcane function getFragmentCode(fragmentAnimatorCode:String):String {
+		override public function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String {
 			var code:String = "";
 			if (_opacityMap) {
-				code += sampleTexture(_opacityMap, 0, _shader.getTexture(OPACITY_MAP));
+				code += sampleTexture(_opacityMap, 0, _shader.getTexture(OPACITY_MAP), shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 				code += "sub ft0." + _opacityChannel + ", ft0." + _opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".z\n";
 				code += "kil ft0." + _opacityChannel + "\n";
 			}
@@ -109,7 +115,7 @@ package away3d.materials.passes {
 			} else {
 				//normal tangent space
 				var normalTS:int = _shader.getFreeFragmentTemp();
-				code += sampleTexture(normalMap, normalTS, _shader.getTexture(NORMAL_TEXTURE));
+				code += sampleTexture(normalMap, normalTS, _shader.getTexture(NORMAL_TEXTURE), shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 				//if normal map used as DXT5 it means that normal map encoded in green and alpha channels for better compression quality, we need to restore it
 				if (normalMap.format == "compressedAlpha") {
 					code += "add ft" + normalTS + ".xy, ft" + normalTS + ".yw, ft" + normalTS + ".yw\n"
@@ -141,16 +147,17 @@ package away3d.materials.passes {
 				_shader.removeFragmentTempUsage(normalTS);
 			}
 
-			_numUsedTextures = _shader.numTextureRegisters;
-			_numUsedFragmentConstants = _shader.numFragmentConstants;
+			shaderObject.numUsedTextures = _shader.numTextureRegisters;
+			shaderObject.numUsedFragmentConstants = _shader.numFragmentConstants;
 			return code;
 		}
 
-		override arcane function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void {
-			var context3D:Context3D = stage3DProxy.context3D;
-			if (renderable.materialOwner.animator) {
-				updateAnimationState(renderable, stage3DProxy, camera);
-			}
+		override public function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void {
+			var context3D:Context3D = stage.context3D;
+
+			if (renderable.materialOwner.animator)
+				(renderable.materialOwner.animator as AnimatorBase).setRenderState(pass.shaderObject, renderable, stage, camera, pass.shaderObject.numUsedVertexConstants, pass.shaderObject.numUsedStreams);
+
 			//projection matrix
 			var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
@@ -161,40 +168,42 @@ package away3d.materials.passes {
 				context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(WORLD_MATRIX_VC), renderable.sourceEntity.inverseSceneTransform);
 			}
 
-			stage3DProxy.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			stage.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 			if (_shader.hasAttribute(UV_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
 			}
 			if (_shader.hasAttribute(NORMAL_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(NORMAL_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(NORMAL_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 			}
 			if (_shader.hasAttribute(TANGENT_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(TANGENT_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(TANGENT_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
 			}
 
-			context3D.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+			context3D.drawTriangles(stage.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
-			var context:Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
-			_numUsedTextures = 0;
+		override public function activate(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void {
+			var context:Context3D = stage._context3D;
+			super.activate(pass, stage, camera);
+			pass.shaderObject.numUsedTextures = 0;
 
 			if (_shader.hasTexture(OPACITY_MAP)) {
-				_numUsedTextures++;
-				context.setTextureAt(_shader.getTexture(OPACITY_MAP), _opacityMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(OPACITY_MAP), _opacityMap);
+//				context.setTextureAt(_shader.getTexture(OPACITY_MAP), _opacityMap.getTextureForStage3D(stage3DProxy));
 			}
 
 			if (_shader.hasTexture(NORMAL_TEXTURE)) {
-				_numUsedTextures++;
-				context.setTextureAt(_shader.getTexture(NORMAL_TEXTURE), _normalMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(NORMAL_TEXTURE), _normalMap);
+//				context.setTextureAt(_shader.getTexture(NORMAL_TEXTURE), _normalMap.getTextureForStage3D(stage3DProxy));
 			}
 
 			if (_shader.hasFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT)) {
-				if(!_propertiesData) _propertiesData = new Vector.<Number>();
+				if (!_propertiesData) _propertiesData = new Vector.<Number>();
 				_propertiesData[0] = alphaThreshold;//used for opacity map
 				_propertiesData[1] = 1;//used for normal output and normal restoring and diffuse output
 				_propertiesData[2] = _specularIntensity;
@@ -216,7 +225,7 @@ package away3d.materials.passes {
 				return;
 
 			_alphaThreshold = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get opacityMap():Texture2DBase {
@@ -226,7 +235,7 @@ package away3d.materials.passes {
 		public function set opacityMap(value:Texture2DBase):void {
 			if (_opacityMap == value) return;
 			_opacityMap = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get opacityChannel():String {
@@ -236,7 +245,7 @@ package away3d.materials.passes {
 		public function set opacityChannel(value:String):void {
 			if (_opacityChannel == value) return;
 			_opacityChannel = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get normalMap():Texture2DBase {
@@ -246,22 +255,23 @@ package away3d.materials.passes {
 		public function set normalMap(value:Texture2DBase):void {
 			if (_normalMap == value) return;
 			_normalMap = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
-		override arcane function invalidateShaderProgram(updateMaterial:Boolean = true):void {
+
+		override public function invalidatePass():void {
 			_shader.clear();
-			super.invalidateShaderProgram(updateMaterial);
+			super.invalidatePass();
 		}
 
-		private function sampleTexture(texture:Texture2DBase, targetTemp:int, textureRegister:int):String {
-			var wrap:String = _repeat ? "wrap" : "clamp";
+		private function sampleTexture(texture:Texture2DBase, targetTemp:int, textureRegister:int, repeat:Boolean, mipmap:Boolean, smooth:Boolean):String {
+			var wrap:String = repeat ? "wrap" : "clamp";
 			var filter:String;
 			var format:String;
 			var uvVarying:int;
 			var enableMipMaps:Boolean;
-			enableMipMaps = _mipmap && texture.hasMipMaps;
-			if (_smooth) {
+			enableMipMaps = mipmap && texture.hasMipMaps;
+			if (smooth) {
 				filter = enableMipMaps ? "linear,miplinear" : "linear";
 			} else {
 				filter = enableMipMaps ? "nearest,mipnearest" : "nearest";

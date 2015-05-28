@@ -34,18 +34,18 @@ package away3d.core.render {
 			while (renderable) {
 				activeMaterial = renderable.material;
 				// otherwise this would result in depth rendered anyway because fragment shader kil is ignored
-				activeMaterial.activateForGBuffer(stage3DProxy, camera, _drawDepth, _drawWorldNormal, _drawPosition, _drawAlbedo, _drawSpecular);
+//				activeMaterial.activateForGBuffer(stage3DProxy, camera, _drawDepth, _drawWorldNormal, _drawPosition, _drawAlbedo, _drawSpecular);
 				renderable2 = renderable;
 				do {
-					activeMaterial.renderGBuffer(renderable2, stage3DProxy, camera, projectionMatrix);
+//					activeMaterial.renderGBuffer(renderable2, stage3DProxy, camera, projectionMatrix);
 					renderable2 = renderable2.next as RenderableBase;
 				} while (renderable2 && renderable2.material == activeMaterial);
-				activeMaterial.deactivateGBuffer(stage3DProxy);
+//				activeMaterial.deactivateGBuffer(stage3DProxy);
 				renderable = renderable2;
 			}
 
 			if (activeMaterial) {
-				activeMaterial.deactivateGBuffer(stage3DProxy);
+//				activeMaterial.deactivateGBuffer(stage3DProxy);
 				activeMaterial = null;
 			}
 		}

@@ -28,18 +28,18 @@ package away3d.core.render {
 
 			while (renderable) {
 				activeMaterial = renderable.material;
-				activeMaterial.activateForWorldNormal(stage3DProxy, camera);
+//				activeMaterial.activateForWorldNormal(stage3DProxy, camera);
 				renderable2 = renderable;
 				do {
-					activeMaterial.renderWorldNormal(renderable2, stage3DProxy, camera, projectionMatrix);
+//					activeMaterial.renderWorldNormal(renderable2, stage3DProxy, camera, projectionMatrix);
 					renderable2 = renderable2.next as RenderableBase;
 				} while (renderable2 && renderable2.material == activeMaterial);
-				activeMaterial.deactivateForWorldNormal(stage3DProxy);
+//				activeMaterial.deactivateForWorldNormal(stage3DProxy);
 				renderable = renderable2;
 			}
 
 			if (activeMaterial) {
-				activeMaterial.deactivateForWorldNormal(stage3DProxy);
+//				activeMaterial.deactivateForWorldNormal(stage3DProxy);
 				activeMaterial = null;
 			}
 		}

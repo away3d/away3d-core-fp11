@@ -491,7 +491,6 @@ package away3d.core.render
 			var activePass:MaterialPassData;
 			var activeMaterial:MaterialData;
 
-			var context:Context3D = _stage3DProxy.context3D;
 			var camera:Camera3D = entityCollector.camera;
 			var renderable2:RenderableBase;
 
@@ -500,7 +499,7 @@ package away3d.core.render
 
 				//iterate through each screen pass
 				passes = renderable.material.screenPasses;
-				len = renderable.material.numScreenPasses();
+				len = renderable.material.numScreenPasses;
 				for (i = 0; i < len; i++) {
 					renderable2 = renderable;
 

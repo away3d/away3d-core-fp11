@@ -8,14 +8,15 @@ package away3d.core.pool
     public class MaterialPassData implements IMaterialPassData
 	{
 		private var _pool:MaterialPassDataPool;
+		private var _materialPass:MaterialPassBase;
+
+		public var vertexCode:String;
+		public var fragmentCode:String;
 		public var material:MaterialBase;
 		public var shaderObject:ShaderObjectBase;
-		private var _materialPass:MaterialPassBase;
 		public var programData:ProgramData;
 		public var shadedTarget:String;
-		public var vertexCode:String;
 		public var postAnimationFragmentCode:String;
-		public var fragmentCode:String;
 		public var animationVertexCode:String = "";
 		public var animationFragmentCode:String = "";
 		public var key:String;
@@ -29,9 +30,6 @@ package away3d.core.pool
 			this.material = material;
 		}
 
-		/**
-		 *
-		 */
 		public function dispose():void
 		{
 			_pool.disposeItem(_materialPass);
@@ -43,9 +41,6 @@ package away3d.core.pool
 			programData = null;
 		}
 
-		/**
-		 *
-		 */
 		public function invalidate():void
 		{
 			invalid = true;

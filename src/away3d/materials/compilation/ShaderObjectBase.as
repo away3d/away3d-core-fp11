@@ -71,7 +71,6 @@ package away3d.materials.compilation
 		public var texture:Texture2DBase;
 		public var color:Number;
 
-
 		//set ambient values to default
 		public var ambientR:uint = 0xFF;
 		public var ambientG:uint = 0xFF;

@@ -36,7 +36,7 @@ package away3d.core.pool
 
 		public function getMaterialPass(materialPass:MaterialPassBase, profile:String):MaterialPassData
 		{
-			var materialPassData:MaterialPassData = this._materialPassDataPool.getItem(materialPass);
+			var materialPassData:MaterialPassData = _materialPassDataPool.getItem(materialPass);
 
 			if (!materialPassData.shaderObject) {
 				materialPassData.shaderObject = materialPass.createShaderObject(profile);

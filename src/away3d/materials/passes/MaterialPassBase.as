@@ -39,6 +39,10 @@ package away3d.materials.passes {
         protected var _numLightProbes:int = 0;
         protected var _numLights:int = 0;
 
+		public var useDeferredDiffuseLighting:Boolean;
+		public var useDeferredSpecularLighting:Boolean;
+		public var useDeferredColoredSpecular:Boolean;
+
         private var _passMode:Number;
 
         private var _depthCompareMode:String = Context3DCompareMode.LESS_EQUAL;

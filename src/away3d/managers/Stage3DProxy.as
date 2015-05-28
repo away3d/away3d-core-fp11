@@ -315,7 +315,7 @@ package away3d.managers {
 
                     if (materialPassData.usesAnimation != enabledGPUAnimation) {
                         materialPassData.usesAnimation = enabledGPUAnimation;
-                        materialPassData.key == "";
+                        materialPassData.key = "";
                     }
 
                     if (materialPassData.key == "")

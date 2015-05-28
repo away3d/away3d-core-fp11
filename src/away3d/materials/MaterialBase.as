@@ -572,7 +572,7 @@ package away3d.materials
 		 *
 		 * @private
 		 */
-		arcane function numScreenPasses():uint
+		arcane function get numScreenPasses():uint
 		{
 			return _numPasses;
 		}

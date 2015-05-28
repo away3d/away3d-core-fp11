@@ -197,7 +197,7 @@ package away3d.materials.passes {
          */
         public function addEffectMethodAt(method:EffectMethodBase, index:int):void
         {
-            this.addDependency(new MethodVO(method), true, index);
+            addDependency(new MethodVO(method), true, index);
         }
 
         /**
@@ -376,7 +376,7 @@ package away3d.materials.passes {
             var methodVO:MethodVO;
             var len:int = methodVOs.length;
             for (var i:int = 0; i < len; ++i) {
-                methodVO = this.methodVOs[i];
+                methodVO = methodVOs[i];
                 if (methodVO.useMethod)
                     methodVO.method.activate(pass.shaderObject, methodVO, stage);
             }
