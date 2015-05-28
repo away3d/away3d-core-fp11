@@ -1,11 +1,15 @@
 package away3d.materials.passes {
 	import away3d.arcane;
 	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.MaterialPassData;
 	import away3d.managers.Stage3DProxy;
 	import away3d.core.geom.Matrix3DUtils;
 	import away3d.core.pool.RenderableBase;
 	import away3d.debug.Debug;
 	import away3d.entities.Camera3D;
+	import away3d.materials.compilation.ShaderObjectBase;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderState;
 	import away3d.textures.Texture2DBase;
 
@@ -90,7 +94,7 @@ package away3d.materials.passes {
 			_drawSpecular = drawSpecular;
 		}
 
-		override arcane function getVertexCode():String {
+		override public function getVertexCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String {
 			var code:String = "";
 			var projectedPosTemp:int = _shader.getFreeVertexTemp();
 			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VC, 4) + "\n";
@@ -141,18 +145,19 @@ package away3d.materials.passes {
 				code += "m44 v"+_shader.getVarying(WORLD_POSITION_VARYING)+", va"+_shader.getAttribute(POSITION_ATTRIBUTE)+", vc"+_shader.getVertexConstant(WORLD_MATRIX_VC,4);
 			}
 
-			_numUsedVaryings = _shader.numVaryings;
-			_numUsedVertexConstants = _shader.numVertexConstants;
-			_numUsedStreams = _shader.numAttributes;
+
+			shaderObject.numUsedVaryings = _shader.numVaryings;
+			shaderObject.numUsedVertexConstants = _shader.numVertexConstants;
+			shaderObject.numUsedStreams = _shader.numAttributes;
 			return code;
 		}
 
-		override arcane function getFragmentCode(fragmentAnimatorCode:String):String {
+		override public function getFragmentCode(shaderObject:ShaderObjectBase, registerCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String {
 			var outputRegister:int = 0;
 			var code:String = "";
 
 			if (opacityMap) {
-				code += sampleTexture(opacityMap, opacityUVChannel, 3, _shader.getTexture(OPACITY_TEXTURE));
+				code += sampleTexture(opacityMap, opacityUVChannel, 3, _shader.getTexture(OPACITY_TEXTURE), shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 				code += "sub ft3." + opacityChannel + ", ft3." + opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".x\n";
 				code += "kil ft3." + opacityChannel + "\n";
 			}
@@ -175,7 +180,7 @@ package away3d.materials.passes {
 				} else {
 					//normal tangent space
 					var normalTS:int = _shader.getFreeFragmentTemp();
-					code += sampleTexture(normalMap, normalMapUVChannel, normalTS, _shader.getTexture(NORMAL_TEXTURE));
+					code += sampleTexture(normalMap, normalMapUVChannel, normalTS, _shader.getTexture(NORMAL_TEXTURE), shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 					//if normal map used as DXT5 it means that normal map encoded in green and alpha channels for better compression quality, we need to restore it
 					if (normalMap.format == "compressedAlpha") {
 						code += "add ft" + normalTS + ".xy, ft" + normalTS + ".yw, ft" + normalTS + ".yw\n"
@@ -221,7 +226,7 @@ package away3d.materials.passes {
 			if (_drawAlbedo) {
 				var diffuseColor:int = _shader.getFreeFragmentTemp();
 				if (diffuseMap) {
-					code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE));
+					code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE),shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 					code += "mov oc" + outputRegister + ", ft" + diffuseColor + "\n";
 				} else {
 					code += "mov oc" + outputRegister + ", fc" + _shader.getFragmentConstant(DIFFUSE_COLOR_FC) + "\n";
@@ -234,7 +239,7 @@ package away3d.materials.passes {
 				//specular
 				var specularColor:int = _shader.getFreeFragmentTemp();
 				if (specularMap) {
-					code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
+					code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE), shaderObject.repeatTextures, shaderObject.useMipmapping, shaderObject.useSmoothTextures);
 					code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
 					//gloss
 					code += "mov ft" + specularColor + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".w\n";
@@ -246,19 +251,19 @@ package away3d.materials.passes {
 				_shader.removeFragmentTempUsage(specularColor);
 			}
 
-			_numUsedTextures = _shader.numTextureRegisters;
-			_numUsedFragmentConstants = _shader.numFragmentConstants;
+			shaderObject.numUsedTextures = _shader.numTextureRegisters;
+			shaderObject.numUsedFragmentConstants = _shader.numFragmentConstants;
 			return code;
 		}
 
-		override arcane function invalidateShaderProgram(updateMaterial:Boolean = true):void {
+		override public function invalidatePass():void {
 			_shader.clear();
-			super.invalidateShaderProgram(updateMaterial);
+			super.invalidatePass();
 		}
 
-		override arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
-			var context3D:Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
+		override public function activate(pass:MaterialPassData, stage:Stage3DProxy, camera:Camera3D):void {
+			var context3D:Context3D = stage._context3D;
+			super.activate(pass, stage, camera);
 
 			if (!_depthData) {
 				_depthData = new Vector.<Number>();
@@ -307,25 +312,34 @@ package away3d.materials.passes {
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(SPECULAR_COLOR_FC), _specularColorData, 1);
 			}
 
+			pass.shaderObject.numUsedTextures = null;
 			if (_shader.hasTexture(OPACITY_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(OPACITY_TEXTURE), opacityMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(OPACITY_TEXTURE), opacityMap);
+//				context3D.setTextureAt(_shader.getTexture(OPACITY_TEXTURE), opacityMap.getTextureForStage3D(stage));
 			}
 			if (_shader.hasTexture(NORMAL_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(NORMAL_TEXTURE), normalMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(NORMAL_TEXTURE), normalMap);
+//				context3D.setTextureAt(_shader.getTexture(NORMAL_TEXTURE), normalMap.getTextureForStage3D(stage3DProxy));
 			}
 			if (_shader.hasTexture(DIFFUSE_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(DIFFUSE_TEXTURE), diffuseMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(DIFFUSE_TEXTURE), diffuseMap);
+//				context3D.setTextureAt(_shader.getTexture(DIFFUSE_TEXTURE), diffuseMap.getTextureForStage3D(stage3DProxy));
 			}
 			if (_shader.hasTexture(SPECULAR_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularMap.getTextureForStage3D(stage3DProxy));
+				pass.shaderObject.numUsedTextures++;
+				stage.activateTexture(_shader.getTexture(SPECULAR_TEXTURE), specularMap);
+//				context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularMap.getTextureForStage3D(stage3DProxy));
 			}
 		}
 
-		override arcane function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void {
-			var context3D:Context3D = stage3DProxy.context3D;
-			if (renderable.materialOwner.animator) {
-				updateAnimationState(renderable, stage3DProxy, camera);
-			}
+		override public function render(pass:MaterialPassData, renderable:RenderableBase, stage:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void{
+			var context3D:Context3D = stage._context3D;
+//			if (renderable.materialOwner.animator) {
+//				updateAnimationState(renderable, stage, camera);
+//			}
 			//projection matrix
 			var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
@@ -337,21 +351,21 @@ package away3d.materials.passes {
 				context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(WORLD_MATRIX_VC), renderable.sourceEntity.inverseSceneTransform);
 			}
 
-			stage3DProxy.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			stage.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 			if (_shader.hasAttribute(UV_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
 			}
 			if (_shader.hasAttribute(SECONDARY_UV_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(SECONDARY_UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.SECONDARY_UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(SECONDARY_UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.SECONDARY_UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
 			}
 			if (_shader.hasAttribute(NORMAL_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(NORMAL_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(NORMAL_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 			}
 			if (_shader.hasAttribute(TANGENT_ATTRIBUTE)) {
-				stage3DProxy.activateBuffer(_shader.getAttribute(TANGENT_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
+				stage.activateBuffer(_shader.getAttribute(TANGENT_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
 			}
 
-			context3D.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+			context3D.drawTriangles(stage.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 
 		public function get useSecondaryUV():Boolean {
@@ -364,55 +378,14 @@ package away3d.materials.passes {
 					(normalMap && normalMapUVChannel == TriangleSubGeometry.UV_DATA) || (diffuseMap && diffuseMapUVChannel == TriangleSubGeometry.UV_DATA);
 		}
 
-		/**
-		 * Overrided because of AGAL compilation version
-		 * @param stage3DProxy
-		 */
-		override arcane function updateProgram(stage3DProxy:Stage3DProxy):void {
-			var animatorCode:String = "";
-			var UVAnimatorCode:String = "";
-			var fragmentAnimatorCode:String = "";
-			var vertexCode:String = getVertexCode();
-
-			if (_animationSet && !_animationSet.usesCPU) {
-				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters, stage3DProxy.profile);
-				if (_needFragmentAnimation)
-					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget, stage3DProxy.profile);
-				if (_needUVAnimation)
-					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
-				_animationSet.doneAGALCode(this);
-			} else {
-				var len:uint = _animatableAttributes.length;
-
-				// simply write attributes to targets, do not animate them
-				// projection will pick up on targets[0] to do the projection
-				for (var i:uint = 0; i < len; ++i)
-					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
-				if (_needUVAnimation)
-					UVAnimatorCode = "mov " + _UVTarget + "," + _UVSource + "\n";
-			}
-
-			vertexCode = animatorCode + UVAnimatorCode + vertexCode;
-
-			var fragmentCode:String = getFragmentCode(fragmentAnimatorCode);
-			if (Debug.active) {
-				trace("Compiling AGAL Code:");
-				trace("--------------------");
-				trace(vertexCode);
-				trace("--------------------");
-				trace(fragmentCode);
-			}
-			stage3DProxy.getProgram.setProgram3D(this, vertexCode, fragmentCode, 2);
-		}
-
-		private function sampleTexture(texture:Texture2DBase, textureUVChannel:String, targetTemp:int, textureRegister:int):String {
-			var wrap:String = _repeat ? "wrap" : "clamp";
+		private function sampleTexture(texture:Texture2DBase, textureUVChannel:String, targetTemp:int, textureRegister:int, repeat:Boolean, mipmap:Boolean, smooth:Boolean):String {
+			var wrap:String = repeat ? "wrap" : "clamp";
 			var filter:String;
 			var format:String;
 			var uvVarying:int;
 			var enableMipMaps:Boolean;
-			enableMipMaps = _mipmap && texture.hasMipMaps;
-			if (_smooth) {
+			enableMipMaps = mipmap && texture.hasMipMaps;
+			if (smooth) {
 				filter = enableMipMaps ? "linear,miplinear" : "linear";
 			} else {
 				filter = enableMipMaps ? "nearest,mipnearest" : "nearest";
@@ -434,7 +407,7 @@ package away3d.materials.passes {
 		public function set drawDepth(value:Boolean):void {
 			if (_drawDepth == value) return;
 			_drawDepth = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get drawWorldNormal():Boolean {
@@ -444,7 +417,7 @@ package away3d.materials.passes {
 		public function set drawWorldNormal(value:Boolean):void {
 			if (_drawWorldNormal == value) return;
 			_drawWorldNormal = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get drawAlbedo():Boolean {
@@ -454,7 +427,7 @@ package away3d.materials.passes {
 		public function set drawAlbedo(value:Boolean):void {
 			if (_drawAlbedo == value) return;
 			_drawAlbedo = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get drawSpecular():Boolean {
@@ -464,7 +437,7 @@ package away3d.materials.passes {
 		public function set drawSpecular(value:Boolean):void {
 			if (_drawSpecular == value) return;
 			_drawSpecular = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		public function get drawWorldPosition():Boolean {
@@ -474,7 +447,7 @@ package away3d.materials.passes {
 		public function set drawWorldPosition(value:Boolean):void {
 			if (_drawWorldPosition == value) return;
 			_drawWorldPosition = value;
-			invalidateShaderProgram();
+			invalidatePass();
 		}
 
 		override public function dispose():void {
