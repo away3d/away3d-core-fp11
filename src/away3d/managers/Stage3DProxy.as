@@ -44,6 +44,7 @@ package away3d.managers {
     import flash.events.EventDispatcher;
     import flash.geom.Rectangle;
     import flash.utils.ByteArray;
+    import flash.utils.Dictionary;
 
     use namespace arcane;
 
@@ -87,7 +88,7 @@ package away3d.managers {
         private var _viewportDirty:Boolean;
         private var _bufferClear:Boolean;
 
-        private var _programData:Vector.<ProgramData> = new Vector.<ProgramData>();
+        private var _programData:Dictionary = new Dictionary();
         private var _numUsedStreams:Number = 0;
         private var _numUsedTextures:Number = 0;
         private var _texturePool:TextureDataPool;

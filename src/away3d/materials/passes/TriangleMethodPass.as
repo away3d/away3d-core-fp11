@@ -590,7 +590,7 @@ package away3d.materials.passes {
         override public function usesTangentSpace(shaderObject:ShaderObjectBase):Boolean
         {
             var shaderLightingObject:ShaderLightingObject = shaderObject as ShaderLightingObject;
-            if (shaderLightingObject.usesProbes)
+            if (shaderLightingObject && shaderLightingObject.usesProbes)
                 return false;
 
             var methodVO:MethodVO;

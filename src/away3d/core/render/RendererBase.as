@@ -690,6 +690,8 @@ package away3d.core.render
 			if (!material)
 				material = DefaultMaterialManager.getDefaultMaterial(renderable.materialOwner);
 
+			material.updateMaterial();
+
 			//set ids for faster referencing
 			renderable.material = material as MaterialBase;
 			renderable.materialId = material.materialId;

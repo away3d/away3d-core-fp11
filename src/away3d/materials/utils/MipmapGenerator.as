@@ -19,8 +19,8 @@ package away3d.materials.utils
 
 		public static function generateMipMaps(source:BitmapData, output:Vector.<BitmapData> = null, alpha:Boolean = false):void
 		{
-			var w:uint = source.width,
-				h:uint = source.height;
+			var w:uint = source.width;
+            var h:uint = source.height;
 			var i:int = 0;
 
             _rect.width = w;
@@ -30,7 +30,12 @@ package away3d.materials.utils
 
 			while (w >= 1 || h >= 1) {
 
-                mipmap = output[i] = getMipmapHolder(output[i], w, h);
+                if(output.length>i) {
+                    mipmap = output[i] = getMipmapHolder(output[i], w, h);
+                }else{
+                    mipmap = output[i] = getMipmapHolder(null, w, h);
+                }
+
 
 				if (alpha)
 					mipmap.fillRect(_rect, 0);

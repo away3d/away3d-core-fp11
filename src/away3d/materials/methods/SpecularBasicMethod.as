@@ -58,8 +58,8 @@ package away3d.materials.methods {
             var shaderLightingObject:ShaderLightingObject = shaderObject as ShaderLightingObject;
 
             methodVO.needsUV = _useTexture;
-            methodVO.needsNormals = shaderLightingObject.numLights > 0;
-            methodVO.needsView = shaderLightingObject.numLights > 0;
+            methodVO.needsNormals = shaderLightingObject && shaderLightingObject.numLights > 0;
+            methodVO.needsView = shaderLightingObject && shaderLightingObject.numLights > 0;
         }
 
         /**

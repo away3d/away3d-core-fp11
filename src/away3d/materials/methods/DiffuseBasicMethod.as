@@ -74,7 +74,7 @@ package away3d.materials.methods {
         override arcane function initVO(shaderObject:ShaderObjectBase, methodVO:MethodVO):void
         {
             methodVO.needsUV = _useTexture;
-            methodVO.needsNormals = (shaderObject as ShaderLightingObject).numLights > 0;
+            methodVO.needsNormals = shaderObject is ShaderLightingObject && (shaderObject as ShaderLightingObject).numLights > 0;
         }
 
         /**

@@ -22,7 +22,7 @@ package away3d.materials.utils {
         {
             var wrap:String = forceWrap || (repeat ? "wrap" : "clamp");
             var format:String = ShaderCompilerHelper.getFormatStringForTexture(texture);
-            var enableMipMaps:Boolean = mipmaps && texture.hasMipMaps;
+            var enableMipMaps:Boolean = mipmaps && texture && texture.hasMipMaps;
             var filter:String = (smooth) ? (enableMipMaps ? "linear,miplinear" : "linear") : (enableMipMaps ? "nearest,mipnearest" : "nearest");
 
             if (uvReg == null)
@@ -60,6 +60,7 @@ package away3d.materials.utils {
          */
         public static function getFormatStringForTexture(texture:TextureProxyBase):String
         {
+            if(!texture) return "";
             switch (texture.format) {
                 case Context3DTextureFormat.COMPRESSED:
                     return "dxt1,";

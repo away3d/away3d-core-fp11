@@ -15,7 +15,7 @@
         public function BitmapTexture(bitmapData:BitmapData, generateMipmaps:Boolean = true)
         {
             super();
-
+            this.generateMipmaps = generateMipmaps;
             this.bitmapData = bitmapData;
         }
 

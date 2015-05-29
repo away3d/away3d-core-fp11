@@ -157,7 +157,10 @@ package away3d.animators
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
 			_animationRegisterCache = shaderObject.animationRegisterCache;
-			
+
+			if (_animationRegisterCache == null)
+				_animationRegisterCache = shaderObject.animationRegisterCache = new AnimationRegisterCache(shaderObject.profile);
+
 			//reset animationRegisterCache
 			_animationRegisterCache.vertexConstantOffset = shaderObject.numUsedVertexConstants;
 			_animationRegisterCache.vertexAttributesOffset = shaderObject.numUsedStreams;

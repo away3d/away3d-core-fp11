@@ -47,7 +47,7 @@ package away3d.materials {
         {
             super();
 
-            _materialMode = TriangleMaterialMode.SINGLE_PASS;
+            materialMode = TriangleMaterialMode.SINGLE_PASS;
 
             this.texture = texture;
 
