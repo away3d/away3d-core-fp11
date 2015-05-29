@@ -127,7 +127,7 @@ package away3d.materials.methods
 		{
 			if (methodVO.texturesIndex >= 0) {
                 stage.context3D.setSamplerStateAt(methodVO.texturesIndex, shaderObject.repeatTextures? Context3DWrapMode.REPEAT:Context3DWrapMode.CLAMP, shaderObject.useSmoothTextures? Context3DTextureFilter.LINEAR : Context3DTextureFilter.NEAREST, shaderObject.useMipmapping? Context3DMipFilter.MIPLINEAR : Context3DMipFilter.MIPNONE);
-                stage.activateTexture(methodVO.texturesIndex, this._texture);
+                stage.activateTexture(methodVO.texturesIndex, _texture);
             }
 		}
 

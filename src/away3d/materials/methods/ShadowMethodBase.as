@@ -44,7 +44,7 @@ package away3d.materials.methods {
             methodVO.needsView = true;
             methodVO.needsGlobalVertexPos = true;
             methodVO.needsGlobalFragmentPos = _usePoint;
-            methodVO.needsNormals = (methodVO as ShaderLightingObject).numLights > 0;
+            methodVO.needsNormals = shaderObject is ShaderLightingObject && (shaderObject as ShaderLightingObject).numLights > 0;
         }
 
         /**
