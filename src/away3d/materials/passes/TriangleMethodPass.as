@@ -102,7 +102,7 @@ package away3d.materials.passes {
             return colorTransformMethodVO ? colorTransformMethodVO.method as EffectColorTransformMethod : null;
         }
 
-        public function set colorTransformMethod(value:EffectColorTransformMethod)
+        public function set colorTransformMethod(value:EffectColorTransformMethod):void
         {
             if (colorTransformMethodVO && colorTransformMethodVO.method == value)
                 return;
@@ -231,7 +231,7 @@ package away3d.materials.passes {
             return normalMethodVO ? normalMethodVO.method as NormalBasicMethod : null;
         }
 
-        public function set normalMethod(value:NormalBasicMethod)
+        public function set normalMethod(value:NormalBasicMethod):void
         {
             if (normalMethodVO && normalMethodVO.method == value)
                 return;
@@ -255,7 +255,7 @@ package away3d.materials.passes {
             return this.ambientMethodVO ? ambientMethodVO.method as AmbientBasicMethod : null;
         }
 
-        public function set ambientMethod(value:AmbientBasicMethod)
+        public function set ambientMethod(value:AmbientBasicMethod):void
         {
             if (ambientMethodVO && ambientMethodVO.method == value)
                 return;
@@ -279,7 +279,7 @@ package away3d.materials.passes {
             return shadowMethodVO ? shadowMethodVO.method as ShadowMapMethodBase : null;
         }
 
-        public function set shadowMethod(value:ShadowMapMethodBase)
+        public function set shadowMethod(value:ShadowMapMethodBase):void
         {
             if (shadowMethodVO && shadowMethodVO.method == value)
                 return;
@@ -303,7 +303,7 @@ package away3d.materials.passes {
             return diffuseMethodVO ? diffuseMethodVO.method as DiffuseBasicMethod : null;
         }
 
-        public function set diffuseMethod(value:DiffuseBasicMethod)
+        public function set diffuseMethod(value:DiffuseBasicMethod):void
         {
             if (diffuseMethodVO && diffuseMethodVO.method == value)
                 return;
@@ -327,7 +327,7 @@ package away3d.materials.passes {
             return specularMethodVO ? specularMethodVO.method as SpecularBasicMethod : null;
         }
 
-        public function set specularMethod(value:SpecularBasicMethod)
+        public function set specularMethod(value:SpecularBasicMethod):void
         {
             if (specularMethodVO && specularMethodVO.method == value)
                 return;

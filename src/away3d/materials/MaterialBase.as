@@ -369,7 +369,7 @@ package away3d.materials
 
 		public function set bothSides(value:Boolean):void
 		{
-			if (_bothSides = value)
+			if (_bothSides == value)
 				return;
 
 			_bothSides = value;

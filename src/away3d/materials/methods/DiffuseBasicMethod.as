@@ -61,7 +61,7 @@ package away3d.materials.methods {
             return _multiply;
         }
 
-        public function set multiply(value:Boolean)
+        public function set multiply(value:Boolean):void
         {
             if (_multiply == value)
                 return;
