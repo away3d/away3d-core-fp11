@@ -65,7 +65,7 @@ package away3d.materials.methods
 				code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 			
 			if (_modulateMethod != null)
-				code += _modulateMethod(shaderObject, methodVO, t, registerCache, sharedRegisters);
+				code += _modulateMethod(methodVO, t, registerCache, sharedRegisters);
 			
 			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
 			
