@@ -29,11 +29,13 @@ package away3d.materials.utils
             var mipmap:BitmapData;
 
 			while (w >= 1 || h >= 1) {
-
+				
+				
+				
                 if(output.length>i) {
-                    mipmap = output[i] = getMipmapHolder(output[i], w, h);
+                    mipmap = output[i] = getMipmapHolder(output[i], _rect.width, _rect.height);
                 }else{
-                    mipmap = output[i] = getMipmapHolder(null, w, h);
+                    mipmap = output[i] = getMipmapHolder(null, _rect.width, _rect.height);
                 }
 
 
@@ -47,6 +49,7 @@ package away3d.materials.utils
 
 				w >>= 1;
 				h >>= 1;
+				
 
 				_rect.width = w > 1? w : 1;
 				_rect.height = h > 1? h : 1;

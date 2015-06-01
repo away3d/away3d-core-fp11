@@ -159,7 +159,7 @@ package away3d.animators {
             }
         }
 
-        private function setNullPose(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int)
+        private function setNullPose(shaderObject:ShaderObjectBase, stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int):void
         {
             stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 

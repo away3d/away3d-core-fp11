@@ -101,7 +101,7 @@ package away3d.materials {
             return _alpha;
         }
 
-        public function set alpha(value:Number)
+        public function set alpha(value:Number):void
         {
             if (value > 1)
                 value = 1;
@@ -432,7 +432,7 @@ package away3d.materials {
             return _specularMethod.specularColor;
         }
 
-        public function set specularColor(value:Number)
+        public function set specularColor(value:Number):void
         {
             _specularMethod.specularColor = value;
         }

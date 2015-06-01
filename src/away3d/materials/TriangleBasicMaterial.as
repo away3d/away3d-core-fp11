@@ -44,7 +44,7 @@ package away3d.materials {
             return _depthCompareMode;
         }
 
-        public function set depthCompareMode(value:String)
+        public function set depthCompareMode(value:String):void
         {
             if (_depthCompareMode == value)
                 return;
@@ -62,7 +62,7 @@ package away3d.materials {
             return _alpha;
         }
 
-        public function set alpha(value:Number)
+        public function set alpha(value:Number):void
         {
             if (value > 1)
                 value = 1;

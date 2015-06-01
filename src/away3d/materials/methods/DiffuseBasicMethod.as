@@ -61,7 +61,7 @@ package away3d.materials.methods {
             return _multiply;
         }
 
-        public function set multiply(value:Boolean)
+        public function set multiply(value:Boolean):void
         {
             if (_multiply == value)
                 return;
@@ -213,7 +213,7 @@ package away3d.materials.methods {
                 code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
             if (_modulateMethod != null)
-                code += _modulateMethod(shaderObject, methodVO, t, registerCache, sharedRegisters);
+                code += _modulateMethod(methodVO, t, registerCache, sharedRegisters);
 
             code += "mul " + t + ", " + t + ".w, " + lightColReg + "\n";
 

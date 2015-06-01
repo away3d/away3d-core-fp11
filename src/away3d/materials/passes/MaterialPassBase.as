@@ -65,7 +65,7 @@ package away3d.materials.passes {
             return _preserveAlpha;
         }
 
-        public function set preserveAlpha(value:Boolean)
+        public function set preserveAlpha(value:Boolean):void
         {
             if (_preserveAlpha == value)
                 return;
@@ -83,7 +83,7 @@ package away3d.materials.passes {
             return _includeCasters;
         }
 
-        public function set includeCasters(value:Boolean)
+        public function set includeCasters(value:Boolean):void
         {
             if (_includeCasters == value)
                 return;
@@ -103,7 +103,7 @@ package away3d.materials.passes {
             return _forceSeparateMVP;
         }
 
-        public function set forceSeparateMVP(value:Boolean)
+        public function set forceSeparateMVP(value:Boolean):void
         {
             if (_forceSeparateMVP == value)
                 return;
@@ -122,7 +122,7 @@ package away3d.materials.passes {
             return _directionalLightsOffset;
         }
 
-        public function set directionalLightsOffset(value:Number)
+        public function set directionalLightsOffset(value:Number):void
         {
             _directionalLightsOffset = value;
         }
@@ -136,7 +136,7 @@ package away3d.materials.passes {
             return _pointLightsOffset;
         }
 
-        public function set pointLightsOffset(value:Number)
+        public function set pointLightsOffset(value:Number):void
         {
             _pointLightsOffset = value;
         }
@@ -150,7 +150,7 @@ package away3d.materials.passes {
             return _lightProbesOffset;
         }
 
-        public function set lightProbesOffset(value:Number)
+        public function set lightProbesOffset(value:Number):void
         {
             _lightProbesOffset = value;
         }
@@ -163,7 +163,7 @@ package away3d.materials.passes {
             return _passMode;
         }
 
-        public function set passMode(value:Number)
+        public function set passMode(value:Number):void
         {
             _passMode = value;
 
@@ -198,7 +198,7 @@ package away3d.materials.passes {
             return _writeDepth;
         }
 
-        public function set writeDepth(value:Boolean)
+        public function set writeDepth(value:Boolean):void
         {
             _writeDepth = value;
         }
@@ -211,7 +211,7 @@ package away3d.materials.passes {
             return _depthCompareMode;
         }
 
-        public function set depthCompareMode(value:String)
+        public function set depthCompareMode(value:String):void
         {
             _depthCompareMode = value;
         }
