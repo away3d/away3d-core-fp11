@@ -340,7 +340,7 @@
 			invalidateBounds();
 		}
 		
-		public function getSubMeshForSubGeometry(subGeometry:SubGeometry):SubMesh
+		public function getSubMeshForSubGeometry(subGeometry:ISubGeometry):SubMesh
 		{
 			return _subMeshes[_geometry.subGeometries.indexOf(subGeometry)];
 		}
