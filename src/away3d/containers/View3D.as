@@ -1,41 +1,23 @@
 ﻿package away3d.containers
 {
 	
-	import away3d.core.managers.Touch3DManager;
-	import away3d.events.Scene3DEvent;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.managers.*;
+	import away3d.core.pick.*;
+	import away3d.core.render.*;
+	import away3d.core.traverse.*;
+	import away3d.events.*;
+	import away3d.textures.*;
 	
-	import flash.display.Sprite;
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.textures.Texture;
-	import flash.events.ContextMenuEvent;
-	import flash.events.Event;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.geom.Transform;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.net.navigateToURL;
-	import flash.ui.ContextMenu;
-	import flash.ui.ContextMenuItem;
-	import flash.utils.getTimer;
-	
-	import away3d.Away3D;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.pick.IPicker;
-	import away3d.core.render.DefaultRenderer;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.Filter3DRenderer;
-	import away3d.core.render.RendererBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.events.CameraEvent;
-	import away3d.events.Stage3DEvent;
-	import away3d.textures.Texture2DBase;
+	import flash.display.*;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.net.*;
+	import flash.ui.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -43,8 +25,11 @@
 	{
 		private var _width:Number = 0;
 		private var _height:Number = 0;
-		private var _localPos:Point = new Point();
+		private var _localTLPos:Point = new Point();
+		private var _localBRPos:Point = new Point();
 		private var _globalPos:Point = new Point();
+		private var _globalWidth:Number = 0;
+		private var _globalHeight:Number = 0;
 		private var _globalPosDirty:Boolean;
 		protected var _scene:Scene3D;
 		protected var _camera:Camera3D;
@@ -347,8 +332,8 @@
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff)/0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff)/0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
-			_renderer.viewWidth = _width;
-			_renderer.viewHeight = _height;
+			_renderer.viewWidth = _globalWidth;
+			_renderer.viewHeight = _globalHeight;
 			
 			_backBufferInvalid = true;
 		}
@@ -460,18 +445,22 @@
 			if (_width == value)
 				return;
 			
-			if (_rttBufferManager)
-				_rttBufferManager.viewWidth = value;
-			
 			_hitField.width = value;
 			_width = value;
-			_aspectRatio = _width/_height;
+			
+			_localBRPos.x = value + _localTLPos.x;
+			_globalWidth = parent? parent.localToGlobal(_localBRPos).x - _globalPos.x : value;
+		
+			if (_rttBufferManager)
+				_rttBufferManager.viewWidth = _globalWidth;
+			
+			_aspectRatio = _globalWidth/_globalHeight;
 			_camera.lens.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
-			_renderer.viewWidth = value;
+			_renderer.viewWidth = _globalWidth;
 			
-			_scissorRect.width = value;
+			_scissorRect.width = _globalWidth;
 			
 			_backBufferInvalid = true;
 			_scissorRectDirty = true;
@@ -495,18 +484,22 @@
 			if (_height == value)
 				return;
 			
-			if (_rttBufferManager)
-				_rttBufferManager.viewHeight = value;
-			
 			_hitField.height = value;
 			_height = value;
-			_aspectRatio = _width/_height;
+			
+			_localBRPos.y = value + _localTLPos.y;
+			_globalHeight = parent? parent.localToGlobal(_localBRPos).y - _globalPos.y : value;
+			
+			if (_rttBufferManager)
+				_rttBufferManager.viewHeight = _globalHeight;
+			
+			_aspectRatio = _globalWidth/_globalHeight;
 			_camera.lens.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
-			_renderer.viewHeight = value;
+			_renderer.viewHeight = _globalHeight;
 			
-			_scissorRect.height = value;
+			_scissorRect.height = _globalHeight;
 			
 			_backBufferInvalid = true;
 			_scissorRectDirty = true;
@@ -517,9 +510,9 @@
 			if (x == value)
 				return;
 			
-			_localPos.x = super.x = value;
+			_localTLPos.x = super.x = value;
 			
-			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			_globalPos.x = parent? parent.localToGlobal(_localTLPos).x : value;
 			_globalPosDirty = true;
 		}
 		
@@ -528,9 +521,9 @@
 			if (y == value)
 				return;
 			
-			_localPos.y = super.y = value;
+			_localTLPos.y = super.y = value;
 			
-			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			_globalPos.y = parent? parent.localToGlobal(_localTLPos).y : value;
 			_globalPosDirty = true;
 		}
 		
@@ -593,7 +586,7 @@
 			// Doing this anyway (and relying on _stage3DProxy to cache width/height for 
 			// context does get available) means usesSoftwareRendering won't be reliable.
 			if (_stage3DProxy.context3D && !_shareContext) {
-				if (_width && _height) {
+				if (_globalWidth && _globalHeight) {
 					// Backbuffers are limited to 2048x2048 in software mode and
 					// trying to configure the backbuffer to be bigger than that
 					// will throw an error. Capping the value is a graceful way of
@@ -605,17 +598,18 @@
 						// and height setters, at that point we couldn't be sure that
 						// the context had even been retrieved and the software flag
 						// thus be reliable. Make checks again.
-						if (_width > 2048)
-							_width = 2048;
-						if (_height > 2048)
-							_height = 2048;
+						if (_globalWidth > 2048)
+							_globalWidth = 2048;
+						if (_globalHeight > 2048)
+							_globalHeight = 2048;
 					}
 					
-					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias);
+					_stage3DProxy.configureBackBuffer(_globalWidth, _globalHeight, _antiAlias);
 					_backBufferInvalid = false;
 				} else {
-					width = stage.stageWidth;
-					height = stage.stageHeight;
+					var stageBR:Point = new Point(stage.x + stage.stageWidth, stage.y + stage.stageHeight);
+					width = parent? parent.globalToLocal(stageBR).x - _localTLPos.x : stage.stageWidth;
+					height = parent? parent.globalToLocal(stageBR).y - _localTLPos.y : stage.stageHeight;
 				}
 			}
 		}
@@ -653,7 +647,7 @@
 				stage3DProxy.clearDepthBuffer();
 			
 			if (!_parentIsStage) {
-				var globalPos:Point = parent.localToGlobal(_localPos);
+				var globalPos:Point = parent.localToGlobal(_localTLPos);
 				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {
 					_globalPos = globalPos;
 					_globalPosDirty = true;
@@ -841,8 +835,8 @@
 		{
 			var v:Vector3D = _camera.project(point3d);
 			
-			v.x = (v.x + 1.0)*_width/2.0;
-			v.y = (v.y + 1.0)*_height/2.0;
+			v.x = (v.x + 1.0)*_globalWidth/2.0;
+			v.y = (v.y + 1.0)*_globalHeight/2.0;
 			
 			return v;
 		}
@@ -860,7 +854,7 @@
 		 */
 		public function unproject(sX:Number, sY:Number, sZ:Number, v:Vector3D = null):Vector3D
 		{
-			return _camera.unproject((sX*2 - _width)/_stage3DProxy.width, (sY*2 - _height)/_stage3DProxy.height, sZ, v);
+			return _camera.unproject(((sX - _globalPos.x)*2 - _globalWidth)/_stage3DProxy.width, ((sY - _globalPos.y)*2 - _globalHeight)/_stage3DProxy.height, sZ, v);
 		}
 		
 		/**
@@ -875,7 +869,7 @@
 		 */
 		public function getRay(sX:Number, sY:Number, sZ:Number):Vector3D
 		{
-			return _camera.getRay((sX*2 - _width)/_width, (sY*2 - _height)/_height, sZ);
+			return _camera.getRay(((sX - _globalPos.x)*2 - _globalWidth)/_globalWidth, ((sY - _globalPos.y)*2 - _globalHeight)/_globalHeight, sZ);
 		}
 		
 		public function get mousePicker():IPicker
@@ -938,14 +932,15 @@
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 			
 			//default wiidth/height to stageWidth/stageHeight
-			if (_width == 0)
-				width = stage.stageWidth;
+			var stageBR:Point = new Point(stage.x + stage.stageWidth, stage.y + stage.stageHeight);
+			if (_globalWidth == 0)
+				width = parent? parent.globalToLocal(stageBR).x - _localTLPos.x : stage.stageWidth;
 			else
-				_rttBufferManager.viewWidth = _width;
-			if (_height == 0)
-				height = stage.stageHeight;
+				_rttBufferManager.viewWidth = _globalWidth;
+			if (_globalWidth == 0)
+				height = parent? parent.globalToLocal(stageBR).y - _localTLPos.y : stage.stageHeight;
 			else
-				_rttBufferManager.viewHeight = _height;
+				_rttBufferManager.viewHeight = _globalHeight;
 			
 			if (_shareContext)
 				_mouse3DManager.addViewLayer(this);
@@ -955,7 +950,7 @@
 		{
 			_parentIsStage = (parent == stage);
 			
-			_globalPos = parent.localToGlobal(_localPos);
+			_globalPos = parent.localToGlobal(_localTLPos);
 			_globalPosDirty = true;
 		}
 		
@@ -964,6 +959,8 @@
 			if (_shareContext) {
 				_scissorRect.x = _globalPos.x - _stage3DProxy.x;
 				_scissorRect.y = _globalPos.y - _stage3DProxy.y;
+				_scissorRect.width = _globalWidth;
+				_scissorRect.height = _globalHeight;
 				_scissorRectDirty = true;
 			}
 			

@@ -11,7 +11,7 @@ package away3d.core.pick
 	import away3d.entities.*;
 	import away3d.tools.utils.GeomUtil;
 	
-	import flash.display.*;
+	import flash.display.BitmapData;
 	import flash.display3D.*;
 	import flash.display3D.textures.*;
 	import flash.geom.*;

@@ -1,19 +1,14 @@
 package away3d.core.managers
 {
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.containers.View3D;
-	import away3d.core.pick.IPicker;
-	import away3d.core.pick.PickingCollisionVO;
-	import away3d.core.pick.PickingType;
-	import away3d.events.MouseEvent3D;
+	import away3d.*;
+	import away3d.containers.*;
+	import away3d.core.pick.*;
+	import away3d.events.*;
 	
-	import flash.display.DisplayObject;
-	import flash.display.DisplayObjectContainer;
-	import flash.display.Stage;
-	import flash.events.MouseEvent;
-	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -77,16 +72,18 @@ package away3d.core.managers
 				if (view.stage3DProxy.bufferClear)
 					_collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
 				
+				var p:Point = view.localToGlobal(new Point(view.mouseX, view.mouseY));
 				if (!view.shareContext) {
 					if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
-						_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+						_collidingObject = _mousePicker.getViewCollision(p.x, p.y, view);
 					}
 				} else {
-					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) {
+					//if (view.getBounds(view.parent).contains((view.mouseX + view.x)/view.parent.scaleX, (view.mouseY + view.y)/view.parent.scaleY)) {
 						if (!_collidingViewObjects)
 							_collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
-						_collidingObject = _collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
-					}
+						
+						_collidingObject = _collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(p.x, p.y, view);
+					//}
 				}
 			}
 		}
